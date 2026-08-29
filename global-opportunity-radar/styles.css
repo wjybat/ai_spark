@@ -1,0 +1,810 @@
+:root {
+  color-scheme: light;
+  font-synthesis: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow: hidden;
+  background: #f7f3e8;
+  color: #24443d;
+  font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  color: inherit;
+}
+
+button:focus-visible,
+[tabindex="0"]:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  outline-offset: 3px;
+}
+
+.app {
+  --line: color-mix(in srgb, var(--ink) 13%, transparent);
+  --soft-line: color-mix(in srgb, var(--ink) 8%, transparent);
+  --panel: rgba(255, 255, 253, 0.88);
+  width: 100%;
+  height: 100%;
+  min-width: 1060px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 11% 3%, color-mix(in srgb, var(--mint) 70%, transparent), transparent 31%),
+    linear-gradient(115deg, color-mix(in srgb, var(--canvas) 96%, white), var(--canvas));
+  position: relative;
+}
+
+.app::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.32;
+  background-image: radial-gradient(color-mix(in srgb, var(--ink) 15%, transparent) 0.65px, transparent 0.65px);
+  background-size: 9px 9px;
+  mask-image: linear-gradient(90deg, #000, transparent 68%);
+}
+
+.icon {
+  flex: 0 0 auto;
+}
+
+.app-header {
+  height: 78px;
+  padding: 0 26px 0 32px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  z-index: 20;
+  background: color-mix(in srgb, var(--canvas) 76%, transparent);
+  backdrop-filter: blur(22px);
+}
+
+.brand-lockup,
+.header-actions,
+.brand-line,
+.scan-button,
+.source-pill,
+.live-pill {
+  display: flex;
+  align-items: center;
+}
+
+.brand-lockup {
+  gap: 13px;
+}
+
+.brand-mark {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  position: relative;
+  color: var(--ink);
+  border: 1px solid color-mix(in srgb, var(--ink) 24%, transparent);
+  border-radius: 50%;
+  background: color-mix(in srgb, white 66%, var(--mint));
+  box-shadow: 0 7px 18px color-mix(in srgb, var(--ink) 10%, transparent);
+}
+
+.brand-mark span {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  right: 1px;
+  top: 4px;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.brand-line {
+  gap: 10px;
+}
+
+.brand-line b {
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-size: 18px;
+  letter-spacing: 0.08em;
+}
+
+.brand-line em {
+  font-style: normal;
+  font-size: 14px;
+  font-weight: 650;
+  color: color-mix(in srgb, var(--ink) 76%, transparent);
+  padding-left: 10px;
+  border-left: 1px solid var(--line);
+}
+
+.brand-lockup p {
+  margin: 2px 0 0;
+  font-size: 11px;
+  color: color-mix(in srgb, var(--ink) 52%, transparent);
+  letter-spacing: 0.05em;
+}
+
+.header-actions {
+  gap: 10px;
+}
+
+.source-pill,
+.live-pill {
+  height: 34px;
+  gap: 8px;
+  padding: 0 12px;
+  border-radius: 99px;
+  font-size: 11px;
+  color: color-mix(in srgb, var(--ink) 65%, transparent);
+  border: 1px solid var(--soft-line);
+  background: color-mix(in srgb, white 58%, transparent);
+}
+
+.source-pill span {
+  width: 6px;
+  height: 6px;
+  border-radius: 1px;
+  background: var(--accent);
+}
+
+.live-pill i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #5b9b6c;
+  box-shadow: 0 0 0 4px rgba(91, 155, 108, 0.12);
+}
+
+.scan-button {
+  gap: 8px;
+  height: 38px;
+  padding: 0 15px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--ink);
+  color: var(--canvas);
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+  box-shadow: 0 7px 17px color-mix(in srgb, var(--ink) 20%, transparent);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.scan-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px color-mix(in srgb, var(--ink) 24%, transparent);
+}
+
+.scan-button:disabled {
+  opacity: 0.66;
+  cursor: wait;
+}
+
+.app-stage {
+  height: calc(100% - 78px);
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(590px, 57%) minmax(460px, 43%);
+  position: relative;
+  z-index: 2;
+}
+
+.map-stage {
+  min-width: 0;
+  min-height: 0;
+  position: relative;
+  border-right: 1px solid var(--line);
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) 38px 74px;
+}
+
+.map-stage::before,
+.map-stage::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+.map-stage::before {
+  width: 480px;
+  height: 480px;
+  border: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
+  border-radius: 50%;
+  left: 50%;
+  top: 43%;
+  transform: translate(-50%, -50%) scale(1.43);
+}
+
+.map-stage::after {
+  left: 42px;
+  right: 42px;
+  top: 52%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--line), transparent);
+}
+
+.map-stage-copy {
+  position: absolute;
+  z-index: 7;
+  left: 34px;
+  top: 26px;
+  pointer-events: none;
+}
+
+.map-stage-copy > span,
+.panel-kicker,
+.run-eyebrow,
+.brief-stamp {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.13em;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--ink) 52%, transparent);
+}
+
+.map-stage-copy h2 {
+  margin: 7px 0 2px;
+  font-family: "Bricolage Grotesque", "Noto Sans SC", sans-serif;
+  font-size: clamp(25px, 2vw, 34px);
+  letter-spacing: -0.035em;
+  font-weight: 620;
+}
+
+.map-stage-copy p {
+  margin: 0;
+  color: color-mix(in srgb, var(--ink) 56%, transparent);
+  font-size: 12px;
+}
+
+.globe-wrap {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  position: relative;
+  z-index: 4;
+  padding-top: 20px;
+}
+
+.globe-aura {
+  position: absolute;
+  width: min(58vw, 650px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--mint) 68%, transparent) 0%, transparent 69%);
+  filter: blur(10px);
+}
+
+.globe-svg {
+  max-width: 84%;
+  max-height: 84%;
+  overflow: visible;
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+  position: relative;
+  z-index: 2;
+}
+
+.globe-svg:active {
+  cursor: grabbing;
+}
+
+.sphere-shadow {
+  fill: rgba(116, 164, 151, 0.16);
+}
+
+.sphere-ocean {
+  fill: url(#oceanFill);
+}
+
+.graticule {
+  fill: none;
+  stroke: color-mix(in srgb, var(--ink) 14%, transparent);
+  stroke-width: 0.65;
+}
+
+.world-land {
+  fill: color-mix(in srgb, #f7f2df 78%, var(--mint));
+  stroke: color-mix(in srgb, var(--ink) 15%, transparent);
+  stroke-width: 0.55;
+  vector-effect: non-scaling-stroke;
+}
+
+.region-shape {
+  --region-color: var(--accent);
+  fill: color-mix(in srgb, var(--region-color) 30%, transparent);
+  stroke: color-mix(in srgb, var(--region-color) 60%, var(--ink));
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  cursor: pointer;
+  transition: fill 180ms ease, stroke-width 180ms ease, filter 180ms ease;
+}
+
+.region-country {
+  --region-color: var(--accent);
+  fill: color-mix(in srgb, var(--region-color) 24%, #f7f2df);
+  stroke: color-mix(in srgb, var(--ink) 20%, transparent);
+  stroke-width: 0.62;
+  vector-effect: non-scaling-stroke;
+  cursor: pointer;
+  transition: fill 170ms ease, filter 170ms ease;
+}
+
+.region-country.is-hot,
+.region-country:hover {
+  fill: color-mix(in srgb, var(--region-color) 68%, #fff7ed);
+  stroke: color-mix(in srgb, var(--region-color) 68%, var(--ink));
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--region-color) 28%, transparent));
+}
+
+.region-shape:hover,
+.region-shape.is-hot {
+  fill: color-mix(in srgb, var(--region-color) 66%, transparent);
+  stroke: color-mix(in srgb, var(--region-color) 72%, var(--ink));
+  stroke-width: 2.2;
+  filter: drop-shadow(0 0 9px color-mix(in srgb, var(--region-color) 45%, transparent));
+}
+
+.target-country {
+  --region-color: var(--accent);
+  fill: color-mix(in srgb, var(--region-color) 56%, #fff);
+  stroke: #fffdf7;
+  stroke-width: 1.35;
+  vector-effect: non-scaling-stroke;
+  cursor: pointer;
+  transition: fill 150ms ease, filter 150ms ease;
+}
+
+.target-country.is-hover,
+.target-country:hover,
+.target-country.is-selected {
+  fill: var(--accent);
+  filter: url(#countryGlow);
+}
+
+.earth-shade {
+  fill: url(#earthShade);
+  pointer-events: none;
+}
+
+.sphere-outline {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.92);
+  stroke-width: 2.2;
+  pointer-events: none;
+}
+
+.country-marker {
+  cursor: pointer;
+  color: var(--accent);
+  outline: none;
+}
+
+.marker-pulse {
+  fill: color-mix(in srgb, var(--accent) 16%, transparent);
+  stroke: color-mix(in srgb, var(--accent) 42%, transparent);
+  stroke-width: 1;
+}
+
+.is-live .country-marker:not(.is-selected) .marker-pulse {
+  animation: pulse-marker 2.8s ease-out infinite;
+}
+
+.marker-dot {
+  fill: var(--accent);
+  stroke: #fff;
+  stroke-width: 2;
+}
+
+.country-marker.is-selected .marker-dot {
+  fill: var(--ink);
+}
+
+.marker-label rect {
+  fill: rgba(255, 253, 247, 0.95);
+  stroke: color-mix(in srgb, var(--ink) 15%, transparent);
+  filter: drop-shadow(0 7px 12px rgba(41, 72, 63, 0.15));
+}
+
+.marker-label text {
+  fill: var(--ink);
+  font-family: "Noto Sans SC", sans-serif;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.marker-label .marker-score {
+  fill: var(--accent);
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 700;
+}
+
+.globe-toolbar {
+  position: absolute;
+  left: 34px;
+  right: 34px;
+  bottom: 16px;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.globe-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.pin-badge {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 650;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--mint) 48%, rgba(255, 255, 253, 0.82));
+  border: 1px solid color-mix(in srgb, var(--ink) 14%, transparent);
+  backdrop-filter: blur(8px);
+  animation: toast-in 220ms ease both;
+}
+
+.pin-badge i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ink) 8%, transparent);
+}
+
+.pin-badge em {
+  font-style: normal;
+  font-size: 8px;
+  color: color-mix(in srgb, var(--ink) 46%, transparent);
+  border-left: 1px solid var(--line);
+  padding-left: 8px;
+}
+
+.region-quick-nav {
+  position: absolute;
+  left: 34px;
+  top: 138px;
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+}
+
+.region-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 30px;
+  padding: 0 11px;
+  border: 1px solid var(--soft-line);
+  border-radius: 99px;
+  background: rgba(255, 255, 253, 0.66);
+  backdrop-filter: blur(8px);
+  font-size: 10px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+}
+
+.region-chip i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.region-chip b {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 9px;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--ink) 45%, transparent);
+}
+
+.region-chip:hover {
+  transform: translateX(3px);
+  border-color: color-mix(in srgb, var(--ink) 26%, transparent);
+  background: rgba(255, 255, 253, 0.92);
+  box-shadow: 0 6px 14px color-mix(in srgb, var(--ink) 8%, transparent);
+}
+
+.region-chip.is-active {
+  background: var(--ink);
+  color: var(--canvas);
+  border-color: var(--ink);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--ink) 18%, transparent);
+}
+
+.region-chip.is-active b {
+  color: color-mix(in srgb, var(--canvas) 62%, transparent);
+}
+
+.hq-arc {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.15;
+  stroke-dasharray: 3 6;
+  stroke-linecap: round;
+  opacity: 0.52;
+  pointer-events: none;
+  vector-effect: non-scaling-stroke;
+}
+
+.is-live .hq-arc {
+  animation: arc-flow 1.6s linear infinite;
+}
+
+.hq-marker rect {
+  fill: var(--ink);
+  stroke: #fff;
+  stroke-width: 1.5;
+}
+
+.hq-marker text {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  fill: color-mix(in srgb, var(--ink) 70%, transparent);
+}
+
+@keyframes arc-flow {
+  to { stroke-dashoffset: -18; }
+}
+
+.signal-ticker {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  border-top: 1px solid var(--line);
+  background: color-mix(in srgb, var(--canvas) 80%, rgba(255, 255, 255, 0.62));
+  position: relative;
+  z-index: 8;
+  min-width: 0;
+}
+
+.ticker-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px 0 28px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: color-mix(in srgb, var(--ink) 60%, transparent);
+  white-space: nowrap;
+}
+
+.ticker-label .icon {
+  color: var(--accent);
+}
+
+.ticker-viewport {
+  overflow: hidden;
+  min-width: 0;
+  mask-image: linear-gradient(90deg, transparent, #000 26px, #000 calc(100% - 26px), transparent);
+}
+
+.ticker-track {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: max-content;
+  padding: 6px 0;
+  animation: ticker-scroll linear infinite;
+}
+
+.ticker-viewport:hover .ticker-track {
+  animation-play-state: paused;
+}
+
+.signal-ticker.is-static .ticker-viewport {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.signal-ticker.is-static .ticker-track {
+  animation: none;
+}
+
+.ticker-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--soft-line);
+  background: rgba(255, 255, 253, 0.72);
+  border-radius: 99px;
+  padding: 4px 10px;
+  font-size: 9px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 150ms ease, transform 150ms ease;
+}
+
+.ticker-item:hover {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+  transform: translateY(-1px);
+}
+
+.ticker-item em {
+  font-style: normal;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.ticker-item span {
+  font-weight: 650;
+}
+
+.ticker-item b {
+  font-weight: 500;
+  color: color-mix(in srgb, var(--ink) 52%, transparent);
+}
+
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.globe-hint,
+.globe-tool,
+.data-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  color: color-mix(in srgb, var(--ink) 58%, transparent);
+}
+
+.globe-tool {
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 253, 0.67);
+  cursor: pointer;
+}
+
+.data-status span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #5d9a6d;
+}
+
+.region-legend {
+  position: absolute;
+  right: 34px;
+  top: 30px;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  color: color-mix(in srgb, var(--ink) 45%, transparent);
+}
+
+.region-legend i {
+  width: 18px;
+  height: 5px;
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.region-legend i:nth-of-type(2) {
+  background: color-mix(in srgb, var(--accent) 48%, transparent);
+}
+
+.region-legend i:nth-of-type(3) {
+  background: color-mix(in srgb, var(--accent) 82%, transparent);
+}
+
+.region-legend b {
+  font-weight: 600;
+}
+
+.agent-rail {
+  height: 74px;
+  border-top: 1px solid var(--line);
+  background: color-mix(in srgb, var(--canvas) 72%, rgba(255, 255, 255, 0.5));
+  display: grid;
+  grid-template-columns: 176px minmax(0, 1fr);
+  align-items: center;
+  padding: 0 28px;
+  gap: 15px;
+  position: relative;
+  z-index: 8;
+}
+
+.agent-rail-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  font-weight: 650;
+  color: color-mix(in srgb, var(--ink) 64%, transparent);
+}
+
+.agent-steps {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.agent-step {
+  min-width: 0;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+}
+
+.agent-step i {
+  width: 21px;
+  height: 21px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  background: var(--canvas);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 9px;
+  font-style: normal;
+  color: color-mix(in srgb, var(--ink) 55%, transparent);
+}
+
+.agent-step span {
+  font-size: 9px;
+  color: color-mix(in srgb, var(--ink) 49%, transparent);
+  white-space: nowrap;
+}
+
+.agent-steps > b {
+  flex: 1;
+  min-width: 8px;
+  height: 1px;
+  margin: 0 5px 13px;
+  background: var(--line);
+}
+
+.agent-step.is-running i {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 14%, transparent);
+  animation: agent-breathe 1.2s ease-in-out infinite;
+}
+
+.agent-step.is-done i {
+  border-color: color-mix(in srgb, #5f9b6e 50%, transparent);
+  background: color-mix(in srgb, #5f9b6e 15%, var(--canvas));
+  color: #4a8058;
+}
+

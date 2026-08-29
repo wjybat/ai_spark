@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#F7F3E8">
+  <title>ATLAS · 海外商机决策 Agent</title>
+  <link rel="preconnect" href="https://miaoda.feishu.cn">
+  <link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=IBM+Plex+Mono:wght@500;600&family=Noto+Sans+SC:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./panels.css">
+  <link rel="stylesheet" href="./overlays.css">
+  <link rel="stylesheet" href="./live.css">
+  <script src="https://sf3-scmcdn-cn.feishucdn.com/obj/feishu-static/miaoda/coding-unpkg-sdk/react@18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
+  <script src="https://sf3-scmcdn-cn.feishucdn.com/obj/feishu-static/miaoda/coding-unpkg-sdk/react-dom@18.3.1/umd/react-dom.development.js" crossorigin="anonymous"></script>
+  <script src="https://sf3-scmcdn-cn.feishucdn.com/obj/feishu-static/miaoda/coding-unpkg-sdk/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script>
+    window.TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+      "palette": ["#F47C61", "#DDF2EC", "#F7F3E8", "#24443D", "#6E8F87"],
+      "density": "stage",
+      "motion": true
+    }/*EDITMODE-END*/;
+  </script>
+  <script src="./data.js"></script>
+  <script src="./agent-client.js"></script>
+  <script type="text/babel" src="./tweaks-panel.jsx"></script>
+  <script type="text/babel" src="./globe.jsx"></script>
+  <script type="text/babel" src="./app.jsx"></script>
+</body>
+</html>
