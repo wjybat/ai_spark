@@ -1,0 +1,111 @@
+.markdown-content {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+  line-height: 1.75;
+  color: inherit;
+  text-align: left;
+  white-space: normal;
+}
+
+.markdown-inline {
+  font: inherit;
+  color: inherit;
+}
+
+.markdown-content :is(h1, h2, h3, h4, h5, h6) {
+  font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+  font-weight: 700;
+  line-height: 1.45;
+  letter-spacing: normal;
+  color: var(--ink, #24443d);
+  margin: 1.1em 0 0.45em;
+}
+
+.markdown-content h1 { font-size: 1.5em; }
+.markdown-content h2 { font-size: 1.3em; }
+.markdown-content h3 { font-size: 1.15em; }
+.markdown-content :is(h4, h5, h6) { font-size: 1em; }
+
+.markdown-content :is(p, ul, ol, blockquote, pre, table) {
+  margin: 0.65em 0;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+  white-space: normal;
+}
+
+.markdown-content > :first-child { margin-top: 0; }
+.markdown-content > :last-child { margin-bottom: 0; }
+
+.markdown-content :is(ul, ol) { padding-left: 1.6em; }
+.markdown-content ul { list-style: disc outside; }
+.markdown-content ol { list-style: decimal outside; }
+.markdown-content ul ul { list-style-type: circle; }
+.markdown-content li {
+  margin: 0.25em 0;
+  padding-left: 0.2em;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+}
+.markdown-content li > :is(ul, ol) { margin: 0.25em 0; }
+.markdown-content li > p { margin: 0.25em 0; }
+.markdown-content :is(strong, b) { font-size: inherit; font-weight: 700; color: inherit; display: inline; }
+.markdown-content :is(em, i) { font: inherit; font-style: italic; color: inherit; display: inline; }
+.markdown-content a {
+  display: inline;
+  color: #316e62;
+  text-decoration: underline;
+  text-underline-offset: 0.16em;
+}
+.markdown-content a:hover { color: var(--accent, #f47c61); }
+.markdown-content a:focus-visible { outline: 2px solid var(--accent, #f47c61); outline-offset: 2px; }
+
+.markdown-content code {
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  background: rgba(36, 68, 61, 0.07);
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.9em;
+  color: inherit;
+}
+.markdown-content pre {
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 12px;
+  border: 1px solid var(--line, #dae3dd);
+  border-radius: 8px;
+  background: #f1f5f1;
+  white-space: pre;
+  overflow-wrap: normal;
+}
+.markdown-content pre code { padding: 0; background: none; white-space: pre; }
+
+.markdown-content blockquote {
+  padding: 4px 12px;
+  border-left: 3px solid #91b7aa;
+  background: rgba(221, 242, 236, 0.35);
+}
+.markdown-content table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+.markdown-content :is(th, td) {
+  min-width: 80px;
+  padding: 7px 10px;
+  border: 1px solid var(--line, #dae3dd);
+  text-align: left;
+  vertical-align: top;
+}
+.markdown-content th { font-weight: 700; background: #eaf3ee; }
+.markdown-content [align="center"] { text-align: center; }
+.markdown-content [align="right"] { text-align: right; }
+.markdown-content input[type="checkbox"] { margin-right: 0.5em; accent-color: #568b77; }
+.markdown-content hr { border: 0; border-top: 1px solid var(--line, #dae3dd); margin: 1em 0; }
+.package-section > .markdown-content + .markdown-content { margin-top: 0.8em; }
+.package-section > ul > li > .markdown-content { font-size: inherit; }
+.run-status:not(.run-conclusion) { text-align: center; }

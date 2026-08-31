@@ -18,6 +18,8 @@
   box-shadow: 0 30px 90px rgba(37, 70, 62, 0.22);
   text-align: center;
   position: relative;
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
 }
 
 .agent-orb {
@@ -45,10 +47,20 @@
   letter-spacing: -0.03em;
 }
 
-.agent-run-card > p {
+.agent-run-card > .run-status {
   margin: 0;
   font-size: 11px;
   color: color-mix(in srgb, var(--ink) 55%, transparent);
+}
+
+.agent-run-card > .run-conclusion {
+  max-height: min(34vh, 320px);
+  overflow-y: auto;
+  text-align: left;
+  padding: 12px;
+  margin-top: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--soft-line);
 }
 
 .run-steps {

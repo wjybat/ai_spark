@@ -1,0 +1,51 @@
+.market-scan-card {
+  position: relative;
+  width: min(570px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  padding: 30px;
+  border: 1px solid rgba(255,255,255,.8);
+  border-radius: 22px;
+  background: var(--canvas);
+  box-shadow: 0 25px 80px rgba(37,70,62,.18);
+}
+.market-scan-eyebrow { display: flex; align-items: center; gap: 8px; color: var(--muted); font: 10px "IBM Plex Mono", monospace; letter-spacing: .1em; }
+.market-scan-eyebrow > span { padding: 3px 7px; border-radius: 5px; background: var(--mint); font: 9px "Noto Sans SC", sans-serif; letter-spacing: 0; }
+.market-scan-card h2 { margin: 16px 0 7px; font-size: 24px; letter-spacing: -.03em; }
+.market-scan-subtitle { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.7; }
+.market-scan-nodes { list-style: none; margin: 24px 0 20px; padding: 0; }
+.market-scan-nodes > li { position: relative; display: flex; align-items: center; gap: 13px; min-height: 72px; padding: 11px 14px; border: 1px solid var(--soft-line); border-radius: 12px; background: rgba(255,255,255,.45); transition: background 250ms ease, border-color 250ms ease; }
+.market-scan-nodes > li + li { margin-top: 14px; }
+.market-scan-nodes > li + li::before { content: ""; position: absolute; top: -15px; left: 32px; width: 2px; height: 14px; background: var(--line); }
+.market-scan-node-icon { flex: 0 0 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; background: color-mix(in srgb, var(--ink) 5%, transparent); color: var(--muted); }
+.market-scan-nodes strong { font-size: 12px; }
+.market-scan-nodes p { margin: 3px 0 0; font-size: 10px; color: var(--muted); line-height: 1.5; }
+.market-scan-nodes small { margin-left: auto; flex-shrink: 0; font-size: 9px; color: var(--muted); }
+.market-scan-nodes .is-active { border-color: color-mix(in srgb, var(--accent) 65%, white); background: color-mix(in srgb, var(--accent) 8%, white); }
+.market-scan-nodes .is-active .market-scan-node-icon { background: var(--accent); color: white; animation: market-node-pulse 1s ease-in-out infinite; }
+.market-scan-nodes .is-active small { color: var(--accent); }
+.market-scan-nodes .is-done .market-scan-node-icon { background: var(--mint); color: #4e815a; }
+.market-scan-nodes .is-done::before { background: #a0c4b5; }
+.market-scan-progress-label { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); }
+.market-scan-card .run-progress { margin-top: 8px; }
+.market-scan-result { display: flex; justify-content: space-around; padding: 13px; margin-top: 15px; border-radius: 10px; background: var(--mint); font-size: 10px; }
+.market-scan-result b { font: 20px "IBM Plex Mono", monospace; margin-right: 4px; }
+.market-scan-footer { margin-top: 15px; display: flex; align-items: center; justify-content: space-between; gap: 15px; }
+.market-scan-footer > small { font-size: 9px; line-height: 1.6; color: var(--muted); }
+.market-scan-footer .run-complete-button { flex-shrink: 0; margin-top: 0; }
+.market-overview-note { font-size: 11px; color: var(--muted); line-height: 1.7; margin: 14px 0 20px; }
+.market-overview-regions, .market-overview-customers { display: grid; gap: 8px; }
+.market-overview-regions button, .market-overview-customers button { color: var(--ink); text-align: left; padding: 12px; border: 1px solid var(--soft-line); border-radius: 10px; background: rgba(255,255,255,.45); cursor: pointer; }
+.market-overview-regions button:hover, .market-overview-customers button:hover { border-color: var(--accent); background: rgba(255,255,255,.8); }
+.market-overview-regions button { display: flex; align-items: center; gap: 10px; }
+.market-overview-regions button > span { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.market-overview-regions button > div { flex: 1; }
+.market-overview strong { font-size: 12px; }
+.market-overview-regions p, .market-overview-customers p { font-size: 10px; color: var(--muted); margin: 4px 0 0; }
+.market-overview-regions small, .market-overview-customers small { font-size: 9px; color: var(--muted); }
+.market-overview-customers button > div { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.market-overview-customers button > div span { display: flex; align-items: center; flex-shrink: 0; gap: 6px; font-size: 9px; }
+.market-overview-customers small { display: block; margin-top: 7px; }
+@keyframes market-node-pulse { 50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 15%, transparent); } }
+@media (prefers-reduced-motion: reduce) { .market-scan-nodes .is-active .market-scan-node-icon { animation: none; } }
+@media (max-width: 600px) { .market-scan-card { padding: 22px 18px; } .market-scan-card h2 { font-size: 21px; } .market-scan-nodes > li { padding-inline: 10px; gap: 9px; } }

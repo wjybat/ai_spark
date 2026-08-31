@@ -1,8 +1,17 @@
 (function () {
   const eventTypes = ["run_created", "agent_start", "tool_start", "tool_progress", "tool_end", "message_delta", "run_complete", "run_error"];
   const targetByCountry = {
+    chile: { regionId: "south-america", customerId: "cencosud", customerName: "Cencosud" },
+    argentina: { regionId: "south-america", customerId: "cencosud", customerName: "Cencosud" },
+    peru: { regionId: "south-america", customerId: "cencosud", customerName: "Cencosud" },
+    colombia: { regionId: "south-america", customerId: "cencosud", customerName: "Cencosud" },
     canada: { regionId: "canada", customerId: "loblaw", customerName: "Loblaw Companies Limited" },
+    usa: { regionId: "south-america", customerId: "cencosud", customerName: "Cencosud" },
     australia: { regionId: "oceania", customerId: "sigma-chemist", customerName: "Sigma Healthcare / Chemist Warehouse" },
+    new_zealand: { regionId: "oceania", customerId: "sigma-chemist", customerName: "Sigma Healthcare / Chemist Warehouse" },
+    ireland: { regionId: "oceania", customerId: "sigma-chemist", customerName: "Sigma Healthcare / Chemist Warehouse" },
+    uae: { regionId: "oceania", customerId: "sigma-chemist", customerName: "Sigma Healthcare / Chemist Warehouse" },
+    china: { regionId: "oceania", customerId: "sigma-chemist", customerName: "Sigma Healthcare / Chemist Warehouse" },
     brazil: { regionId: "south-america", customerId: "cencosud", customerName: "Cencosud" }
   };
 

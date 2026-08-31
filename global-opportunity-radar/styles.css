@@ -331,6 +331,7 @@ button:focus-visible,
   stroke: color-mix(in srgb, var(--ink) 15%, transparent);
   stroke-width: 0.55;
   vector-effect: non-scaling-stroke;
+  pointer-events: none;
 }
 
 .region-shape {
@@ -807,4 +808,3 @@ button:focus-visible,
   background: color-mix(in srgb, #5f9b6e 15%, var(--canvas));
   color: #4a8058;
 }
-

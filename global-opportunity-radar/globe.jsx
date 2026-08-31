@@ -2,6 +2,7 @@ const { useEffect, useMemo, useRef, useState } = React;
 
 // DMALL 总部（北京）坐标，用于绘制出海航线
 const HQ_COORD = [116.4, 39.9];
+const DEFAULT_ROTATION = { lon: 78, lat: -14 };
 
 function GlobeIcon({ name, size = 18 }) {
   const paths = {
@@ -33,10 +34,10 @@ function Globe({
   const dragRef = useRef(null);
   const movedRef = useRef(false);
   const animRef = useRef(null);
-  const rotationRef = useRef({ lon: -28, lat: -9 });
+  const rotationRef = useRef(DEFAULT_ROTATION);
   const [size, setSize] = useState(560);
   const [worldFeatures, setWorldFeatures] = useState([]);
-  const [rotation, setRotation] = useState({ lon: -28, lat: -9 });
+  const [rotation, setRotation] = useState(DEFAULT_ROTATION);
   const [hoverCountry, setHoverCountry] = useState(null);
   const [loadState, setLoadState] = useState("loading");
 
@@ -79,7 +80,7 @@ function Globe({
   useEffect(() => {
     const target = selectedRegion
       ? (() => { const center = regions[selectedRegion].center; return { lon: -center[0], lat: -center[1] }; })()
-      : { lon: -28, lat: -9 };
+      : DEFAULT_ROTATION;
     if (animRef.current) cancelAnimationFrame(animRef.current);
     if (!motion) {
       setRotation(target);
@@ -158,15 +159,13 @@ function Globe({
     return lookup;
   }, [worldFeatures]);
 
-  const regionForFeature = (feature) => {
-    const [lon, lat] = d3.geoCentroid(feature);
-    if (lon < -28 && lat > 12) return "north_america";
-    if (lon < -28 && lat <= 12) return "south_america";
-    if ((lon > 112 && lat < -8) || (lon > 165 && lat < 8)) return "oceania";
-    if (lon >= -25 && lon <= 42 && lat >= 36) return "europe";
-    if (lon >= -22 && lon <= 52 && lat < 36 && (lon < 37 || lat < 13)) return "africa";
-    return "asia";
-  };
+  const countryByIso = useMemo(() => {
+    const lookup = {};
+    Object.values(countries).forEach((country) => { lookup[country.iso] = country; });
+    return lookup;
+  }, [countries]);
+
+  const coveredWorldFeatures = useMemo(() => worldFeatures.filter((feature) => countryByIso[String(feature.id).padStart(3, "0")]), [worldFeatures, countryByIso]);
 
   const visible = (coord) => {
     const center = [-rotation.lon, -rotation.lat];
@@ -229,7 +228,7 @@ function Globe({
         height={size}
         viewBox={`0 0 ${size} ${size}`}
         role="img"
-        aria-label={selectedRegion ? `${regions[selectedRegion].name}重点国家分布` : "全球商机交互地球"}
+        aria-label={selectedRegion ? `${regions[selectedRegion].name}真实客户国家分布` : "完整世界地图，仅调研覆盖国家可交互"}
         onPointerDown={startDrag}
         onPointerMove={moveDrag}
         onPointerUp={endDrag}
@@ -259,17 +258,20 @@ function Globe({
         <path className="sphere-ocean" d={model.path({ type: "Sphere" })}></path>
         <g clipPath="url(#sphereClip)">
           <path className="graticule" d={model.path(model.graticule)}></path>
+          {/* 完整地理底图与业务交互层分开：所有国家可见，仅调研覆盖国家可点击。 */}
           {worldFeatures.map((feature, index) => (
-            <path key={`land-${feature.id ?? index}`} className="world-land" d={model.path(feature)}></path>
+            <path key={`land-${feature.id ?? index}`} className="world-land" data-country-iso={String(feature.id).padStart(3, "0")} aria-hidden="true" d={model.path(feature)}></path>
           ))}
 
-          {!selectedRegion && worldFeatures.length > 0 && worldFeatures.map((feature, index) => {
-            const region = regions[regionForFeature(feature)];
+          {!selectedRegion && coveredWorldFeatures.length > 0 && coveredWorldFeatures.map((feature, index) => {
+            const country = countryByIso[String(feature.id).padStart(3, "0")];
+            const region = regions[country.region];
             const isHot = highlightedRegion === region.id;
             return (
               <path
                 key={`region-country-${feature.id ?? index}`}
                 className={`region-country ${isHot ? "is-hot" : ""}`}
+                data-country-iso={country.iso}
                 style={{ "--region-color": region.color }}
                 d={model.path(feature)}
                 onPointerEnter={() => onHoverRegion(region.id)}
@@ -279,26 +281,14 @@ function Globe({
             );
           })}
 
-          {!selectedRegion && worldFeatures.length === 0 && continentFeatures.map((feature) => {
+          {!selectedRegion && loadState === "fallback" && continentFeatures.filter((feature) => regions[feature.properties.id]).map((feature) => {
             const region = regions[feature.properties.id];
-            const isHot = highlightedRegion === region.id;
             return (
               <path
                 key={region.id}
-                className={`region-shape ${isHot ? "is-hot" : ""}`}
-                style={{ "--region-color": region.color }}
+                className="world-land"
+                aria-hidden="true"
                 d={model.path(feature)}
-                tabIndex="0"
-                role="button"
-                aria-label={`查看${region.name}商机`}
-                onPointerEnter={() => onHoverRegion(region.id)}
-                onPointerLeave={() => onHoverRegion(null)}
-                onFocus={() => onHoverRegion(region.id)}
-                onBlur={() => onHoverRegion(null)}
-                onClick={() => selectRegion(region.id)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter" || event.key === " ") selectRegion(region.id);
-                }}
               ></path>
             );
           })}
@@ -365,7 +355,7 @@ function Globe({
                 <g className="marker-label" transform="translate(12 -17)">
                   <rect x="0" y="0" width={country.name.length * 15 + 70} height="35" rx="10"></rect>
                   <text x="12" y="22">{country.name}</text>
-                  <text className="marker-score" x={country.name.length * 15 + 36} y="22">{country.score}</text>
+                  <text className="marker-score" x={country.name.length * 15 + 36} y="22">{country.score ?? "实证"}</text>
                 </g>
               )}
             </g>
@@ -386,7 +376,7 @@ function Globe({
               onPointerEnter={() => { if (!selectedRegion) onHoverRegion(id); }}
               onPointerLeave={() => { if (!selectedRegion) onHoverRegion(null); }}
             >
-              <i style={{ background: item.color }}></i><span>{item.name}</span><b>{item.score}</b>
+              <i style={{ background: item.color }}></i><span>{item.name}</span><b>{item.badge}</b>
             </button>
           );
         })}
@@ -408,12 +398,12 @@ function Globe({
         ) : (
           <div className="globe-hint"><GlobeIcon name="rotate" size={16}></GlobeIcon>拖动旋转 · 悬停预览 · 点击锁定大洲</div>
         )}
-        <div className="data-status"><span></span>{loadState === "ready" ? "地理数据已就绪" : "轻量地图模式"}</div>
+        <div className="data-status"><span></span>{loadState === "ready" ? "真实国家边界已就绪" : "轻量地图模式"}</div>
       </div>
 
       {!selectedRegion && (
-        <div className="region-legend" aria-label="区域机会图例">
-          <span>机会强度</span><i></i><i></i><i></i><b>高</b>
+        <div className="region-legend" aria-label="真实资料覆盖图例">
+          <span>真实资料覆盖</span><b>{Object.keys(countries).length} 国</b>
         </div>
       )}
     </div>

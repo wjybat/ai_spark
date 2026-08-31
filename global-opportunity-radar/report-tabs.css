@@ -1,0 +1,90 @@
+.country-quick-metrics .metric-cell strong {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.report-tabs {
+  display: grid;
+  gap: 20px;
+  font-size: 11px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
+.report-provenance {
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--mint) 42%, transparent);
+}
+
+.report-provenance > div,
+.report-card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.report-provenance > div { flex-wrap: wrap; }
+.report-provenance strong { color: #436f60; }
+.report-provenance span, .report-provenance small { font-size: 9px; }
+.report-provenance p { margin: 6px 0; }
+.report-provenance small, .report-note, .report-empty, .report-card > small { color: color-mix(in srgb, var(--ink) 62%, transparent); }
+.report-section { min-width: 0; }
+.report-section > .report-section { margin-top: 15px; }
+.report-section > .markdown-content { margin-block: 8px; }
+.report-section .section-heading { flex-wrap: wrap; gap: 4px 12px; }
+.report-section .section-heading small { font-size: 10px; }
+
+.report-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--mint) 55%, white);
+  border: 1px solid var(--line);
+}
+
+.report-hero > div { min-width: 0; }
+.report-hero h2 { margin: 5px 0; font-size: 21px; }
+.report-score { flex-shrink: 0; font-family: "IBM Plex Mono", monospace; font-size: 30px; color: var(--accent); text-align: center; }
+.report-score small { display: block; font-size: 10px; color: var(--muted); }
+.report-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+.report-stack { display: grid; gap: 10px; }
+.report-card { min-width: 0; padding: 12px; border: 1px solid var(--soft-line); border-radius: 10px; background: rgba(255,255,255,.5); }
+.report-card > .markdown-content { margin: 7px 0; }
+.report-card-heading { margin-bottom: 6px; }
+.report-card-heading > strong { font-size: 12px; }
+.report-badge { flex-shrink: 0; max-width: 48%; padding: 2px 7px; border-radius: 5px; font-size: 9px; font-weight: 500; background: color-mix(in srgb, var(--mint) 65%, white); color: #436f60; }
+.report-list { padding-left: 19px; margin: 8px 0; }
+.report-list > li { margin: 7px 0; padding-left: 2px; }
+.report-list > li::marker { color: var(--muted); }
+.report-field { display: grid; grid-template-columns: 88px minmax(0, 1fr); align-items: baseline; gap: 10px; margin: 10px 0; }
+.report-field > b { font-size: 10px; color: var(--muted); }
+.report-note { margin: 8px 0 0; font-size: 10px; }
+
+.report-disclosure { padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.35); }
+.report-disclosure > summary { cursor: pointer; font-weight: 600; font-size: 11px; }
+.report-disclosure > summary .report-badge { display: inline-block; margin-left: 8px; }
+.report-disclosure[open] > summary { margin-bottom: 12px; }
+.report-disclosure > .report-section { margin-top: 15px; }
+.report-evidence-refs { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; font-size: 9px; }
+.report-evidence-refs > a, .report-evidence-refs > span { padding: 2px 6px; border: 1px solid var(--soft-line); border-radius: 5px; color: var(--muted); text-decoration: none; }
+.report-evidence-refs > a:hover { color: var(--ink); border-color: var(--accent); }
+.report-source-link { display: block; margin-top: 5px; color: var(--muted); }
+.report-risk { background: color-mix(in srgb, #efd5a7 15%, white); }
+.report-email { padding: 16px; border: 1px solid var(--line); border-radius: 10px; background: #fffdf8; }
+.report-email > .markdown-content { font-size: 11px; }
+.report-brief-actions { margin-top: 0; }
+.report-management { font-size: 11px; }
+.report-management h1 { font-size: 23px; }
+
+@media (max-width: 1240px) {
+  .report-grid { grid-template-columns: 1fr; }
+  .report-field { grid-template-columns: 76px minmax(0, 1fr); }
+}
