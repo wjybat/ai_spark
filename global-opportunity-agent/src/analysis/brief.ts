@@ -2,6 +2,7 @@ import { customerById } from "../data/knowledge.js";
 import type {
   AdmissionResult,
   OpportunitySignal,
+  OutreachEmail,
   ProductMatchResult,
   ResearchBriefResult,
   RiskResult,
@@ -39,7 +40,7 @@ const internalActions: Record<string, string[]> = {
 
 function formatCapabilityList(productMatch: ProductMatchResult): string[] {
   return productMatch.matches
-    .filter((match) => match.fit === "high")
+    .filter((match) => match.fit !== "low")
     .slice(0, 4)
     .map((match) => `${match.capabilityName}（匹配参考 ${match.fitScore}）`);
 }
@@ -50,6 +51,7 @@ export function generateResearchBrief(
   signals: OpportunitySignal[],
   productMatch: ProductMatchResult,
   risks: RiskResult,
+  generatedEmail?: OutreachEmail,
 ): ResearchBriefResult {
   const customer = customerById.get(customerId);
   if (!customer) throw new Error(`Unknown customer: ${customerId}`);
@@ -73,7 +75,7 @@ export function generateResearchBrief(
     opportunitySignals: signalTitles,
     recommendedEntryPoints: topCapabilities,
     firstMeetingQuestions: [...questions],
-    outreachEmail: {
+    outreachEmail: generatedEmail ?? {
       subject: `Exploring a focused ${topCapabilities[0]?.split("（")[0] ?? "retail operations"} pilot with ${customer.name}`,
       body: [
         "Hi [Name],",
@@ -92,7 +94,7 @@ export function generateResearchBrief(
     nextActions: [
       "在 3 个工作日内核验目标联系人和项目所有者",
       "用首次沟通问题补齐系统、预算、决策链和部署边界",
-      `基于 ${topCapabilities.slice(0, 2).map((item) => item.split("（")[0]).join(" + ")} 准备单一场景试点`,
+      topCapabilities.length ? `基于 ${topCapabilities.slice(0, 2).map((item) => item.split("（")[0]).join(" + ")} 准备单一场景试点` : "优先补齐关键证据，暂不确定试点模块",
       "将新证据按事实/推断分层写回客户档案并设置复核日期",
     ],
     evidenceIds: [...new Set(evidenceIds)],

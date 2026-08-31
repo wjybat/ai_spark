@@ -277,9 +277,10 @@ function LiveAgentResult({ report }) {
         </section>
         <section>
           <div className="section-heading"><span>Dmall 能力匹配</span><small>含前置条件</small></div>
+          <p className="report-note">{materialSourceLabel(report.productMatch.generation)}</p>
           <div className="live-match-list">
             {report.productMatch.matches.slice(0, 4).map((match) => (
-              <div key={match.capabilityId}><span><b>{match.capabilityName}</b><em>{match.fitScore}</em></span><i><u style={{ width: `${match.fitScore}%` }}></u></i><p>禁止直接宣称：<MarkdownContent inline content={match.caution}></MarkdownContent></p></div>
+              <div key={match.capabilityId}><span><b>{match.capabilityName}</b><em>{match.fitScore}</em></span><i><u style={{ width: `${match.fitScore}%` }}></u></i><MarkdownContent className="live-match-reason" content={match.reasons.join("\n\n")}></MarkdownContent>{match.pilotScope && <MarkdownContent className="live-match-reason" content={`**建议验证范围**\n\n${match.pilotScope}`}></MarkdownContent>}<p>禁止直接宣称：<MarkdownContent inline content={match.caution}></MarkdownContent></p></div>
             ))}
           </div>
           <div className="section-heading live-risk-heading"><span>风险与待确认项</span><small>人工确认门禁</small></div>
@@ -434,8 +435,9 @@ function buildLiveBattlePackage(report) {
       { h: "解释边界", list: report.opportunitySignals.map((signal) => signal.interpretation) }
     ]},
     { id: "match", title: "Dmall 能力匹配", en: "CAPABILITY MATCH", sections: [
-      { h: "推荐切入", list: report.productMatch.matches.slice(0, 5).map((match) => `${match.capabilityName}｜匹配参考 ${match.fitScore}｜${match.reasons[0]}`) },
-      { h: "前置条件", list: report.productMatch.matches.slice(0, 3).flatMap((match) => match.prerequisites.map((item) => `${match.capabilityName}：${item}`)) },
+      { h: "生成方式", paras: [materialSourceLabel(report.productMatch.generation), "模型建议需人工核验，不代表已确认项目或成交概率。"] },
+      { h: "切入定位", paras: [report.productMatch.positioning] },
+      ...report.productMatch.matches.map((match) => ({ h: `${match.capabilityName}｜匹配参考 ${match.fitScore}`, paras: [...match.reasons, ...(match.pilotScope ? [`建议验证范围：${match.pilotScope}`] : []), `禁止直接宣称：${match.caution}`], list: match.prerequisites })),
       { h: "禁止宣称", list: report.productMatch.avoidClaims }
     ]},
     { id: "risk", title: "风险与待确认项", en: "RISKS & GAPS", sections: [
@@ -443,8 +445,10 @@ function buildLiveBattlePackage(report) {
       { h: "需人工确认", list: report.riskAssessment.pendingConfirmations }
     ]},
     { id: "email", title: "英文开发邮件", en: "OUTREACH EMAIL", sections: [
+      { h: "生成方式", paras: [materialSourceLabel(brief.outreachEmail.generation), "待销售审核，未发送。"] },
       { h: "Subject", paras: [brief.outreachEmail.subject] },
       { h: "Body", paras: [brief.outreachEmail.body] },
+      ...(brief.outreachEmail.angle ? [{ h: "写作依据", paras: [brief.outreachEmail.angle], list: brief.outreachEmail.evidenceIds || [] }] : []),
       { h: "首次拜访问题", list: brief.firstMeetingQuestions }
     ]},
     { id: "actions", title: "销售行动计划", en: "SALES ACTIONS", sections: [
@@ -694,7 +698,7 @@ function App() {
           }
           if (event.type === "tool_progress") {
             const progress = event.data?.progress || 50;
-            setRun((current) => current?.source === "backend" ? { ...current, statusMessage: `${event.label || event.toolName} · ${progress}%` } : current);
+            setRun((current) => current?.source === "backend" ? { ...current, step: event.stage ? Math.max(0, event.stage - 1) : current.step, statusMessage: `${event.label || event.toolName} · ${progress}%` } : current);
           }
         }
       });

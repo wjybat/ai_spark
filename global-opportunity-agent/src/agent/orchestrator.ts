@@ -13,6 +13,7 @@ import { createFinalNarrative } from "../analysis/index.js";
 import { config, resolveMode, type RequestedAgentMode } from "../config.js";
 import type { PipelineEvent, PipelineOutput } from "../types/domain.js";
 import { createOpportunityTools } from "./tools.js";
+import { materialGenerationInstructions } from "./generated-materials.js";
 import { dmallRouterProvider, DMALL_ROUTER_PROVIDER_ID } from "./dmall-router-provider.js";
 
 export interface PipelineRequest {
@@ -77,12 +78,14 @@ function getTextDelta(event: AgentEvent): string | undefined {
 export async function runOpportunityPipeline(request: PipelineRequest, sink: PipelineEventSink): Promise<PipelineOutput> {
   const startedAt = new Date().toISOString();
   const mode = resolveMode(request.mode);
-  const { tools, workspace } = createOpportunityTools();
   const models = createModels();
   let model;
   let nextExpectedToolIndex = 0;
   let currentTurnText = "";
   let lastTurnText = "";
+  let completedTurns = 0;
+  let failureReason = "";
+  const failedAttempts = new Map<string, number>();
   const usage = { input: 0, output: 0, totalTokens: 0, cost: 0 };
 
   if (mode === "demo") {
@@ -104,9 +107,10 @@ export async function runOpportunityPipeline(request: PipelineRequest, sink: Pip
     model = models.getModel("openai", config.model);
   }
   if (!model) throw new Error(`Model not found: ${config.provider}/${config.model}`);
+  const { tools, workspace } = createOpportunityTools({ mode, model: { provider: model.provider, model: model.id, thinkingEffort: config.thinkingEffort } });
 
   const agent = new Agent({
-    initialState: { systemPrompt, model, tools, thinkingLevel: mode === "live" ? config.thinkingEffort : "low" },
+    initialState: { systemPrompt: systemPrompt + (mode === "live" ? materialGenerationInstructions : ""), model, tools, thinkingLevel: mode === "live" ? config.thinkingEffort : "low" },
     streamFn: models.streamSimple.bind(models),
     toolExecution: "sequential",
     sessionId: request.runId,
@@ -123,8 +127,19 @@ export async function runOpportunityPipeline(request: PipelineRequest, sink: Pip
       if (mode === "live" && toolCall.name !== toolOrder[nextExpectedToolIndex]) {
         return { block: true, reason: `Expected ${toolOrder[nextExpectedToolIndex]}, received ${toolCall.name}` };
       }
-      if (mode === "live") nextExpectedToolIndex += 1;
       return undefined;
+    },
+    afterToolCall: async ({ toolCall, isError }) => {
+      // Only accepted output advances the workflow; invalid model arguments can be repaired.
+      if (!isError && toolCall.name === toolOrder[nextExpectedToolIndex]) nextExpectedToolIndex += 1;
+      return undefined;
+    },
+    shouldStopAfterTurn: () => {
+      completedTurns += 1;
+      const exhausted = [...failedAttempts].find(([, count]) => count >= 3);
+      if (exhausted) failureReason = `${exhausted[0]} failed validation/execution three times; no template fallback was used`;
+      else if (completedTurns >= 18) failureReason = "Agent exceeded the 18-turn workflow limit";
+      return Boolean(failureReason);
     },
   });
 
@@ -162,6 +177,7 @@ export async function runOpportunityPipeline(request: PipelineRequest, sink: Pip
       return;
     }
     if (event.type === "tool_execution_end") {
+      if (event.isError) failedAttempts.set(event.toolName, (failedAttempts.get(event.toolName) ?? 0) + 1);
       const details = event.result?.details as { stage?: number; label?: string; output?: unknown } | undefined;
       await sink({
         runId: request.runId,
@@ -173,6 +189,14 @@ export async function runOpportunityPipeline(request: PipelineRequest, sink: Pip
         message: event.isError ? "tool failed" : "tool completed",
         ...(details?.output !== undefined ? { data: details.output } : {}),
       });
+      if (mode === "live" && !event.isError && (nextExpectedToolIndex === 6 || nextExpectedToolIndex === 8)) {
+        await sink({
+          runId: request.runId, type: "tool_progress", timestamp, stage: nextExpectedToolIndex + 1,
+          toolName: toolOrder[nextExpectedToolIndex]!,
+          label: nextExpectedToolIndex === 6 ? "分析客户需求与产品适配" : "撰写英文开发邮件",
+          data: { progress: 15 },
+        });
+      }
       return;
     }
     const delta = getTextDelta(event);
@@ -183,6 +207,7 @@ export async function runOpportunityPipeline(request: PipelineRequest, sink: Pip
   });
 
   await agent.prompt(`Run the complete workflow for regionId=${request.regionId} and customerId=${request.customerId}.`);
+  if (failureReason || agent.state.errorMessage) throw new Error(failureReason || agent.state.errorMessage);
 
   if (
     !workspace.marketRadar
@@ -196,6 +221,9 @@ export async function runOpportunityPipeline(request: PipelineRequest, sink: Pip
     || !workspace.researchBrief
   ) {
     throw new Error("Agent stopped before completing every required P0 tool stage");
+  }
+  if (mode === "live" && (workspace.productMatch.generation?.source !== "llm" || workspace.researchBrief.outreachEmail.generation?.source !== "llm")) {
+    throw new Error("Live workflow requires both capability matching and outreach email to be LLM-generated");
   }
 
   const deterministicNarrative = createFinalNarrative(workspace.researchBrief, workspace.productMatch);

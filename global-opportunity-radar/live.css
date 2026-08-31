@@ -225,6 +225,14 @@
   color: color-mix(in srgb, var(--ink) 53%, transparent);
 }
 
+.live-match-list .live-match-reason {
+  margin-top: 8px;
+  font-size: 9px;
+  line-height: 1.6;
+}
+
+.live-match-list .live-match-reason p { font-size: inherit; line-height: inherit; }
+
 .live-risk-heading {
   margin-top: 15px;
 }

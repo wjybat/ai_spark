@@ -173,6 +173,24 @@ export interface CapabilityMatch {
   prerequisites: string[];
   evidenceIds: string[];
   caution: string;
+  pilotScope?: string;
+}
+
+export interface GenerationProvenance {
+  source: "llm" | "rules";
+  generatedAt: string;
+  requiresHumanReview: true;
+  provider?: string;
+  model?: string;
+  thinkingEffort?: string;
+}
+
+export interface OutreachEmail {
+  subject: string;
+  body: string;
+  angle?: string;
+  evidenceIds?: string[];
+  generation?: GenerationProvenance;
 }
 
 export interface ProductMatchResult {
@@ -180,6 +198,7 @@ export interface ProductMatchResult {
   matches: CapabilityMatch[];
   positioning: string;
   avoidClaims: string[];
+  generation?: GenerationProvenance;
 }
 
 export interface RiskItem {
@@ -208,10 +227,7 @@ export interface ResearchBriefResult {
   opportunitySignals: string[];
   recommendedEntryPoints: string[];
   firstMeetingQuestions: string[];
-  outreachEmail: {
-    subject: string;
-    body: string;
-  };
+  outreachEmail: OutreachEmail;
   internalActions: string[];
   risksAndUnknowns: string[];
   nextActions: string[];

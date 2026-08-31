@@ -23,6 +23,10 @@ import type {
   RiskResult,
 } from "../types/domain.js";
 import { PipelineWorkspace, type ToolStageDetails } from "./workspace.js";
+import {
+  acceptGeneratedProduct, acceptGeneratedEmail, generatedProductSchema, generatedBriefSchema,
+  generationProvenance, type GenerationModel,
+} from "./generated-materials.js";
 
 const regionSchema = Type.Object({ regionId: Type.String({ description: "Region id from the catalog" }) });
 const customerSchema = Type.Object({ customerId: Type.String({ description: "Customer id from the generated pool" }) });
@@ -61,8 +65,10 @@ export interface OpportunityTools {
   workspace: PipelineWorkspace;
 }
 
-export function createOpportunityTools(): OpportunityTools {
+export function createOpportunityTools(options: { mode?: "demo" | "live"; model?: GenerationModel } = {}): OpportunityTools {
   const workspace = new PipelineWorkspace();
+  const live = options.mode === "live";
+  const generationModel = options.model ?? {};
 
   const marketRadarTool: AgentTool<typeof regionSchema, ToolStageDetails<MarketRadarResult>> = {
     name: "scan_market",
@@ -155,8 +161,22 @@ export function createOpportunityTools(): OpportunityTools {
         const signals = workspace.opportunitySignals ?? detectOpportunitySignals(params.customerId);
         workspace.opportunitySignals = signals;
         workspace.productMatch = matchProducts(params.customerId, signals);
+        workspace.productMatch.generation = generationProvenance("rules");
         return workspace.productMatch;
       }),
+  };
+
+  const generatedProductTool: AgentTool<typeof generatedProductSchema, ToolStageDetails<ProductMatchResult>> = {
+    name: "match_dmall_capabilities",
+    label: "分析客户需求与产品适配",
+    description: "由你根据前序客户画像、商机信号、准入与证据链生成 analysis；本工具只校验和保存，不替你生成内容。能力目录见系统提示。为各能力给出不同的事实依据、业务假设、建议试点与约束。",
+    parameters: generatedProductSchema,
+    executionMode: "sequential",
+    execute: async (_id, params, signal, onUpdate) => withProgress(7, "核对匹配依据与前置条件", onUpdate, signal, () => {
+      if (!workspace.customerProfile || !workspace.opportunitySignals || !workspace.admission || !workspace.evidenceChain) throw new Error("Complete profile, signals, admission and evidence-chain stages first");
+      workspace.productMatch = acceptGeneratedProduct(params, workspace.evidenceChain, generationModel);
+      return workspace.productMatch;
+    }),
   };
 
   const riskTool: AgentTool<typeof customerSchema, ToolStageDetails<RiskResult>> = {
@@ -189,12 +209,28 @@ export function createOpportunityTools(): OpportunityTools {
         workspace.productMatch = productMatch;
         workspace.riskAssessment = risks;
         workspace.researchBrief = generateResearchBrief(params.customerId, admission, signals, productMatch, risks);
+        workspace.researchBrief.outreachEmail.generation = generationProvenance("rules");
         return workspace.researchBrief;
       }),
   };
 
+  const generatedBriefTool: AgentTool<typeof generatedBriefSchema, ToolStageDetails<ResearchBriefResult>> = {
+    name: "generate_research_brief",
+    label: "撰写开发邮件与汇总客户简报",
+    description: "由你生成 email 的英文主题、正文、中文写作依据与事实引用。利用前序已接受的能力匹配与风险结果，聚焦一个真实信号，不套通用产品推销模板。本工具校验邮件并组装其他 Brief 字段。",
+    parameters: generatedBriefSchema,
+    executionMode: "sequential",
+    execute: async (_id, params, signal, onUpdate) => withProgress(9, "核对邮件内容与客户证据", onUpdate, signal, () => {
+      if (!workspace.admission || !workspace.opportunitySignals || !workspace.productMatch || !workspace.riskAssessment || !workspace.evidenceChain) throw new Error("Complete all preceding stages, including LLM capability matching and risks, before writing the email");
+      if (workspace.productMatch.generation?.source !== "llm") throw new Error("Live Brief requires LLM-generated capability matching");
+      const email = acceptGeneratedEmail(params, workspace.evidenceChain, generationModel);
+      workspace.researchBrief = generateResearchBrief(params.customerId, workspace.admission, workspace.opportunitySignals, workspace.productMatch, workspace.riskAssessment, email);
+      return workspace.researchBrief;
+    }),
+  };
+
   return {
     workspace,
-    tools: [marketRadarTool, customerPoolTool, customerProfileTool, signalTool, admissionTool, evidenceTool, productTool, riskTool, briefTool],
+    tools: [marketRadarTool, customerPoolTool, customerProfileTool, signalTool, admissionTool, evidenceTool, live ? generatedProductTool : productTool, riskTool, live ? generatedBriefTool : briefTool],
   };
 }

@@ -16,12 +16,12 @@ Fastify API + in-memory RunStore
         ├─ 4 detect_opportunity_signals
         ├─ 5 assess_customer_admission
         ├─ 6 build_evidence_chain
-        ├─ 7 match_dmall_capabilities
+        ├─ 7 match_dmall_capabilities (live: LLM authors analysis → validation)
         ├─ 8 assess_customer_risks
-        └─ 9 generate_research_brief
+        └─ 9 generate_research_brief (live: LLM authors email → validation + Brief assembly)
                 │
                 ▼
-Evidence retriever + typed knowledge base + deterministic analysis
+Evidence retriever + typed knowledge base + deterministic analysis + model-authored material
 ```
 
 ## 关键设计
@@ -31,7 +31,8 @@ Evidence retriever + typed knowledge base + deterministic analysis
 3. **事实与推断分离**：每条证据有 `kind=fact|inference`、来源等级和置信度。
 4. **人工确认门禁**：预算、RFP、决策链、部署和系统版本缺失时不作绝对判断。
 5. **稳定路演模式**：无密钥时使用 pi-ai faux provider 驱动真实 Agent 工具循环；不是预先返回一个静态 JSON。
-6. **Live 可切换**：提供 OpenAI/Anthropic provider，复用完全相同的工具合同。
+6. **Live 可切换**：提供 Dmall Router/OpenAI/Anthropic provider。live 的第 7/9 阶段要求模型提供生成内容，demo 保留规则/模板合同；最终结果结构兼容，并通过 `generation.source` 标明来源。
+7. **生成与校验分离**：匹配排序、理由、试点范围、邮件主题和正文由当前 pi Agent 在工具调用参数中撰写。固定能力目录和事实证据是上下文约束；工具不伪造模型文本。只有成功执行才推进阶段；错误可原阶段修正，三次失败或超过 18 轮则结束。
 
 ## MVP 边界
 

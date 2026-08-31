@@ -11,6 +11,16 @@ function reportSourceUrl(value) {
 function reportMode(report) {
   return report.mode === "live" ? `实时模型 · ${report.modelRun?.model || "模型名称未返回"}` : "演示模式 · 真实资料 / 规则分析";
 }
+function materialSourceLabel(generation) {
+  if (generation?.source === "llm") return `LLM 生成 · ${generation.model || "本次模型"}`;
+  if (generation?.source === "rules") return "演示模式 · 规则 / 模板";
+  return "历史结果 · 未记录生成来源";
+}
+function reportGenerationNote(report) {
+  return report.productMatch?.generation?.source === "llm" && report.researchBrief?.outreachEmail?.generation?.source === "llm"
+    ? "能力匹配、英文开发邮件由本次 LLM Agent 生成；其余结构化内容来自证据工具链。所有建议与邮件均需人工审核。"
+    : "各模块生成方式以来源标记为准；最终结论在 live 模式由模型生成。建议与邮件均需人工审核。";
+}
 function reportScope(report, country) {
   return `地图入口：${country.name}；市场分析范围：${reportText(report.marketRadar?.regionName)}；客户分析范围：${reportText(report.customerProfile?.name)}（集团口径，非单一国家结论）。`;
 }
@@ -112,8 +122,11 @@ function ReportSales({ report }) {
     <ReportSection title="优先联系角色" meta="需核验具体联系人"><ReportList items={report.customerProfile?.decisionRoles}></ReportList></ReportSection>
     <ReportSection title="首次拜访问题"><ReportList items={brief.firstMeetingQuestions} ordered></ReportList></ReportSection>
     <ReportSection title="英文开发邮件" meta="待销售审核，未发送" className="report-email">
+      <p className="report-note">{materialSourceLabel(brief.outreachEmail?.generation)}</p>
       <div className="report-field"><b>Subject</b><ReportText value={brief.outreachEmail?.subject}></ReportText></div>
       <ReportText value={brief.outreachEmail?.body}></ReportText>
+      {brief.outreachEmail?.angle && <div className="report-field"><b>写作依据</b><ReportText value={brief.outreachEmail.angle}></ReportText></div>}
+      <ReportEvidenceRefs ids={brief.outreachEmail?.evidenceIds} report={report}></ReportEvidenceRefs>
     </ReportSection>
     <ReportSection title="内部协同行动"><ReportList items={brief.internalActions}></ReportList></ReportSection>
     <ReportEvidenceRefs ids={brief.evidenceIds} report={report}></ReportEvidenceRefs>
@@ -133,10 +146,12 @@ function ReportBattle({ report }) {
       <ReportSection title="准入前必须确认"><ReportList items={admission.mustConfirm}></ReportList></ReportSection><ReportText className="report-note" value={admission.disclaimer}></ReportText>
     </ReportSection>
     <ReportSection title="Dmall 能力匹配" meta="匹配理由 / 前置条件 / 禁止承诺">
+      <p className="report-note">{materialSourceLabel(match.generation)} · 参考评分，需人工验证</p>
       <ReportText value={match.positioning}></ReportText>
       <div className="report-stack">{reportList(match.matches).map(item => <article className="report-card" key={item.capabilityId}>
         <div className="report-card-heading"><strong>{item.capabilityName}</strong><span className="report-badge">{reportLevel(item.fit)}匹配 · {item.fitScore} 分</span></div>
         <ReportList items={item.reasons}></ReportList><b>前置条件</b><ReportList items={item.prerequisites}></ReportList>
+        {item.pilotScope && <div className="report-field"><b>建议验证范围</b><ReportText value={item.pilotScope}></ReportText></div>}
         <div className="report-field"><b>禁止直接宣称</b><ReportText value={item.caution}></ReportText></div><ReportEvidenceRefs ids={item.evidenceIds} report={report}></ReportEvidenceRefs>
       </article>)}</div>
       {!reportList(match.matches).length && <p className="report-empty">本次结果未返回能力匹配。</p>}
@@ -168,7 +183,7 @@ function buildReportManagementBrief(report, country) {
     `# ${reportText(report.customerProfile?.name)} · 管理层简报`,
     `${reportMode(report)}\n\n生成时间：${reportText(brief.generatedAt || report.completedAt)}\n\n运行 ID：${reportText(report.runId)}`,
     reportScope(report, country),
-    "结构化分析来自本次后端工具链；最终结论在 live 模式由模型生成。建议与推断均需人工核验。",
+    reportGenerationNote(report),
     "## 最终结论", reportText(report.finalNarrative),
     "## 执行摘要", reportText(brief.executiveSummary),
     "## 准入建议", reportText(brief.admission), reportText(report.admission?.rationale), reportText(report.admission?.disclaimer),
@@ -191,9 +206,9 @@ function ReportTab({ tab, report, country, generating, onCopy, onDownload }) {
   const View = { overview: ReportMarket, customers: ReportCustomers, sales: ReportSales, battle: ReportBattle, brief: ReportManagement }[tab];
   if (!View) return null;
   return <div className="tab-body report-tabs" data-report-tab={tab} data-report-run={report.runId} key={report.runId}>
-    <div className="report-provenance"><div><strong>{generating ? "重新分析中 · 当前展示上次成功结果" : "已回填 · 最近成功结果"}</strong><span>{reportMode(report)}</span></div><small>完成于 {reportText(report.completedAt)} · {reportText(report.runId)}</small><p>{reportScope(report, country)}</p><small>结构化内容来自本次后端工具链；最终结论在 live 模式由模型生成。</small></div>
+    <div className="report-provenance"><div><strong>{generating ? "重新分析中 · 当前展示上次成功结果" : "已回填 · 最近成功结果"}</strong><span>{reportMode(report)}</span></div><small>完成于 {reportText(report.completedAt)} · {reportText(report.runId)}</small><p>{reportScope(report, country)}</p><small>{reportGenerationNote(report)}</small></div>
     <View report={report} country={country} onCopy={onCopy} onDownload={onDownload}></View>
   </div>;
 }
 
-Object.assign(window, { ReportTab, buildReportManagementBrief });
+Object.assign(window, { ReportTab, buildReportManagementBrief, materialSourceLabel });
