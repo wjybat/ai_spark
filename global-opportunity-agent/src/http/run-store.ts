@@ -9,6 +9,8 @@ export interface RunRecord {
   id: string;
   regionId: string;
   customerId: string;
+  countryId?: string;
+  countryName?: string;
   requestedMode: "auto" | "demo" | "live";
   status: RunStatus;
   createdAt: string;
@@ -24,18 +26,24 @@ export class RunStore {
   private readonly runs = new Map<string, RunRecord>();
   private readonly listeners = new Map<string, Set<Listener>>();
 
-  create(input: { regionId: string; customerId: string; mode?: "auto" | "demo" | "live" }): RunRecord {
+  create(input: { regionId: string; customerId: string; countryId?: string; countryName?: string; mode?: "auto" | "demo" | "live" }): RunRecord {
     const region = regionById.get(input.regionId);
     if (!region) throw new Error(`Unknown region: ${input.regionId}`);
-    if (!customerById.has(input.customerId)) throw new Error(`Unknown customer: ${input.customerId}`);
+    const customer = customerById.get(input.customerId);
+    if (!customer) throw new Error(`Unknown customer: ${input.customerId}`);
     if (input.regionId !== "global" && !region.customerIds.includes(input.customerId)) {
       throw new Error(`Customer ${input.customerId} is not in region ${input.regionId}`);
     }
+    if (Boolean(input.countryId) !== Boolean(input.countryName)) throw new Error("countryId and countryName must be provided together");
+    if (input.countryName && !customer.countries.includes(input.countryName)) throw new Error(`Customer ${input.customerId} is not known in country ${input.countryName}`);
+    if (input.countryId && !/^[a-z][a-z0-9_-]*$/.test(input.countryId)) throw new Error("countryId has an invalid format");
     const now = new Date().toISOString();
     const record: RunRecord = {
       id: randomUUID(),
       regionId: input.regionId,
       customerId: input.customerId,
+      ...(input.countryId ? { countryId: input.countryId } : {}),
+      ...(input.countryName ? { countryName: input.countryName } : {}),
       requestedMode: input.mode ?? "auto",
       status: "queued",
       createdAt: now,
@@ -76,6 +84,8 @@ export class RunStore {
         runId: run.id,
         regionId: run.regionId,
         customerId: run.customerId,
+        ...(run.countryId ? { countryId: run.countryId } : {}),
+        ...(run.countryName ? { countryName: run.countryName } : {}),
         mode: run.requestedMode,
       },
       async (event) => this.push(id, event),

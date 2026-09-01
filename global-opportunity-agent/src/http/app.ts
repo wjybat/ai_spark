@@ -10,6 +10,8 @@ import { RunStore } from "./run-store.js";
 interface CreateRunBody {
   regionId?: string;
   customerId?: string;
+  countryId?: string;
+  countryName?: string;
   mode?: "auto" | "demo" | "live";
 }
 
@@ -18,6 +20,8 @@ function serializeRun(run: ReturnType<RunStore["create"]>) {
     id: run.id,
     regionId: run.regionId,
     customerId: run.customerId,
+    countryId: run.countryId,
+    countryName: run.countryName,
     requestedMode: run.requestedMode,
     status: run.status,
     createdAt: run.createdAt,
@@ -92,6 +96,8 @@ export async function buildApp(options: { serveFrontend?: boolean } = {}): Promi
       const run = store.create({
         regionId: body.regionId,
         customerId: body.customerId,
+        ...(body.countryId ? { countryId: body.countryId } : {}),
+        ...(body.countryName ? { countryName: body.countryName } : {}),
         ...(body.mode ? { mode: body.mode } : {}),
       });
       setImmediate(() => store.start(run.id));

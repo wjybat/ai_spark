@@ -33,6 +33,7 @@ Evidence retriever + typed knowledge base + deterministic analysis + model-autho
 5. **稳定路演模式**：无密钥时使用 pi-ai faux provider 驱动真实 Agent 工具循环；不是预先返回一个静态 JSON。
 6. **Live 可切换**：提供 Dmall Router/OpenAI/Anthropic provider。live 的第 7/9 阶段要求模型提供生成内容，demo 保留规则/模板合同；最终结果结构兼容，并通过 `generation.source` 标明来源。
 7. **生成与校验分离**：匹配排序、理由、试点范围、邮件主题和正文由当前 pi Agent 在工具调用参数中撰写。固定能力目录和事实证据是上下文约束；工具不伪造模型文本。只有成功执行才推进阶段；错误可原阶段修正，三次失败或超过 18 轮则结束。
+8. **国家为报告范围**：前端任务携带 `countryId/countryName`；区域雷达只作为背景，当前客户作为首个潜客样本。最终结论不得以公司名作为整份报告标题，客户发现阶段可以继续扩充该国家的企业名单。
 
 ## MVP 边界
 

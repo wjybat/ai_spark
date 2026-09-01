@@ -31,7 +31,7 @@
 可选复测（会真实调用已配置模型）：
 
 ```bash
-node --import tsx scripts/evaluate-materials.ts --customer cencosud --region south-america --output /absolute/path/report.json
+node --import tsx scripts/evaluate-materials.ts --customer cencosud --region south-america --country-id brazil --country-name 巴西 --output /absolute/path/report.json
 ```
 
 脚本不打印密钥；240 秒未结束时退出。普通 `npm test` 使用脚本化 provider，不调用外部模型。

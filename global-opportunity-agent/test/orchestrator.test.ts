@@ -6,7 +6,7 @@ describe("pi-agent-core orchestrator", () => {
   it("executes all P0 tools in order and returns a complete report", async () => {
     const events: Array<Omit<PipelineEvent, "id">> = [];
     const output = await runOpportunityPipeline(
-      { runId: "test-run", regionId: "global", customerId: "cencosud", mode: "demo" },
+      { runId: "test-run", regionId: "global", customerId: "cencosud", countryId: "brazil", countryName: "巴西", mode: "demo" },
       (event) => { events.push(event); },
     );
     const startedTools = events.filter((event) => event.type === "tool_start").map((event) => event.toolName);
@@ -18,11 +18,14 @@ describe("pi-agent-core orchestrator", () => {
     expect(output.marketRadar.regionId).toBe("global");
     expect(output.customerPool.customers).toHaveLength(3);
     expect(output.customerProfile.customerId).toBe("cencosud");
+    expect(output.countryId).toBe("brazil");
+    expect(output.countryName).toBe("巴西");
     expect(output.opportunitySignals.length).toBeGreaterThan(1);
     expect(output.evidenceChain.records.length).toBeGreaterThan(2);
     expect(output.productMatch.matches[0]?.capabilityName).toBe("Open Platform");
     expect(output.riskAssessment.risks.length).toBeGreaterThanOrEqual(4);
     expect(output.researchBrief.nextActions).toHaveLength(4);
-    expect(output.finalNarrative).toContain("待确认项");
+    expect(output.finalNarrative).toContain("巴西国家商机报告");
+    expect(output.finalNarrative).toContain("首个潜在客户样本为 Cencosud");
   }, 20_000);
 });

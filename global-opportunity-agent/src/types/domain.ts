@@ -239,6 +239,8 @@ export interface PipelineOutput {
   mode: "demo" | "live";
   regionId: string;
   customerId: string;
+  countryId?: string;
+  countryName?: string;
   startedAt: string;
   completedAt: string;
   marketRadar: MarketRadarResult;

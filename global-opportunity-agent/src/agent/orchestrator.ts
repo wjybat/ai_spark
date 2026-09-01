@@ -20,6 +20,8 @@ export interface PipelineRequest {
   runId: string;
   regionId: string;
   customerId: string;
+  countryId?: string;
+  countryName?: string;
   mode?: RequestedAgentMode;
 }
 
@@ -44,6 +46,16 @@ Use the requested regionId for the first two tools and the requested customerId 
 Separate verified facts from inferences. Treat budget, procurement, decision chain and unknown system versions as pending confirmation.
 Do not claim that Dmall replaces a customer's existing ERP, cloud, AI, WMS or internal team unless evidence explicitly proves it.
 After all tools complete, provide a concise Chinese conclusion for sales.`;
+
+function countryReportInstructions(request: PipelineRequest): string {
+  if (!request.countryName) return "";
+  return `\nThe primary report scope is the country ${request.countryName} (${request.countryId || "unknown-id"}).
+Region-level market results are supporting context, not the report title or final geographic scope.
+The selected customer ${request.customerId} is the initial potential-customer sample for this country, not the report's sole subject.
+Frame the final Chinese narrative as a country opportunity report: country market context, current potential-customer set, customer-specific opportunities, risks and next actions.
+Do not title the final report with a company name. Explicitly distinguish country conclusions from facts that only apply to an individual customer.
+The customer pool may grow in later discovery stages, so do not imply that the current sample is exhaustive.\n`;
+}
 
 function buildDemoResponses(regionId: string, customerId: string) {
   const calls = [
@@ -110,7 +122,7 @@ export async function runOpportunityPipeline(request: PipelineRequest, sink: Pip
   const { tools, workspace } = createOpportunityTools({ mode, model: { provider: model.provider, model: model.id, thinkingEffort: config.thinkingEffort } });
 
   const agent = new Agent({
-    initialState: { systemPrompt: systemPrompt + (mode === "live" ? materialGenerationInstructions : ""), model, tools, thinkingLevel: mode === "live" ? config.thinkingEffort : "low" },
+    initialState: { systemPrompt: systemPrompt + countryReportInstructions(request) + (mode === "live" ? materialGenerationInstructions : ""), model, tools, thinkingLevel: mode === "live" ? config.thinkingEffort : "low" },
     streamFn: models.streamSimple.bind(models),
     toolExecution: "sequential",
     sessionId: request.runId,
@@ -206,7 +218,7 @@ export async function runOpportunityPipeline(request: PipelineRequest, sink: Pip
     }
   });
 
-  await agent.prompt(`Run the complete workflow for regionId=${request.regionId} and customerId=${request.customerId}.`);
+  await agent.prompt(`Run the complete workflow for regionId=${request.regionId}, country=${request.countryName || "not specified"}, and initial customerId=${request.customerId}.`);
   if (failureReason || agent.state.errorMessage) throw new Error(failureReason || agent.state.errorMessage);
 
   if (
@@ -226,7 +238,8 @@ export async function runOpportunityPipeline(request: PipelineRequest, sink: Pip
     throw new Error("Live workflow requires both capability matching and outreach email to be LLM-generated");
   }
 
-  const deterministicNarrative = createFinalNarrative(workspace.researchBrief, workspace.productMatch);
+  const customerNarrative = createFinalNarrative(workspace.researchBrief, workspace.productMatch);
+  const deterministicNarrative = request.countryName ? `${request.countryName}国家商机报告：当前纳入的首个潜在客户样本为 ${workspace.customerProfile.name}，后续客户发现可能扩充名单。${customerNarrative}` : customerNarrative;
   const modelNarrative = lastTurnText.trim();
   const finalNarrative = mode === "live" && modelNarrative ? modelNarrative : deterministicNarrative;
   return {
@@ -234,6 +247,8 @@ export async function runOpportunityPipeline(request: PipelineRequest, sink: Pip
     mode,
     regionId: request.regionId,
     customerId: request.customerId,
+    ...(request.countryId ? { countryId: request.countryId } : {}),
+    ...(request.countryName ? { countryName: request.countryName } : {}),
     startedAt,
     completedAt: new Date().toISOString(),
     marketRadar: workspace.marketRadar,

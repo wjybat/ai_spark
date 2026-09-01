@@ -21,13 +21,15 @@ const { runOpportunityPipeline, toolOrder } = await import("../src/agent/orchest
 const call = (name: string, args: Record<string, unknown>) => fauxAssistantMessage(fauxToolCall(name, args), { stopReason: "toolUse" });
 const prefix = () => toolOrder.slice(0, 6).map((name, index) => call(name, index < 2 ? { regionId: "south-america" } : { customerId: "cencosud" }));
 const finish = () => [call("assess_customer_risks", { customerId: "cencosud" }), call("generate_research_brief", emailInput), fauxAssistantMessage("模型已完成两个内容模块，建议由销售审核后跟进。")];
-const request = { runId: "live-contract-test", regionId: "south-america", customerId: "cencosud", mode: "live" as const };
+const request = { runId: "live-contract-test", regionId: "south-america", customerId: "cencosud", countryId: "brazil", countryName: "巴西", mode: "live" as const };
 beforeEach(() => { fixture.responses = []; });
 
 describe("live model-authored tool workflow (scripted provider, no network)", { timeout: 20_000 }, () => {
   it("passes real prior evidence and capability context to generation, then carries generated matching into Brief", async () => {
     fixture.responses = [...prefix(), context => {
       expect(context.systemPrompt).toContain("Dmall capability catalog");
+      expect(context.systemPrompt).toContain("primary report scope is the country 巴西");
+      expect(context.systemPrompt).toContain("initial potential-customer sample");
       const previous = JSON.stringify(context.messages);
       expect(previous).toContain("cencosud-q2-2026");
       expect(previous).toContain("SAP");
@@ -39,6 +41,7 @@ describe("live model-authored tool workflow (scripted provider, no network)", { 
     const events: Array<Omit<PipelineEvent, "id">> = [];
     const report = await runOpportunityPipeline(request, event => { events.push(event); });
     expect(report.mode).toBe("live");
+    expect(report.countryName).toBe("巴西");
     expect(report.productMatch.generation?.source).toBe("llm");
     expect(report.productMatch.matches[0]?.fitScore).toBe(88);
     expect(report.researchBrief.outreachEmail.body).toBe(emailInput.email.body);

@@ -5,6 +5,8 @@ const { values } = parseArgs({
   options: {
     region: { type: "string", default: "global" },
     customer: { type: "string", default: "cencosud" },
+    "country-id": { type: "string" },
+    "country-name": { type: "string" },
     mode: { type: "string", default: "auto" },
   },
 });
@@ -14,6 +16,8 @@ const output = await runOpportunityPipeline(
     runId: `cli-${Date.now()}`,
     regionId: values.region ?? "global",
     customerId: values.customer ?? "cencosud",
+    ...(values["country-id"] ? { countryId: values["country-id"] } : {}),
+    ...(values["country-name"] ? { countryName: values["country-name"] } : {}),
     mode,
   },
   (event) => {

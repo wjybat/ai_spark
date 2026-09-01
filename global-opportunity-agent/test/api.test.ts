@@ -20,10 +20,13 @@ describe("HTTP API", () => {
     expect(catalog.statusCode).toBe(200);
     expect(catalog.json().customers).toHaveLength(3);
 
+    const invalidCountry = await app.inject({ method: "POST", url: "/api/agent/runs", payload: { regionId: "canada", customerId: "loblaw", countryId: "brazil", countryName: "巴西", mode: "demo" } });
+    expect(invalidCountry.statusCode).toBe(400);
+
     const created = await app.inject({
       method: "POST",
       url: "/api/agent/runs",
-      payload: { regionId: "canada", customerId: "loblaw", mode: "demo" },
+      payload: { regionId: "canada", customerId: "loblaw", countryId: "canada", countryName: "加拿大", mode: "demo" },
     });
     expect(created.statusCode).toBe(202);
     const runId = created.json().runId as string;
@@ -37,8 +40,11 @@ describe("HTTP API", () => {
     }
 
     expect(result?.status).toBe("completed");
-    const output = result?.output as { customerId: string; evidenceChain: { records: unknown[] } };
+    const output = result?.output as { customerId: string; countryId: string; countryName: string; finalNarrative: string; evidenceChain: { records: unknown[] } };
     expect(output.customerId).toBe("loblaw");
+    expect(output.countryId).toBe("canada");
+    expect(output.countryName).toBe("加拿大");
+    expect(output.finalNarrative).toContain("加拿大国家商机报告");
     expect(output.evidenceChain.records.length).toBeGreaterThan(3);
   }, 20_000);
 });

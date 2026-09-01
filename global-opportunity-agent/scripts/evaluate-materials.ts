@@ -6,6 +6,8 @@ import { runOpportunityPipeline } from "../src/agent/orchestrator.js";
 const { values } = parseArgs({ options: {
   customer: { type: "string", default: "cencosud" },
   region: { type: "string", default: "south-america" },
+  "country-id": { type: "string", default: "brazil" },
+  "country-name": { type: "string", default: "巴西" },
   output: { type: "string" },
 } });
 const deadline = setTimeout(() => { console.error("Live evaluation exceeded 240 seconds"); process.exit(1); }, 240_000);
@@ -13,7 +15,7 @@ try {
   const started = Date.now();
   let toolErrors = 0;
   const output = await runOpportunityPipeline({
-    runId: `materials-evaluation-${Date.now()}`, customerId: values.customer!, regionId: values.region!, mode: "live",
+    runId: `materials-evaluation-${Date.now()}`, customerId: values.customer!, regionId: values.region!, countryId: values["country-id"]!, countryName: values["country-name"]!, mode: "live",
   }, event => {
     if (event.type === "tool_start") console.log(`[${event.stage}/9] ${event.label}`);
     if (event.type === "tool_end" && event.message === "tool failed") { toolErrors += 1; console.log(`Validation/execution retry: ${event.toolName}`); }

@@ -33,7 +33,7 @@ const productMatch = matchProducts(customerId, signals);
 const risks = assessRisks(customerId);
 const brief = generateResearchBrief(customerId, admission, signals, productMatch, risks);
 const report = {
-  mode: "live", customerProfile: profile, opportunitySignals: signals, admission,
+  mode: "live", countryId: "brazil", countryName: "巴西", customerProfile: profile, opportunitySignals: signals, admission,
   evidenceChain: buildEvidenceChain(customerId), productMatch, riskAssessment: risks,
   researchBrief: { ...brief, executiveSummary: source, firstMeetingQuestions: ["**确认**采购周期"] },
   finalNarrative: source,
@@ -71,8 +71,13 @@ describe("Agent output surfaces", () => {
   });
 
   it("renders final narrative and Brief using the same local Markdown bundle", () => {
-    const root = render(window.LiveAgentResult, { report });
-    assertMarkdown(root.querySelector(".live-result-narrative"));
+    const country = window.OPPORTUNITY_DATA.countries.brazil;
+    const root = render(window.LiveAgentResult, { report, country });
+    expect(root.querySelector(".live-result-hero > div > h2")?.textContent).toBe("巴西");
+    expect(root.querySelector(".live-result-subtitle")?.textContent).toContain("Cencosud");
+    expect(root.querySelector(".live-result-narrative h2")).toBeNull();
+    expect(root.querySelector(".live-result-narrative > p > strong")?.textContent).toBe("销售结论");
+    expect(root.querySelector(".live-result-narrative ul strong")?.textContent).toBe("高潜");
     assertMarkdown(root.querySelector(".live-brief-summary"));
   });
 
