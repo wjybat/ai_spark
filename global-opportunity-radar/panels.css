@@ -322,7 +322,7 @@
 }
 
 .country-panel-head {
-  padding: 24px 32px 0;
+  padding: 13px 30px 0;
 }
 
 .back-link {
@@ -332,7 +332,7 @@
   padding: 0;
   border: 0;
   background: transparent;
-  font-size: 11px;
+  font-size: 10px;
   color: color-mix(in srgb, var(--ink) 52%, transparent);
   cursor: pointer;
 }
@@ -341,47 +341,75 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 18px;
-  margin-top: 12px;
+  gap: 14px;
+  margin-top: 5px;
 }
 
 .country-head-main .panel-kicker {
-  margin-bottom: 4px;
+  margin-bottom: 2px;
+  font-size: 7px;
 }
 
 .country-head-main h1 {
-  font-size: clamp(27px, 2.2vw, 37px);
+  font-size: clamp(23px, 1.8vw, 29px);
+  line-height: 1.08;
+}
+
+.country-head-main p {
+  margin-top: 2px;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.country-head-main .score-ring.compact,
+.country-head-main .verified-badge {
+  width: 54px;
+  height: 54px;
+}
+
+.country-head-main .score-ring.compact span {
+  font-size: 17px;
+}
+
+.country-head-main .verified-badge strong {
+  font-size: 14px;
 }
 
 .country-quick-metrics {
-  margin-top: 16px;
+  margin-top: 8px;
 }
 
 .country-quick-metrics .metric-cell {
-  padding-block: 10px;
+  padding-block: 6px;
 }
 
 .country-quick-metrics .metric-cell strong {
-  font-size: 14px;
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.country-quick-metrics .metric-cell > span {
+  font-size: 9px;
 }
 
 .detail-tabs {
   display: flex;
-  gap: 21px;
-  padding: 0 32px;
+  gap: 18px;
+  padding: 0 30px;
   border-bottom: 1px solid var(--line);
-  margin-top: 12px;
+  margin-top: 4px;
   overflow-x: auto;
 }
 
 .detail-tabs button {
   position: relative;
-  height: 42px;
+  height: 36px;
   padding: 0;
   border: 0;
   background: transparent;
   color: color-mix(in srgb, var(--ink) 49%, transparent);
-  font-size: 11px;
+  font-size: 10.5px;
   white-space: nowrap;
   cursor: pointer;
 }
@@ -413,7 +441,21 @@
 }
 
 .tab-body {
-  padding: 19px 32px 28px;
+  padding: 17px 30px 30px;
+}
+
+.country-tab-scroll .section-heading > span {
+  font-size: 14px;
+}
+
+.country-tab-scroll .section-heading > small {
+  font-size: 11px;
+}
+
+.country-tab-scroll .tab-body > p,
+.country-tab-scroll .tab-body :is(.evidence-item, .customer-card-detail, .sales-timeline, .battle-block, .brief-grid) p {
+  font-size: 12px;
+  line-height: 1.72;
 }
 
 .insight-hero {
@@ -435,7 +477,7 @@
 
 .insight-hero p {
   margin: 0;
-  font-size: 11px;
+  font-size: 12.5px;
   line-height: 1.75;
 }
 
@@ -562,7 +604,7 @@
 
 .customer-summary p {
   margin: 0;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.6;
 }
 
@@ -586,6 +628,12 @@
 .customer-card:hover,
 .customer-card.is-open {
   border-color: color-mix(in srgb, var(--accent) 35%, var(--line));
+}
+
+.customer-entry-card:hover .customer-card-head > .icon,
+.report-customer-entry:hover .customer-card-action > .icon,
+.report-profile-entry:hover > .icon:last-child {
+  transform: translateX(3px);
 }
 
 .customer-card-head {
@@ -635,10 +683,39 @@
 
 .customer-card-detail {
   display: grid;
-  grid-template-columns: 1.05fr 1.35fr 0.5fr;
+  grid-template-columns: 1fr 1.2fr 1fr;
   border-top: 1px solid var(--soft-line);
   background: color-mix(in srgb, var(--mint) 23%, transparent);
 }
+
+.customer-card-action {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 7px 13px;
+  border-top: 1px solid var(--soft-line);
+  background: rgba(255,255,255,.58);
+  color: var(--ink);
+}
+
+.customer-card-action span { font-size: 11px; font-weight: 700; }
+.customer-card-action small { font-size: 9.5px; color: var(--muted); }
+.customer-card-action .icon { color: var(--accent); transition: transform 160ms ease; }
+
+.is-customer-level .country-panel-head {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--mint) 28%, transparent), transparent);
+}
+
+.is-customer-level .country-head-main h1 {
+  max-width: 460px;
+  font-size: clamp(18px, 1.55vw, 24px);
+  line-height: 1.16;
+}
+
+.is-customer-level .country-head-main p { font-size: 10.5px; }
+.is-customer-level .detail-tabs { background: color-mix(in srgb, var(--mint) 12%, transparent); }
 
 .customer-card-detail > div {
   padding: 11px 13px;
@@ -651,14 +728,14 @@
 
 .customer-card-detail span {
   display: block;
-  font-size: 8px;
+  font-size: 10px;
   color: color-mix(in srgb, var(--ink) 41%, transparent);
 }
 
 .customer-card-detail p {
   margin: 4px 0 0;
-  font-size: 9px;
-  line-height: 1.5;
+  font-size: 12px;
+  line-height: 1.7;
 }
 
 .sales-timeline {
@@ -698,8 +775,8 @@
 
 .sales-timeline p {
   margin: 1px 0 0;
-  font-size: 11px;
-  line-height: 1.6;
+  font-size: 12px;
+  line-height: 1.7;
 }
 
 .role-card {
@@ -762,8 +839,8 @@
   margin: 7px 0 0;
   color: color-mix(in srgb, var(--ink) 62%, transparent);
   font-family: "IBM Plex Mono", monospace;
-  font-size: 8px;
-  line-height: 1.65;
+  font-size: 11px;
+  line-height: 1.72;
 }
 
 .battle-card-grid {
@@ -810,8 +887,8 @@
 
 .battle-block p {
   margin: 7px 0 0;
-  font-size: 10px;
-  line-height: 1.62;
+  font-size: 12px;
+  line-height: 1.7;
 }
 
 .battle-block.risk > span {
@@ -845,7 +922,7 @@
   margin: 0;
   max-width: 600px;
   color: color-mix(in srgb, var(--ink) 66%, transparent);
-  font-size: 11px;
+  font-size: 12.5px;
   line-height: 1.72;
 }
 
@@ -872,8 +949,8 @@
 
 .brief-grid p {
   margin: 6px 0 0;
-  font-size: 9px;
-  line-height: 1.6;
+  font-size: 12px;
+  line-height: 1.7;
 }
 
 .brief-actions {
@@ -903,12 +980,12 @@
 }
 
 .panel-footer-action {
-  min-height: 67px;
+  min-height: 57px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-  padding: 10px 32px;
+  padding: 7px 30px;
   border-top: 1px solid var(--line);
   background: color-mix(in srgb, var(--canvas) 64%, rgba(255,255,255,0.7));
   backdrop-filter: blur(17px);
@@ -965,4 +1042,3 @@
   opacity: 0.65;
   cursor: wait;
 }
-

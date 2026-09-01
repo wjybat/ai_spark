@@ -162,31 +162,27 @@ function OpportunityOverview({ country }) {
   );
 }
 
-function CustomerRadar({ country, activeCustomer, setActiveCustomer }) {
+function CustomerRadar({ country, onSelectCustomer }) {
   return (
     <div className="tab-body">
       <div className="customer-summary"><span><Icon name="users" size={18}></Icon></span><p>调研文档在该国家收录 <strong>{country.customers.length} 家真实客户样例</strong>；未运行 Agent 前不展示模拟排名。</p></div>
       <div className="customer-list">
-        {country.customers.map((customer, index) => {
-          const open = activeCustomer === index;
-          return (
-            <button type="button" className={`customer-card ${open ? "is-open" : ""}`} key={customer.name} onClick={() => setActiveCustomer(open ? -1 : index)}>
+        {country.customers.map((customer, index) => (
+            <button type="button" className="customer-card customer-entry-card" data-customer-entry={country.companyId} key={customer.name} onClick={() => onSelectCustomer({ ...customer, customerId: country.companyId, countryId: country.id })}>
               <div className="customer-card-head">
                 <span className="customer-index">{String(index + 1).padStart(2, "0")}</span>
-                <div><strong>{customer.name}</strong><small>{customer.type} · {customer.stores} 门店</small></div>
+                <div><strong>{customer.name}</strong><small>{customer.type} · {customer.stores}</small></div>
                 <div className="customer-score"><span>来源</span><b>{customer.sourceLevel}</b></div>
                 <Icon name="chevron" size={17}></Icon>
               </div>
-              {open && (
-                <div className="customer-card-detail">
+              <div className="customer-card-detail">
                   <div><span>已确认信号</span><p>{customer.signal}</p></div>
                   <div><span>文档建议切入</span><p>{customer.modules.join(" · ")}</p></div>
                   <div><span>风险与未知</span><p>{customer.risk}</p></div>
-                </div>
-              )}
+              </div>
+              <div className="customer-card-action"><span>进入客户作战视图</span><small>销售建议 · 作战卡</small><Icon name="arrow" size={15}></Icon></div>
             </button>
-          );
-        })}
+        ))}
       </div>
     </div>
   );
@@ -214,8 +210,8 @@ function SalesAdvice({ country }) {
   );
 }
 
-function BattleCard({ country }) {
-  const lead = country.customers[0];
+function BattleCard({ country, customer }) {
+  const lead = customer || country.customers[0];
   return (
     <div className="tab-body battle-card-grid">
       <div className="battle-lead">
@@ -234,8 +230,8 @@ function ManagementBrief({ country, onCopy, onDownload }) {
   return (
     <div className="tab-body brief-page">
       <div className="brief-stamp">SOURCE DATA BRIEF · {country.en.toUpperCase()}</div>
-      <h2>{country.customers[0].name} 已核验资料摘要</h2>
-      <p className="brief-lead">当前页面仅展示调研文档中的真实资料：{country.customers[0].stores}；{country.pipeline}。准入、商机和行动结论将在 Agent 运行后生成。</p>
+      <h2>{country.name} 已核验资料摘要</h2>
+      <p className="brief-lead">当前国家报告已纳入潜在客户样本 {country.customers[0].name}：{country.customers[0].stores}；{country.pipeline}。准入、商机和行动结论将在 Agent 运行后生成，后续可继续扩充客户名单。</p>
       <div className="brief-grid">
         <div><span>Verified facts</span><p>{country.opportunities.slice(0, 2).join("；")}。</p></div>
         <div><span>Research entry</span><p>{country.recommendations[0]}</p></div>
@@ -250,12 +246,12 @@ function ManagementBrief({ country, onCopy, onDownload }) {
   );
 }
 
-function LiveAgentResult({ report }) {
+function LiveAgentResult({ report, country }) {
   const brief = report.researchBrief;
   return (
     <div className="tab-body live-agent-result">
       <div className="live-result-hero">
-        <div><span>PI AGENT CORE · {report.modelRun?.model || report.mode.toUpperCase()} · {report.modelRun?.thinkingEffort || "low"}</span><h2>{report.customerProfile.name}</h2><MarkdownContent className="live-result-narrative" content={report.finalNarrative}></MarkdownContent></div>
+        <div><span>PI AGENT CORE · {report.modelRun?.model || report.mode.toUpperCase()} · {report.modelRun?.thinkingEffort || "low"}</span><h2>{country?.name || report.countryName || report.marketRadar?.regionName}</h2><p className="live-result-subtitle">国家商机报告 · 当前潜在客户样本：{report.customerProfile.name}</p><MarkdownContent className="live-result-narrative" content={countryReportNarrative(report.finalNarrative)}></MarkdownContent></div>
         <ScoreRing value={report.admission.referenceScore} size="compact"></ScoreRing>
       </div>
       <div className="live-result-stats">
@@ -299,17 +295,39 @@ function LiveAgentResult({ report }) {
   );
 }
 
-function CountryPanel({ country, region, onBack, onGenerate, generating, notify, packageReady, onViewPackage, liveReport }) {
-  const tabs = [
-    ...(liveReport ? [["live", "Agent 实时结果"]] : []),
-    ["overview", "市场与商机"], ["customers", "客户雷达"], ["sales", "销售建议"], ["battle", "作战卡"], ["brief", "管理层简报"]
-  ];
+function CountryPanel({ country, region, onBack, onGenerate, generating, notify, packageReady, onViewPackage, liveReport, selectedCustomer: controlledCustomer, onSelectCustomer: controlledSelectCustomer }) {
+  const [internalCustomer, setInternalCustomer] = useAppState(null);
+  const selectedCustomer = controlledCustomer === undefined ? internalCustomer : controlledCustomer;
+  const selectCustomer = controlledSelectCustomer || setInternalCustomer;
+  const tabs = selectedCustomer
+    ? [["sales", "销售建议"], ["battle", "作战卡"]]
+    : [...(liveReport ? [["live", "Agent 实时结果"]] : []), ["overview", "市场与商机"], ["customers", "客户雷达"], ["brief", "管理层简报"]];
   const [tab, setTab] = useAppState("overview");
-  const [activeCustomer, setActiveCustomer] = useAppState(0);
   const tabScrollRef = React.useRef(null);
+  const navigationRef = React.useRef({ countryId: null, customerId: null, runId: null });
 
-  useAppEffect(() => { setTab(liveReport ? "live" : "overview"); setActiveCustomer(0); }, [country.id, liveReport]);
-  useAppEffect(() => { if (tabScrollRef.current) tabScrollRef.current.scrollTop = 0; }, [tab, country.id, liveReport?.runId]);
+  useAppEffect(() => {
+    const current = { countryId: country.id, customerId: selectedCustomer?.customerId || null, runId: liveReport?.runId || null };
+    const previous = navigationRef.current;
+    if (previous.countryId !== current.countryId) setTab(current.customerId ? "sales" : current.runId ? "live" : "overview");
+    else if (current.customerId && previous.customerId !== current.customerId) setTab("sales");
+    else if (!current.customerId && previous.customerId) setTab("customers");
+    else if (!current.customerId && previous.runId !== current.runId) setTab(current.runId ? "live" : "overview");
+    navigationRef.current = current;
+  }, [country.id, liveReport?.runId, selectedCustomer?.customerId]);
+  useAppEffect(() => { if (tabScrollRef.current) tabScrollRef.current.scrollTop = 0; }, [tab, country.id, liveReport?.runId, selectedCustomer?.customerId]);
+
+  const enterCustomer = (customer) => { selectCustomer({ ...customer, countryId: country.id }); setTab("sales"); };
+  const returnToCountry = () => { selectCustomer(null); setTab("customers"); };
+  const liveProfile = liveReport?.customerProfile;
+  const headerName = selectedCustomer ? (liveProfile?.customerId === selectedCustomer.customerId ? liveProfile.name : selectedCustomer.name) : country.name;
+  const headerSubtitle = selectedCustomer
+    ? liveProfile?.customerId === selectedCustomer.customerId ? `${country.name} · ${liveProfile.formats.slice(0, 3).join(" / ")}` : `${country.name} · ${selectedCustomer.type}`
+    : liveReport ? liveProfile.name : country.tagline;
+  const headerMetrics = selectedCustomer
+    ? liveReport ? [["分析状态", liveReport.admission.label], ["匹配能力", liveReport.productMatch.matches.length], ["行动建议", liveReport.researchBrief.nextActions.length], ["风险项", liveReport.riskAssessment.risks.length]]
+      : [["分析状态", "待 Agent"], ["已确认信号", country.signalCount], ["建议模块", selectedCustomer.modules?.length || 0], ["资料来源", country.sourceCount]]
+    : [["分析状态", liveReport?.admission.label ?? "待 Agent"], [liveReport ? "集团体量" : "客户体量", liveReport ? liveProfile.storeCountLabel.split("（")[0] : country.storeCount], ["资料摘要", liveReport?.opportunitySignals.length ?? country.signalCount], ["证据", liveReport ? `${liveReport.evidenceChain.coverage.sourceLevelA} A级` : `${country.sourceCount} A级`]];
 
   const briefText = liveReport ? buildReportManagementBrief(liveReport, country) : `${country.name}真实资料摘要\n客户：${country.customers[0].name}\n规模：${country.customers[0].stores}\n集团收入：${country.pipeline}\n已核验资料：${country.opportunities.join("；")}\n来源：${country.sources.map((source) => source.title).join("；")}`;
   const copyBrief = async () => {
@@ -331,32 +349,33 @@ function CountryPanel({ country, region, onBack, onGenerate, generating, notify,
   };
 
   return (
-    <div className="country-panel-shell">
+    <div className={`country-panel-shell ${selectedCustomer ? "is-customer-level" : "is-country-level"}`} data-view-level={selectedCustomer ? "customer" : "country"}>
       <div className="country-panel-head">
-        <button type="button" className="back-link" onClick={onBack}><Icon name="back" size={16}></Icon>{region.name}雷达</button>
+        <button type="button" className="back-link" onClick={selectedCustomer ? returnToCountry : onBack}><Icon name="back" size={16}></Icon>{selectedCustomer ? `${country.name} · 客户雷达` : `${region.name}雷达`}</button>
         <div className="country-head-main">
-          <div><div className="panel-kicker"><span style={{ background: region.color }}></span>{liveReport ? "LIVE EVIDENCE REPORT" : `${country.en.toUpperCase()} OPPORTUNITY`}</div><h1>{country.name}</h1><p>{liveReport ? liveReport.customerProfile.name : country.tagline}</p></div>
+          <div><div className="panel-kicker"><span style={{ background: region.color }}></span>{selectedCustomer ? `${country.en.toUpperCase()} · CUSTOMER PROFILE` : liveReport ? "LIVE EVIDENCE REPORT" : `${country.en.toUpperCase()} OPPORTUNITY`}</div><h1>{headerName}</h1><p>{headerSubtitle}</p></div>
           {liveReport ? <ScoreRing value={liveReport.admission.referenceScore} size="compact"></ScoreRing> : <VerifiedBadge count={country.sourceCount}></VerifiedBadge>}
         </div>
         <div className="country-quick-metrics">
-          <Metric label="分析状态" value={liveReport?.admission.label ?? "待 Agent"}></Metric><Metric label={liveReport ? "集团体量" : "客户体量"} value={liveReport ? liveReport.customerProfile.storeCountLabel.split("（")[0] : country.storeCount}></Metric><Metric label="资料摘要" value={liveReport?.opportunitySignals.length ?? country.signalCount}></Metric><Metric label="证据" value={liveReport ? `${liveReport.evidenceChain.coverage.sourceLevelA} A级` : `${country.sourceCount} A级`}></Metric>
+          {headerMetrics.map(([label, value]) => <Metric key={label} label={label} value={value}></Metric>)}
         </div>
       </div>
-      <nav className="detail-tabs" aria-label="国家详情">
+      <nav className="detail-tabs" aria-label={selectedCustomer ? "客户作战视图" : "国家详情"}>
         {tabs.map(([id, label]) => <button type="button" key={id} className={tab === id ? "is-active" : ""} onClick={() => setTab(id)}>{label}</button>)}
       </nav>
       <div className="country-tab-scroll" ref={tabScrollRef}>
-        {tab === "live" && liveReport && <LiveAgentResult report={liveReport}></LiveAgentResult>}
-        {liveReport && tab !== "live" ? <ReportTab tab={tab} report={liveReport} country={country} generating={generating} onCopy={copyBrief} onDownload={downloadBrief}></ReportTab> : <>
-        {tab === "overview" && <OpportunityOverview country={country}></OpportunityOverview>}
-        {tab === "customers" && <CustomerRadar country={country} activeCustomer={activeCustomer} setActiveCustomer={setActiveCustomer}></CustomerRadar>}
-        {tab === "sales" && <SalesAdvice country={country}></SalesAdvice>}
-        {tab === "battle" && <BattleCard country={country}></BattleCard>}
-        {tab === "brief" && <ManagementBrief country={country} onCopy={copyBrief} onDownload={downloadBrief}></ManagementBrief>}
-        </>}
+        {!selectedCustomer && tab === "live" && liveReport && <LiveAgentResult report={liveReport} country={country}></LiveAgentResult>}
+        {selectedCustomer ? (liveReport
+          ? <ReportTab tab={tab} report={liveReport} country={country} generating={generating} onCopy={copyBrief} onDownload={downloadBrief}></ReportTab>
+          : <>{tab === "sales" && <SalesAdvice country={country}></SalesAdvice>}{tab === "battle" && <BattleCard country={country} customer={selectedCustomer}></BattleCard>}</>)
+          : liveReport && tab !== "live" ? <ReportTab tab={tab} report={liveReport} country={country} generating={generating} onCopy={copyBrief} onDownload={downloadBrief} onSelectCustomer={enterCustomer}></ReportTab> : <>
+          {tab === "overview" && <OpportunityOverview country={country}></OpportunityOverview>}
+          {tab === "customers" && <CustomerRadar country={country} onSelectCustomer={enterCustomer}></CustomerRadar>}
+          {tab === "brief" && <ManagementBrief country={country} onCopy={copyBrief} onDownload={downloadBrief}></ManagementBrief>}
+          </>}
       </div>
       <div className="panel-footer-action">
-        <div><Icon name="spark" size={18}></Icon><span><b>{liveReport ? "pi-agent-core 实时结果" : "真实证据 Agent"}</b><small>{packageReady ? "真实证据作战包已就绪" : "基于调研资料运行 P0 2–10"}</small></span></div>
+        <div><Icon name="spark" size={18}></Icon><span><b>{selectedCustomer ? "客户作战 Agent" : liveReport ? "pi-agent-core 实时结果" : "真实证据 Agent"}</b><small>{selectedCustomer ? headerName : packageReady ? "真实证据作战包已就绪" : "基于调研资料运行 P0 2–10"}</small></span></div>
         <div className="footer-buttons">
           {packageReady && !generating && (
             <button type="button" className="ghost" onClick={onViewPackage}>查看作战包</button>
@@ -644,6 +663,7 @@ function App() {
   const [pkgReady, setPkgReady] = useAppState(() => new Set());
   const [agentStatus, setAgentStatus] = useAppState(null);
   const [liveReports, setLiveReports] = useAppState({});
+  const [customerFocus, setCustomerFocus] = useAppState(null);
 
   const signals = useAppMemo(() => liveSignals, [liveSignals]);
 
@@ -675,22 +695,24 @@ function App() {
   }, [toast]);
 
   const selectRegion = (id) => {
-    setSelectedRegion(id); setSelectedCountry(null); setHoverRegion(null);
+    setSelectedRegion(id); setSelectedCountry(null); setCustomerFocus(null); setHoverRegion(null);
   };
   const selectCountry = (id) => {
     const target = countries[id];
-    setSelectedRegion(target.region); setSelectedCountry(id); setHoverRegion(null);
+    setSelectedRegion(target.region); setSelectedCountry(id); setCustomerFocus(null); setHoverRegion(null);
   };
-  const backToGlobal = () => { setSelectedRegion(null); setSelectedCountry(null); setHoverRegion(null); };
-  const backToRegion = () => setSelectedCountry(null);
+  const backToGlobal = () => { setSelectedRegion(null); setSelectedCountry(null); setCustomerFocus(null); setHoverRegion(null); };
+  const backToRegion = () => { setSelectedCountry(null); setCustomerFocus(null); };
   const notify = (message) => setToast(message);
 
-  const startBackendRun = async ({ targetCountryId, regionId, customerId }) => {
+  const startBackendRun = async ({ targetCountryId, regionId, customerId, countryName }) => {
     setRun({ source: "backend", mode: "package", step: 0, done: false, targetCountryId, statusMessage: "正在连接 pi-agent-core…" });
     try {
       const output = await window.AgentApi.startRun({
         regionId,
         customerId,
+        countryId: targetCountryId,
+        countryName,
         mode: "auto",
         onEvent: (event) => {
           if (event.type === "tool_start") {
@@ -726,7 +748,7 @@ function App() {
     if (marketScan || (run && !run.done)) return;
     const target = window.AgentApi.targetForCountry(selectedCountry);
     if (target) {
-      return startBackendRun({ targetCountryId: selectedCountry, regionId: target.regionId, customerId: target.customerId });
+      return startBackendRun({ targetCountryId: selectedCountry, regionId: target.regionId, customerId: target.customerId, countryName: countries[selectedCountry].name });
     }
     notify("当前国家暂无可运行的真实客户资料");
     return undefined;
@@ -739,12 +761,13 @@ function App() {
       if (pkgCountry) { setPkgCountry(null); return; }
       if (marketScan) { setMarketScan(null); return; }
       if (run) { setRun(null); return; }
+      if (customerFocus) { setCustomerFocus(null); return; }
       if (selectedCountry) backToRegion();
       else if (selectedRegion) backToGlobal();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [pkgCountry, marketScan, run, selectedCountry, selectedRegion]);
+  }, [pkgCountry, marketScan, run, customerFocus, selectedCountry, selectedRegion]);
 
   const palette = t.palette;
   const themeStyle = {
@@ -780,7 +803,7 @@ function App() {
 
         <aside className="intelligence-panel" data-screen-label="Agent 情报面板">
           {country ? (
-            <CountryPanel country={country} region={regions[country.region]} onBack={backToRegion} onGenerate={startCountryPackage} generating={run?.mode === "package" && !run.done} notify={notify} packageReady={pkgReady.has(country.id)} onViewPackage={() => setPkgCountry(country.id)} liveReport={liveReports[country.id]}></CountryPanel>
+            <CountryPanel country={country} region={regions[country.region]} onBack={backToRegion} onGenerate={startCountryPackage} generating={run?.mode === "package" && !run.done} notify={notify} packageReady={pkgReady.has(country.id)} onViewPackage={() => setPkgCountry(country.id)} liveReport={liveReports[country.id]} selectedCustomer={customerFocus?.countryId === country.id ? customerFocus : null} onSelectCustomer={setCustomerFocus}></CountryPanel>
           ) : marketOverview && !selectedRegion && !hoverRegion ? (
             <MarketOverviewPanel summary={marketOverview} onSelectRegion={selectRegion} onSelectCountry={selectCountry}></MarketOverviewPanel>
           ) : (

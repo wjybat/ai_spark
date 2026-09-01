@@ -204,7 +204,7 @@ button:focus-visible,
   height: calc(100% - 78px);
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(590px, 57%) minmax(460px, 43%);
+  grid-template-columns: minmax(560px, 54%) minmax(500px, 46%);
   position: relative;
   z-index: 2;
 }

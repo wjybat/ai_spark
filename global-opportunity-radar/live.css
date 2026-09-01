@@ -68,13 +68,13 @@
 }
 
 .source-index-list a > span {
-  font-size: 8px;
+  font-size: 10.5px;
   line-height: 1.4;
 }
 
 .live-agent-result {
   display: grid;
-  gap: 18px;
+  gap: 20px;
 }
 
 .live-result-hero {
@@ -82,7 +82,7 @@
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 20px;
-  padding: 17px 18px;
+  padding: 14px 16px;
   border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--line));
   border-radius: 15px;
   background: linear-gradient(110deg, color-mix(in srgb, var(--mint) 54%, transparent), color-mix(in srgb, var(--accent) 5%, transparent));
@@ -98,14 +98,20 @@
 .live-result-hero h2 {
   margin: 5px 0 4px;
   font-family: "Bricolage Grotesque", "Noto Sans SC", sans-serif;
-  font-size: 22px;
+  font-size: 20px;
   letter-spacing: -0.03em;
+}
+
+.live-result-subtitle {
+  margin: 2px 0 10px;
+  font-size: 10.5px;
+  color: var(--muted);
 }
 
 .live-result-narrative {
   margin: 0;
-  font-size: 10px;
-  line-height: 1.65;
+  font-size: 12.5px;
+  line-height: 1.76;
   color: color-mix(in srgb, var(--ink) 68%, transparent);
 }
 
@@ -161,20 +167,20 @@
 .live-match-list b,
 .live-risk-list b {
   display: block;
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .live-evidence-list p {
   margin: 3px 0;
-  font-size: 8px;
-  line-height: 1.5;
+  font-size: 10.5px;
+  line-height: 1.65;
   color: color-mix(in srgb, var(--ink) 64%, transparent);
 }
 
 .live-evidence-list small {
   display: block;
   font-family: "IBM Plex Mono", monospace;
-  font-size: 7px;
+  font-size: 9px;
   color: color-mix(in srgb, var(--ink) 40%, transparent);
 }
 
@@ -220,15 +226,15 @@
 
 .live-match-list p {
   margin: 6px 0 0;
-  font-size: 7.5px;
-  line-height: 1.45;
+  font-size: 10px;
+  line-height: 1.65;
   color: color-mix(in srgb, var(--ink) 53%, transparent);
 }
 
 .live-match-list .live-match-reason {
   margin-top: 8px;
-  font-size: 9px;
-  line-height: 1.6;
+  font-size: 11.5px;
+  line-height: 1.72;
 }
 
 .live-match-list .live-match-reason p { font-size: inherit; line-height: inherit; }
@@ -259,8 +265,8 @@
 .live-risk-list p span {
   display: block;
   margin-top: 2px;
-  font-size: 7.5px;
-  line-height: 1.45;
+  font-size: 10.5px;
+  line-height: 1.65;
   color: color-mix(in srgb, var(--ink) 58%, transparent);
 }
 
@@ -273,8 +279,8 @@
 
 .live-brief-summary {
   margin: 0 0 10px;
-  font-size: 9px;
-  line-height: 1.62;
+  font-size: 11.5px;
+  line-height: 1.72;
 }
 
 .live-brief-field {
@@ -282,8 +288,8 @@
   grid-template-columns: 62px 1fr;
   gap: 8px;
   margin-top: 7px;
-  font-size: 8px;
-  line-height: 1.55;
+  font-size: 10.5px;
+  line-height: 1.68;
 }
 
 .live-brief-field > b {

@@ -454,7 +454,7 @@
 @media (max-height: 800px) {
   .app-header { height: 68px; }
   .app-stage { height: calc(100% - 68px); }
-  .app-stage { grid-template-columns: minmax(560px, 55%) minmax(470px, 45%); }
+  .app-stage { grid-template-columns: minmax(550px, 54%) minmax(490px, 46%); }
   .map-stage { grid-template-rows: minmax(0, 1fr) 36px 67px; }
   .region-quick-nav { top: 112px; }
   .region-chip { height: 27px; }
@@ -464,12 +464,12 @@
   .panel-content { padding-top: 24px; }
   .region-summary { margin-block: 12px 16px; }
   .panel-section { margin-top: 18px; }
-  .country-panel-head { padding-top: 16px; }
-  .tab-body { padding-top: 14px; }
+  .country-panel-head { padding-top: 11px; }
+  .tab-body { padding-top: 15px; }
 }
 
 @media (max-width: 1240px) {
-  .app-stage { grid-template-columns: 54% 46%; }
+  .app-stage { grid-template-columns: 53% 47%; }
   .source-pill { display: none; }
   .agent-rail { grid-template-columns: 138px minmax(0,1fr); padding-inline: 18px; }
   .agent-step span { font-size: 8px; }
