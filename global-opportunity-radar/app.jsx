@@ -1,4 +1,4 @@
-const { useEffect: useAppEffect, useMemo: useAppMemo, useState: useAppState } = React;
+const { useEffect: useAppEffect, useState: useAppState } = React;
 
 function Icon({ name, size = 18 }) {
   const shapes = {
@@ -62,7 +62,6 @@ function Header({ onScan, scanning, scanDisabled, agentStatus }) {
 function AgentRail({ steps, activeStep }) {
   return (
     <div className="agent-rail" aria-label="Agent 编排链路">
-      <div className="agent-rail-title"><Icon name="layers" size={16}></Icon><span>水滴引擎 · Orchestrator</span></div>
       <div className="agent-steps">
         {steps.map((step, index) => (
           <React.Fragment key={step}>
@@ -204,7 +203,7 @@ function SalesAdvice({ country }) {
       <div className="email-preview">
         <div><span><Icon name="mail" size={16}></Icon>英文开发邮件</span><small>等待 Agent</small></div>
         <strong>不使用静态模板冒充模型结果</strong>
-        <p>点击底部“运行 P0 2–10 完整链路”后，Agent 会基于该客户真实证据生成英文邮件、拜访问题和下一步行动。</p>
+        <p>点击底部“运行完整商机分析链路”后，Agent 会基于该客户真实证据生成英文邮件、拜访问题和下一步行动。</p>
       </div>
     </div>
   );
@@ -375,7 +374,7 @@ function CountryPanel({ country, region, onBack, onGenerate, generating, notify,
           </>}
       </div>
       <div className="panel-footer-action">
-        <div><Icon name="spark" size={18}></Icon><span><b>{selectedCustomer ? "客户作战 Agent" : liveReport ? "pi-agent-core 实时结果" : "真实证据 Agent"}</b><small>{selectedCustomer ? headerName : packageReady ? "真实证据作战包已就绪" : "基于调研资料运行 P0 2–10"}</small></span></div>
+        <div><Icon name="spark" size={18}></Icon><span><b>{selectedCustomer ? "客户作战 Agent" : liveReport ? "pi-agent-core 实时结果" : "真实证据 Agent"}</b><small>{selectedCustomer ? headerName : packageReady ? "真实证据作战包已就绪" : "基于调研资料运行完整分析"}</small></span></div>
         <div className="footer-buttons">
           {packageReady && !generating && (
             <button type="button" className="ghost" onClick={onViewPackage}>查看作战包</button>
@@ -395,7 +394,7 @@ function AgentRunOverlay({ steps, active, mode, onClose, onViewPackage, statusMe
         {done && <button type="button" className="overlay-close" onClick={onClose}><Icon name="close" size={18}></Icon></button>}
         <div className={`agent-orb ${done && !error ? "is-done" : ""} ${error ? "is-error" : ""}`}>{done && !error ? <Icon name="check" size={27}></Icon> : <Icon name={error ? "close" : "spark"} size={25}></Icon>}</div>
         <span className="run-eyebrow">PI AGENT CORE · EVIDENCE-FIRST ORCHESTRATOR</span>
-        <h2>{error ? "Agent 运行未完成" : done ? (mode === "scan" ? "真实市场扫描已完成" : "真实客户作战包已生成") : (mode === "scan" ? "正在运行市场与客户扫描" : "正在运行 P0 2–10 完整链路")}</h2>
+        <h2>{error ? "Agent 运行未完成" : done ? (mode === "scan" ? "真实市场扫描已完成" : "真实客户作战包已生成") : (mode === "scan" ? "正在运行市场与客户扫描" : "正在运行完整商机分析链路")}</h2>
         <MarkdownContent className={`run-status ${done ? "run-conclusion" : ""}`} content={error || statusMessage || (done ? "证据链、准入评估、能力匹配、风险和客户 Brief 均已生成。" : `正在运行：${steps[Math.min(active, steps.length - 1)]} Agent`)}></MarkdownContent>
         <div className="run-steps">
           {steps.map((step, index) => <i key={step} className={active > index ? "done" : active === index ? "active" : ""}><span>{active > index ? <Icon name="check" size={11}></Icon> : index + 1}</span><b>{step}</b></i>)}
@@ -412,24 +411,6 @@ function AgentRunOverlay({ steps, active, mode, onClose, onViewPackage, statusMe
             </button>
           </div>
         )}
-      </div>
-    </div>
-  );
-}
-
-function SignalTicker({ signals, onPick, motion }) {
-  const doubled = [...signals, ...signals];
-  return (
-    <div className={`signal-ticker ${motion ? "" : "is-static"}`} aria-label="实时商机信号流">
-      <div className="ticker-label"><Icon name="signal" size={14}></Icon>实时商机信号</div>
-      <div className="ticker-viewport">
-        <div className="ticker-track" style={{ animationDuration: `${signals.length * 2.4}s` }}>
-          {doubled.map((signal, index) => (
-            <button type="button" className="ticker-item" key={`${signal.countryId}-${signal.customer}-${index}`} onClick={() => onPick(signal.countryId)} title={`查看${signal.country} · ${signal.customer}`}>
-              <em>{signal.country}</em><span>{signal.customer}</span><b>{signal.signal}</b>
-            </button>
-          ))}
-        </div>
       </div>
     </div>
   );
@@ -650,7 +631,7 @@ function BattlePackageDrawer({ country, region, onClose, notify, liveReport }) {
 }
 
 function App() {
-  const { regions, countries, continentFeatures, liveSignals, agentSteps } = window.OPPORTUNITY_DATA;
+  const { regions, countries, continentFeatures, agentSteps } = window.OPPORTUNITY_DATA;
   const [t, setTweak] = useTweaks(window.TWEAK_DEFAULTS);
   const [selectedRegion, setSelectedRegion] = useAppState(null);
   const [selectedCountry, setSelectedCountry] = useAppState(null);
@@ -664,8 +645,6 @@ function App() {
   const [agentStatus, setAgentStatus] = useAppState(null);
   const [liveReports, setLiveReports] = useAppState({});
   const [customerFocus, setCustomerFocus] = useAppState(null);
-
-  const signals = useAppMemo(() => liveSignals, [liveSignals]);
 
   const regionId = selectedRegion || hoverRegion || "north_america";
   const region = regions[regionId];
@@ -797,7 +776,6 @@ function App() {
             onBack={backToGlobal}
             motion={t.motion}
           ></Globe>
-          <SignalTicker signals={signals} onPick={selectCountry} motion={t.motion}></SignalTicker>
           <AgentRail steps={agentSteps} activeStep={activeStep}></AgentRail>
         </section>
 

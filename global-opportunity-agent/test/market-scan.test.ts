@@ -70,6 +70,9 @@ async function finishScan() { for (let i = 0; i < 4; i += 1) await tick(); }
 
 describe("local market scan demo", { timeout: 20_000 }, () => {
   it("advances four nodes without any API calls, then opens the overall market and customer pool", async () => {
+    expect(container.textContent).not.toContain("实时商机信号");
+    expect(container.textContent).not.toContain("水滴引擎");
+    expect(container.querySelectorAll(".agent-step")).toHaveLength(9);
     await click("测试选择加拿大");
     await click("重新扫描市场");
     expect(button("扫描中").disabled).toBe(true);
@@ -122,6 +125,8 @@ describe("local market scan demo", { timeout: 20_000 }, () => {
   it("preserves the real BD request, blocks scanning during it, and keeps that result after a local scan", async () => {
     await click("测试选择加拿大");
     await click("生成 BD 作战包");
+    expect(container.textContent).toContain("正在运行完整商机分析链路");
+    expect(container.textContent).not.toMatch(/P0\s*2[–-]10/i);
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock.mock.calls[0][0]).toBe("/api/agent/runs");
     expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ regionId: "canada", customerId: "loblaw", countryId: "canada", countryName: "加拿大", mode: "auto" });
