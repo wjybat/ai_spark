@@ -58,7 +58,7 @@ describe("Agent output surfaces", () => {
     };
     const country = window.OPPORTUNITY_DATA.countries.brazil;
     const battle = render(window.ReportTab, { tab: "battle", report: generated, country });
-    expect(battle.textContent).toContain("LLM 生成 · materials-ui-test");
+    expect(battle.textContent).toContain("智能生成");
     expect(battle.textContent).toContain(productInput.analysis.matches[0]!.pilotScope);
     const sales = render(window.ReportTab, { tab: "sales", report: generated, country });
     expect(sales.textContent).toContain(emailInput.email.subject);
@@ -67,7 +67,7 @@ describe("Agent output surfaces", () => {
     const artifacts = window.buildLiveBattlePackage(generated);
     expect(artifacts.find(item => item.id === "match").text).toContain(productInput.analysis.matches[0]!.pilotScope);
     expect(artifacts.find(item => item.id === "email").text).toContain(emailInput.email.body);
-    expect(artifacts.find(item => item.id === "email").text).toContain("materials-ui-test");
+    expect(artifacts.find(item => item.id === "email").text).toContain("智能生成");
   });
 
   it("renders final narrative and Brief using the same local Markdown bundle", () => {

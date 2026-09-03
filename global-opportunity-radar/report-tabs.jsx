@@ -9,17 +9,17 @@ function reportSourceUrl(value) {
   } catch { return null; }
 }
 function reportMode(report) {
-  return report.mode === "live" ? `实时模型 · ${report.modelRun?.model || "模型名称未返回"}` : "演示模式 · 真实资料 / 规则分析";
+  return report.mode === "live" ? "实时智能分析" : "演示分析";
 }
 function materialSourceLabel(generation) {
-  if (generation?.source === "llm") return `LLM 生成 · ${generation.model || "本次模型"}`;
-  if (generation?.source === "rules") return "演示模式 · 规则 / 模板";
+  if (generation?.source === "llm") return "智能生成";
+  if (generation?.source === "rules") return "演示分析";
   return "历史结果 · 未记录生成来源";
 }
 function reportGenerationNote(report) {
   return report.productMatch?.generation?.source === "llm" && report.researchBrief?.outreachEmail?.generation?.source === "llm"
-    ? "能力匹配、英文开发邮件由本次 LLM Agent 生成；其余结构化内容来自证据工具链。所有建议与邮件均需人工审核。"
-    : "各模块生成方式以来源标记为准；最终结论在 live 模式由模型生成。建议与邮件均需人工审核。";
+    ? "能力匹配和英文开发邮件由智能体结合证据生成；其余内容来自结构化分析。所有建议与邮件均需人工审核。"
+    : "各模块生成方式以来源标记为准；建议与邮件均需人工审核。";
 }
 function reportScope(report, country) {
   return `报告国家：${country.name}；区域市场资料范围：${reportText(report.marketRadar?.regionName)}；当前潜在客户样本：${reportText(report.customerProfile?.name)}。国家报告可在后续客户发现阶段继续扩充企业名单。`;
@@ -87,31 +87,28 @@ function ReportMarket({ report }) {
   </>;
 }
 
-function ReportCustomers({ report, onSelectCustomer }) {
+function ReportCustomers({ report, country, onSelectCustomer }) {
   const pool = report.customerPool || {};
   const profile = report.customerProfile || {};
-  const currentInPool = reportList(pool.customers).some(customer => customer.customerId === report.customerId);
+  const analyzedCustomers = reportList(pool.customers).filter(customer => customer.customerId === report.customerId);
+  const candidates = reportList(country?.customers).filter(customer => customer.selectable === false).slice(0, Math.max(0, 3 - analyzedCustomers.length));
+  const currentInPool = analyzedCustomers.length > 0;
   const enterProfile = (customer = {}) => onSelectCustomer?.({
     customerId: report.customerId, name: profile.name, type: reportList(profile.formats).join(" / "), stores: profile.storeCountLabel,
     sourceLevel: `${report.evidenceChain?.coverage?.sourceLevelA || 0} A级`, ...customer,
   });
   return <>
-    <ReportSection title="高潜客户池" meta={`${reportList(pool.customers).length} 家 · 区域排序，非国家名单`}>
+    <ReportSection title="客户池" meta={`${analyzedCustomers.length + candidates.length} 家客户资料`}>
       <ReportText className="report-note" value={`排序依据：${reportList(pool.rankingBasis).join(" · ") || "未返回，待确认"}`}></ReportText>
-      <div className="report-stack">{reportList(pool.customers).map((customer, index) => customer.customerId === report.customerId ? <button type="button" className="report-disclosure report-customer-entry" data-customer-entry={customer.customerId} key={customer.customerId} onClick={() => enterProfile(customer)}>
+      <div className="report-stack">{analyzedCustomers.map((customer, index) => <button type="button" className="report-disclosure report-customer-entry" data-customer-entry={customer.customerId} key={customer.customerId} onClick={() => enterProfile(customer)}>
         <div className="report-customer-entry-head"><strong>{index + 1}. {customer.name} · 本次研究客户</strong><span className="report-badge">参考分 {customer.poolScore}</span></div>
         <div className="report-field"><b>总部 / 业态</b><ReportText value={`${customer.country} · ${reportList(customer.formats).join(" / ")}`}></ReportText></div>
         <div className="report-field"><b>集团规模</b><ReportText value={customer.storeCountLabel}></ReportText></div>
         <div className="report-field"><b>集团收入</b><ReportText value={customer.revenueLabel}></ReportText></div>
         <ReportText value={customer.reason}></ReportText><ReportList items={customer.digitalFoundation}></ReportList>
         <div className="customer-card-action"><span>进入客户作战视图</span><small>销售建议 · 作战卡</small><Icon name="arrow" size={15}></Icon></div>
-      </button> : <details className="report-disclosure" key={customer.customerId}>
-        <summary><span>{index + 1}. {customer.name} · 客户池摘要</span><span className="report-badge">参考分 {customer.poolScore}</span></summary>
-        <div className="report-field"><b>总部 / 业态</b><ReportText value={`${customer.country} · ${reportList(customer.formats).join(" / ")}`}></ReportText></div>
-        <div className="report-field"><b>集团规模</b><ReportText value={customer.storeCountLabel}></ReportText></div>
-        <ReportText value={customer.reason}></ReportText><p className="report-note">信息缺口 {customer.unknownCount} 项；本次未为该客户生成完整画像和作战卡。</p>
-      </details>)}</div>
-      {!reportList(pool.customers).length && <p className="report-empty">本次结果未返回客户池。</p>}
+      </button>)}{candidates.map((customer, index) => <CandidateCustomerCard key={customer.name} customer={customer} index={analyzedCustomers.length + index}></CandidateCustomerCard>)}</div>
+      {!analyzedCustomers.length && <p className="report-empty">本次结果未返回该国家的已分析客户；可从下方客户画像进入当前样本。</p>}
     </ReportSection>
     <ReportSection title={`${reportText(profile.name)} · 客户画像`} meta="仅本次研究客户的完整结果">
       {!currentInPool && <button type="button" className="report-profile-entry" data-customer-entry={report.customerId} onClick={() => enterProfile()}><Icon name="users" size={17}></Icon><span><strong>{profile.name}</strong><small>进入销售建议与作战卡</small></span><Icon name="arrow" size={15}></Icon></button>}
@@ -195,7 +192,7 @@ function buildReportManagementBrief(report, country) {
   });
   return [
     `# ${country.name} · 管理层简报`,
-    `${reportMode(report)}\n\n生成时间：${reportText(brief.generatedAt || report.completedAt)}\n\n运行 ID：${reportText(report.runId)}`,
+    `${reportMode(report)}\n\n生成时间：${reportText(brief.generatedAt || report.completedAt)}\n\n报告编号：${reportText(report.runId)}`,
     reportScope(report, country),
     reportGenerationNote(report),
     "## 最终结论", countryReportNarrative(report.finalNarrative),
@@ -220,7 +217,7 @@ function ReportTab({ tab, report, country, generating, onCopy, onDownload, onSel
   const View = { overview: ReportMarket, customers: ReportCustomers, sales: ReportSales, battle: ReportBattle, brief: ReportManagement }[tab];
   if (!View) return null;
   return <div className="tab-body report-tabs" data-report-tab={tab} data-report-run={report.runId} key={report.runId}>
-    <div className="report-provenance"><div><strong>{generating ? "重新分析中 · 当前展示上次成功结果" : "已回填 · 最近成功结果"}</strong><span>{reportMode(report)}</span></div><details className="report-meta-details"><summary>查看分析口径与运行信息</summary><small>完成于 {reportText(report.completedAt)} · {reportText(report.runId)}</small><p>{reportScope(report, country)}</p><small>{reportGenerationNote(report)}</small></details></div>
+    <div className="report-provenance"><div><strong>{generating ? "正在更新 · 当前显示上次结果" : "分析已完成 · 最新结果"}</strong><span>{reportMode(report)}</span></div><details className="report-meta-details"><summary>查看报告口径与生成信息</summary><small>完成于 {reportText(report.completedAt)} · 报告编号 {reportText(report.runId)}</small><p>{reportScope(report, country)}</p><small>{reportGenerationNote(report)}</small></details></div>
     <View report={report} country={country} onCopy={onCopy} onDownload={onDownload} onSelectCustomer={onSelectCustomer}></View>
   </div>;
 }

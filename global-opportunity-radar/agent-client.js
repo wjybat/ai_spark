@@ -6,18 +6,17 @@
     peru: { regionId: "south-america", customerId: "cencosud", customerName: "Cencosud" },
     colombia: { regionId: "south-america", customerId: "cencosud", customerName: "Cencosud" },
     canada: { regionId: "canada", customerId: "loblaw", customerName: "Loblaw Companies Limited" },
-    usa: { regionId: "south-america", customerId: "cencosud", customerName: "Cencosud" },
+    usa: { regionId: "usa", customerId: "cencosud", customerName: "Cencosud" },
     australia: { regionId: "oceania", customerId: "sigma-chemist", customerName: "Sigma Healthcare / Chemist Warehouse" },
     new_zealand: { regionId: "oceania", customerId: "sigma-chemist", customerName: "Sigma Healthcare / Chemist Warehouse" },
-    ireland: { regionId: "oceania", customerId: "sigma-chemist", customerName: "Sigma Healthcare / Chemist Warehouse" },
-    uae: { regionId: "oceania", customerId: "sigma-chemist", customerName: "Sigma Healthcare / Chemist Warehouse" },
-    china: { regionId: "oceania", customerId: "sigma-chemist", customerName: "Sigma Healthcare / Chemist Warehouse" },
+    ireland: { regionId: "ireland", customerId: "sigma-chemist", customerName: "Sigma Healthcare / Chemist Warehouse" },
+    uae: { regionId: "uae", customerId: "sigma-chemist", customerName: "Sigma Healthcare / Chemist Warehouse" },
     brazil: { regionId: "south-america", customerId: "cencosud", customerName: "Cencosud" }
   };
 
   async function readJson(response) {
     const body = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(body.error || `Agent API request failed (${response.status})`);
+    if (!response.ok) throw new Error(body.error || `智能分析请求失败（${response.status}）`);
     return body;
   }
 
@@ -52,11 +51,11 @@
           catch { return; }
           onEvent?.(event);
           if (event.type === "run_complete") finish(resolve, event.data);
-          if (event.type === "run_error") finish(reject, new Error(event.message || "Agent run failed"));
+          if (event.type === "run_error") finish(reject, new Error(event.message || "智能分析未完成"));
         });
       });
       source.onerror = () => {
-        if (source.readyState === EventSource.CLOSED) finish(reject, new Error("Agent event stream disconnected"));
+        if (source.readyState === EventSource.CLOSED) finish(reject, new Error("智能分析连接已中断"));
       };
     });
   }

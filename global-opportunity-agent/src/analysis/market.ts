@@ -15,7 +15,9 @@ function normalizedScale(revenueUsd: number, storeCount: number): number {
 export function scanMarket(regionId: string): MarketRadarResult {
   const region = regionById.get(regionId);
   if (!region) throw new Error(`Unknown region: ${regionId}`);
-  const records = searchEvidence(regionId === "global" ? { limit: 100 } : { regionId, limit: 100 });
+  const records = regionId === "global"
+    ? searchEvidence({ limit: 100 })
+    : region.customerIds.flatMap((customerId) => searchEvidence({ customerId, limit: 100 }));
   const customerCount = region.customerIds.length;
   const score = clampScore(
     region.marketAttractiveness * 0.34

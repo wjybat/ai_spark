@@ -45,13 +45,15 @@ Call the tools in this exact order: ${toolOrder.join(" -> ")}.
 Use the requested regionId for the first two tools and the requested customerId for every remaining tool.
 Separate verified facts from inferences. Treat budget, procurement, decision chain and unknown system versions as pending confirmation.
 Do not claim that Dmall replaces a customer's existing ERP, cloud, AI, WMS or internal team unless evidence explicitly proves it.
+Never expose internal field names or routing identifiers such as regionId, countryId or customerId in user-facing conclusions.
 After all tools complete, provide a concise Chinese conclusion for sales.`;
 
 function countryReportInstructions(request: PipelineRequest): string {
   if (!request.countryName) return "";
-  return `\nThe primary report scope is the country ${request.countryName} (${request.countryId || "unknown-id"}).
+  return `\nThe primary report scope is the country ${request.countryName}.
 Region-level market results are supporting context, not the report title or final geographic scope.
 The selected customer ${request.customerId} is the initial potential-customer sample for this country, not the report's sole subject.
+Supporting customer evidence may cover multiple countries; label it as group-level evidence instead of changing the report's country scope.
 Frame the final Chinese narrative as a country opportunity report: country market context, current potential-customer set, customer-specific opportunities, risks and next actions.
 Do not title the final report with a company name. Explicitly distinguish country conclusions from facts that only apply to an individual customer.
 The customer pool may grow in later discovery stages, so do not imply that the current sample is exhaustive.\n`;
@@ -119,7 +121,11 @@ export async function runOpportunityPipeline(request: PipelineRequest, sink: Pip
     model = models.getModel("openai", config.model);
   }
   if (!model) throw new Error(`Model not found: ${config.provider}/${config.model}`);
-  const { tools, workspace } = createOpportunityTools({ mode, model: { provider: model.provider, model: model.id, thinkingEffort: config.thinkingEffort } });
+  const { tools, workspace } = createOpportunityTools({
+    mode,
+    model: { provider: model.provider, model: model.id, thinkingEffort: config.thinkingEffort },
+    ...(request.countryName ? { countryName: request.countryName } : {}),
+  });
 
   const agent = new Agent({
     initialState: { systemPrompt: systemPrompt + countryReportInstructions(request) + (mode === "live" ? materialGenerationInstructions : ""), model, tools, thinkingLevel: mode === "live" ? config.thinkingEffort : "low" },

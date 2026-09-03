@@ -20,7 +20,7 @@ const meetingQuestions: Record<string, string[]> = {
     "D365 Finance、SCM、Commerce 和 POS 在各国家是否共用实例？",
     "Manhattan WMS/OMNI 当前是生产、历史遗留、POC 还是评估项目？",
     "Sigma Integration Services、Pharmx、SPS、D365 和 WMS 的数据责任边界是什么？",
-    "批次、效期、召回、Schedule 8 和冷链审计的系统要求是什么？",
+    "目标国家适用的药品分类、批次、效期、召回和冷链审计要求是什么？",
     "Click & Collect、门店库存和批发库存如何统一承诺与分单？",
   ],
   loblaw: [
@@ -34,7 +34,7 @@ const meetingQuestions: Record<string, string[]> = {
 
 const internalActions: Record<string, string[]> = {
   cencosud: ["售前准备区域 OMS/WMS/Open Platform 架构草图", "产品确认多国家、多币种、税务和支付能力边界", "销售核验区域平台、暗店和新 DC 的项目所有者"],
-  "sigma-chemist": ["售前准备 D365/Manhattan/EDI 共存架构", "产品核验药品批次效期、召回、冷链和审计能力", "销售确认澳大利亚或新西兰的试点业务范围"],
+  "sigma-chemist": ["售前准备 D365/Manhattan/EDI 共存架构", "产品核验药品批次效期、召回、冷链和审计能力"],
   loblaw: ["售前准备 SAP/OCI/Google 互操作与 UCP 适配方案", "产品梳理 PC Express 履约和自动化 DC 上层编排能力", "销售通过 Groceryshop/NRF 线索核验目标角色和沟通窗口"],
 };
 
@@ -52,6 +52,7 @@ export function generateResearchBrief(
   productMatch: ProductMatchResult,
   risks: RiskResult,
   generatedEmail?: OutreachEmail,
+  countryName?: string,
 ): ResearchBriefResult {
   const customer = customerById.get(customerId);
   if (!customer) throw new Error(`Unknown customer: ${customerId}`);
@@ -80,7 +81,7 @@ export function generateResearchBrief(
       body: [
         "Hi [Name],",
         "",
-        `We have been following ${customer.name}'s recent expansion and digital initiatives across ${customer.countries.join(", ")}.`,
+        `We have been following ${customer.name}'s recent expansion and digital initiatives ${countryName ? `in ${countryName}` : `across ${customer.countries.join(", ")}`}.`,
         `Dmall supports large retail networks with ${topCapabilities.slice(0, 3).map((item) => item.split("（")[0]).join(", ")}, designed to coexist with established core platforms.`,
         "",
         "Would a focused 30-minute discussion be useful to compare your current operating priorities and identify one measurable pilot scope?",
@@ -89,7 +90,7 @@ export function generateResearchBrief(
         "[Name]",
       ].join("\n"),
     },
-    internalActions: [...actions],
+    internalActions: [...actions, ...(customerId === "sigma-chemist" ? [`销售确认${countryName || "目标市场"}的试点业务范围`] : [])],
     risksAndUnknowns: risks.risks.map((risk) => `${risk.title}：${risk.reason}`),
     nextActions: [
       "在 3 个工作日内核验目标联系人和项目所有者",

@@ -37,7 +37,7 @@ function MarketScanOverlay({ scan, onClose, onViewOverview }) {
   return <div className="agent-run-backdrop" role="dialog" aria-modal="true" aria-labelledby="market-scan-title">
     <div className="market-scan-card" ref={cardRef} onKeyDown={trapFocus}>
       <button type="button" className="overlay-close" onClick={onClose} aria-label={scan.done ? "关闭市场扫描" : "取消市场扫描"}><Icon name="close"></Icon></button>
-      <div className="market-scan-eyebrow"><Icon name="globe" size={17}></Icon> MARKET REFRESH <span>前端演示</span></div>
+      <div className="market-scan-eyebrow"><Icon name="globe" size={17}></Icon> MARKET REFRESH <span>市场刷新</span></div>
       <h2 id="market-scan-title">{scan.done ? "整体市场与客户池已就绪" : "正在更新整体市场与客户池"}</h2>
       <p className="market-scan-subtitle">基于已收录调研资料，演示从市场概览到客户池的整理流程。</p>
       <ol className="market-scan-nodes" aria-label="市场扫描演示流程">
@@ -56,16 +56,16 @@ function MarketScanOverlay({ scan, onClose, onViewOverview }) {
       {scan.done && <div className="market-scan-result" aria-label="本地资料覆盖摘要">
         <span><b>{scan.summary.regions.length}</b> 个区域</span><span><b>{scan.summary.countryCount}</b> 个国家</span><span><b>{scan.summary.companies.length}</b> 家客户</span>
       </div>}
-      <div className="market-scan-footer"><small>仅展示流程动画，不调用后端 Agent，也不改写客户分析结果。</small>{scan.done && <button type="button" className="run-complete-button" onClick={onViewOverview}>查看整体市场<Icon name="arrow" size={15}></Icon></button>}</div>
+      <div className="market-scan-footer"><small>基于现有调研资料更新市场概览，不影响已完成的客户分析。</small>{scan.done && <button type="button" className="run-complete-button" onClick={onViewOverview}>查看整体市场<Icon name="arrow" size={15}></Icon></button>}</div>
     </div>
   </div>;
 }
 
 function MarketOverviewPanel({ summary, onSelectRegion, onSelectCountry }) {
   return <div className="panel-content market-overview" data-market-overview="true">
-    <div className="panel-kicker">GLOBAL MARKET OVERVIEW <em className="lock-tag">前端演示</em></div>
-    <div className="region-title-row"><div><h1>整体市场与客户池</h1><p>已收录资料的整体视图 · 未执行后端扫描</p></div></div>
-    <p className="market-overview-note">视图整理于 {new Date(summary.completedAt).toLocaleTimeString("zh-CN", { hour12: false })}。资料仍为原有调研快照；选择国家后，可单独运行真实客户 Agent。</p>
+    <div className="panel-kicker">GLOBAL MARKET OVERVIEW <em className="lock-tag">资料已更新</em></div>
+    <div className="region-title-row"><div><h1>整体市场与客户池</h1><p>已收录调研资料的整体视图</p></div></div>
+    <p className="market-overview-note">视图整理于 {new Date(summary.completedAt).toLocaleTimeString("zh-CN", { hour12: false })}。选择国家后，可继续查看客户资料并启动深度分析。</p>
     <div className="metrics-grid"><Metric label="覆盖区域" value={summary.regions.length}></Metric><Metric label="覆盖国家" value={summary.countryCount}></Metric><Metric label="真实客户" value={summary.companies.length}></Metric><Metric label="资料来源" value={summary.sourceCount}></Metric></div>
     <section className="panel-section"><div className="section-heading"><span>整体市场概览</span><small>点击区域下钻</small></div>
       <div className="market-overview-regions">{summary.regions.map(region => <button type="button" key={region.id} onClick={() => onSelectRegion(region.id)}>

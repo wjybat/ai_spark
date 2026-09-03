@@ -106,6 +106,7 @@
 .markdown-content [align="right"] { text-align: right; }
 .markdown-content input[type="checkbox"] { margin-right: 0.5em; accent-color: #568b77; }
 .markdown-content hr { border: 0; border-top: 1px solid var(--line, #dae3dd); margin: 1em 0; }
+.package-section > .markdown-content { font-size: 13px; line-height: 1.8; }
 .package-section > .markdown-content + .markdown-content { margin-top: 0.8em; }
 .package-section > ul > li > .markdown-content { font-size: inherit; }
 .run-status:not(.run-conclusion) { text-align: center; }

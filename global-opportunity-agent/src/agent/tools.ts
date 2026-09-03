@@ -65,19 +65,19 @@ export interface OpportunityTools {
   workspace: PipelineWorkspace;
 }
 
-export function createOpportunityTools(options: { mode?: "demo" | "live"; model?: GenerationModel } = {}): OpportunityTools {
+export function createOpportunityTools(options: { mode?: "demo" | "live"; model?: GenerationModel; countryName?: string } = {}): OpportunityTools {
   const workspace = new PipelineWorkspace();
   const live = options.mode === "live";
   const generationModel = options.model ?? {};
 
   const marketRadarTool: AgentTool<typeof regionSchema, ToolStageDetails<MarketRadarResult>> = {
     name: "scan_market",
-    label: "市场雷达 Agent",
+    label: "市场雷达",
     description: "分析目标区域的市场吸引力、数字化需求、进入难度与证据可信度。",
     parameters: regionSchema,
     executionMode: "sequential",
     execute: async (_toolCallId, params: Static<typeof regionSchema>, signal, onUpdate) =>
-      withProgress(1, "市场雷达 Agent", onUpdate, signal, () => {
+      withProgress(1, "市场雷达", onUpdate, signal, () => {
         workspace.marketRadar = scanMarket(params.regionId);
         return workspace.marketRadar;
       }),
@@ -85,12 +85,12 @@ export function createOpportunityTools(options: { mode?: "demo" | "live"; model?
 
   const customerPoolTool: AgentTool<typeof regionSchema, ToolStageDetails<CustomerPoolResult>> = {
     name: "generate_customer_pool",
-    label: "目标客户池 Agent",
+    label: "目标客户池",
     description: "按客户体量、数字化基础、公开信号、证据可信度与信息缺口生成客户池。",
     parameters: regionSchema,
     executionMode: "sequential",
     execute: async (_toolCallId, params: Static<typeof regionSchema>, signal, onUpdate) =>
-      withProgress(2, "目标客户池 Agent", onUpdate, signal, () => {
+      withProgress(2, "目标客户池", onUpdate, signal, () => {
         workspace.customerPool = generateCustomerPool(params.regionId);
         return workspace.customerPool;
       }),
@@ -98,12 +98,12 @@ export function createOpportunityTools(options: { mode?: "demo" | "live"; model?
 
   const customerProfileTool: AgentTool<typeof customerSchema, ToolStageDetails<CustomerProfileResult>> = {
     name: "build_customer_profile",
-    label: "客户画像 Agent",
+    label: "客户画像",
     description: "聚合客户规模、业态、区域、组织、数字化基础、已知系统、近期动态与待确认项。",
     parameters: customerSchema,
     executionMode: "sequential",
     execute: async (_toolCallId, params: Static<typeof customerSchema>, signal, onUpdate) =>
-      withProgress(3, "客户画像 Agent", onUpdate, signal, () => {
+      withProgress(3, "客户画像", onUpdate, signal, () => {
         workspace.customerProfile = buildCustomerProfile(params.customerId);
         return workspace.customerProfile;
       }),
@@ -111,12 +111,12 @@ export function createOpportunityTools(options: { mode?: "demo" | "live"; model?
 
   const signalTool: AgentTool<typeof customerSchema, ToolStageDetails<OpportunitySignal[]>> = {
     name: "detect_opportunity_signals",
-    label: "商机信号 Agent",
+    label: "商机信号",
     description: "从扩张、数字化、系统、活动和组织证据中识别商机信号，并明确事实与推断边界。",
     parameters: customerSchema,
     executionMode: "sequential",
     execute: async (_toolCallId, params: Static<typeof customerSchema>, signal, onUpdate) =>
-      withProgress(4, "商机信号 Agent", onUpdate, signal, () => {
+      withProgress(4, "商机信号", onUpdate, signal, () => {
         workspace.opportunitySignals = detectOpportunitySignals(params.customerId);
         return workspace.opportunitySignals;
       }),
@@ -124,12 +124,12 @@ export function createOpportunityTools(options: { mode?: "demo" | "live"; model?
 
   const admissionTool: AgentTool<typeof customerSchema, ToolStageDetails<AdmissionResult>> = {
     name: "assess_customer_admission",
-    label: "客户准入评估 Agent",
+    label: "客户准入评估",
     description: "基于体量、IT 基础、管理层理念、公开信号、预算和付费模式输出非绝对的准入建议。",
     parameters: customerSchema,
     executionMode: "sequential",
     execute: async (_toolCallId, params: Static<typeof customerSchema>, signal, onUpdate) =>
-      withProgress(5, "客户准入评估 Agent", onUpdate, signal, () => {
+      withProgress(5, "客户准入评估", onUpdate, signal, () => {
         const signals = workspace.opportunitySignals ?? detectOpportunitySignals(params.customerId);
         workspace.opportunitySignals = signals;
         workspace.admission = assessAdmission(params.customerId, signals);
@@ -139,12 +139,12 @@ export function createOpportunityTools(options: { mode?: "demo" | "live"; model?
 
   const evidenceTool: AgentTool<typeof customerSchema, ToolStageDetails<EvidenceChainResult>> = {
     name: "build_evidence_chain",
-    label: "证据链 Agent",
+    label: "证据链",
     description: "按来源、时间、事实/推断、可信等级和摘要输出完整可追溯证据链。",
     parameters: customerSchema,
     executionMode: "sequential",
     execute: async (_toolCallId, params: Static<typeof customerSchema>, signal, onUpdate) =>
-      withProgress(6, "证据链 Agent", onUpdate, signal, () => {
+      withProgress(6, "证据链", onUpdate, signal, () => {
         workspace.evidenceChain = buildEvidenceChain(params.customerId);
         return workspace.evidenceChain;
       }),
@@ -152,12 +152,12 @@ export function createOpportunityTools(options: { mode?: "demo" | "live"; model?
 
   const productTool: AgentTool<typeof customerSchema, ToolStageDetails<ProductMatchResult>> = {
     name: "match_dmall_capabilities",
-    label: "Dmall 能力匹配 Agent",
+    label: "Dmall 能力匹配",
     description: "根据客户画像和商机信号匹配 Dmall 能力、前置条件、证据与禁止宣称事项。",
     parameters: customerSchema,
     executionMode: "sequential",
     execute: async (_toolCallId, params: Static<typeof customerSchema>, signal, onUpdate) =>
-      withProgress(7, "Dmall 能力匹配 Agent", onUpdate, signal, () => {
+      withProgress(7, "Dmall 能力匹配", onUpdate, signal, () => {
         const signals = workspace.opportunitySignals ?? detectOpportunitySignals(params.customerId);
         workspace.opportunitySignals = signals;
         workspace.productMatch = matchProducts(params.customerId, signals);
@@ -181,12 +181,12 @@ export function createOpportunityTools(options: { mode?: "demo" | "live"; model?
 
   const riskTool: AgentTool<typeof customerSchema, ToolStageDetails<RiskResult>> = {
     name: "assess_customer_risks",
-    label: "风险与待确认项 Agent",
+    label: "风险与待确认项",
     description: "识别已有系统、本地化、合规、预算、决策链、实施与证据缺口风险。",
     parameters: customerSchema,
     executionMode: "sequential",
     execute: async (_toolCallId, params: Static<typeof customerSchema>, signal, onUpdate) =>
-      withProgress(8, "风险与待确认项 Agent", onUpdate, signal, () => {
+      withProgress(8, "风险与待确认项", onUpdate, signal, () => {
         workspace.riskAssessment = assessRisks(params.customerId);
         return workspace.riskAssessment;
       }),
@@ -194,12 +194,12 @@ export function createOpportunityTools(options: { mode?: "demo" | "live"; model?
 
   const briefTool: AgentTool<typeof customerSchema, ToolStageDetails<ResearchBriefResult>> = {
     name: "generate_research_brief",
-    label: "客户研究 Brief Agent",
+    label: "客户简报",
     description: "汇总准入、信号、能力匹配、风险、拜访问题、英文邮件和下一步行动。",
     parameters: customerSchema,
     executionMode: "sequential",
     execute: async (_toolCallId, params: Static<typeof customerSchema>, signal, onUpdate) =>
-      withProgress(9, "客户研究 Brief Agent", onUpdate, signal, () => {
+      withProgress(9, "客户简报", onUpdate, signal, () => {
         const signals = workspace.opportunitySignals ?? detectOpportunitySignals(params.customerId);
         const admission = workspace.admission ?? assessAdmission(params.customerId, signals);
         const productMatch = workspace.productMatch ?? matchProducts(params.customerId, signals);
@@ -208,7 +208,7 @@ export function createOpportunityTools(options: { mode?: "demo" | "live"; model?
         workspace.admission = admission;
         workspace.productMatch = productMatch;
         workspace.riskAssessment = risks;
-        workspace.researchBrief = generateResearchBrief(params.customerId, admission, signals, productMatch, risks);
+        workspace.researchBrief = generateResearchBrief(params.customerId, admission, signals, productMatch, risks, undefined, options.countryName);
         workspace.researchBrief.outreachEmail.generation = generationProvenance("rules");
         return workspace.researchBrief;
       }),
@@ -224,7 +224,7 @@ export function createOpportunityTools(options: { mode?: "demo" | "live"; model?
       if (!workspace.admission || !workspace.opportunitySignals || !workspace.productMatch || !workspace.riskAssessment || !workspace.evidenceChain) throw new Error("Complete all preceding stages, including LLM capability matching and risks, before writing the email");
       if (workspace.productMatch.generation?.source !== "llm") throw new Error("Live Brief requires LLM-generated capability matching");
       const email = acceptGeneratedEmail(params, workspace.evidenceChain, generationModel);
-      workspace.researchBrief = generateResearchBrief(params.customerId, workspace.admission, workspace.opportunitySignals, workspace.productMatch, workspace.riskAssessment, email);
+      workspace.researchBrief = generateResearchBrief(params.customerId, workspace.admission, workspace.opportunitySignals, workspace.productMatch, workspace.riskAssessment, email, options.countryName);
       return workspace.researchBrief;
     }),
   };

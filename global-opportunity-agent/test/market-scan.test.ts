@@ -70,6 +70,9 @@ async function finishScan() { for (let i = 0; i < 4; i += 1) await tick(); }
 
 describe("local market scan demo", { timeout: 20_000 }, () => {
   it("advances four nodes without any API calls, then opens the overall market and customer pool", async () => {
+    expect(window.OPPORTUNITY_DATA.countries.china).toBeUndefined();
+    expect(window.OPPORTUNITY_DATA.regions.asia.countryIds).toEqual(["uae"]);
+    expect(window.AgentApi.targetForCountry("china")).toBeNull();
     expect(container.textContent).not.toContain("实时商机信号");
     expect(container.textContent).not.toContain("水滴引擎");
     expect(container.querySelectorAll(".agent-step")).toHaveLength(9);
@@ -84,12 +87,12 @@ describe("local market scan demo", { timeout: 20_000 }, () => {
     }
     expect(container.querySelectorAll(".market-scan-nodes .is-done")).toHaveLength(4);
     expect(container.querySelector('[role="progressbar"]')?.getAttribute("aria-valuenow")).toBe("100");
-    expect(container.querySelector(".market-scan-result")?.textContent).toBe("5 个区域12 个国家3 家客户");
+    expect(container.querySelector(".market-scan-result")?.textContent).toBe("5 个区域11 个国家3 家客户");
     await click("查看整体市场");
     expect(container.querySelectorAll("[data-market-customer]")).toHaveLength(3);
     expect(container.querySelectorAll(".market-overview-regions button")).toHaveLength(5);
     expect(container.querySelector(".country-panel-shell")).toBeNull();
-    expect(container.querySelector(".market-overview")?.textContent).toContain("未执行后端扫描");
+    expect(container.querySelector(".market-overview")?.textContent).toContain("已收录调研资料的整体视图");
     expect(fetchMock).not.toHaveBeenCalled();
     expect(TestEventSource.instances).toHaveLength(0);
     expect(button("重新扫描市场").disabled).toBe(false);

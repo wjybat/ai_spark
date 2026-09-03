@@ -82,6 +82,88 @@
     }
   };
 
+  const candidateSources = {
+    "SMU / Unimarc": ["SMU 官方门店公告", "https://assets.ctfassets.net/63tonbtz0lhl/4DpvyJHwWKhedDXS3SpzE5/0ee85c29ff19cf5709231b6f5ed00988/SMU_Opening_Unimarc_Concon_2025-08-29_eng.pdf"],
+    "Falabella Retail": ["Falabella Retail 官方门店页", "https://falabellaretail.falabella.com/tiendas/"],
+    "Carrefour Argentina": ["Carrefour Argentina 官方门店页", "https://www.carrefour.com.ar/stores"],
+    "Coto": ["Coto 官方门店页", "https://www.coto.com.ar/sucursales/"],
+    "Grupo Mateus": ["Grupo Mateus 官网", "https://grupomateus.com.br/"],
+    "Assaí Atacadista": ["Assaí 官网", "https://www.assai.com.br/"],
+    "InRetail Food Retail": ["InRetail 官方业务页", "https://www.inretail.pe/Unidades%20de%20Negocio/90/"],
+    "Tottus Perú": ["Tottus Perú 官方门店页", "https://www.tottus.com.pe/tottus-pe/content/horario-tiendas"],
+    "Grupo Éxito": ["Grupo Éxito 官方门店页", "https://www.grupoexito.com.co/en/customers/find-us"],
+    "Olímpica": ["Olímpica 官方门店页", "https://www.olimpica.com/nuestras-tiendas/"],
+    "H-E-B": ["H-E-B 官网", "https://www.heb.com/"],
+    "Giant Eagle": ["Giant Eagle 官网", "https://www.gianteagle.com/"],
+    "Empire Company": ["Empire Company 官网", "https://www.empireco.ca/"],
+    "Giant Tiger": ["Giant Tiger 官方资料", "https://press.gianttiger.com/overview"],
+    "Metcash": ["Metcash 官网", "https://www.metcash.com/"],
+    "Harris Farm Markets": ["Harris Farm 官方门店页", "https://www.harrisfarm.com.au/pages/our-stores"],
+    "Foodstuffs": ["Foodstuffs 官网", "https://www.foodstuffs.co.nz/"],
+    "Woolworths New Zealand": ["Woolworths NZ 公司页", "https://www.woolworths.co.nz/info/about/woolworths-nz"],
+    "Musgrave / SuperValu": ["Musgrave 官网", "https://musgravegroup.com/"],
+    "Dunnes Stores": ["Dunnes Stores 官网", "https://www.dunnesstores.com/"],
+    "LuLu Retail": ["LuLu Retail 年报", "https://www.luluretail.com/investors/results-reports/integrated-annual-report/"],
+    "Union Coop": ["Union Coop 官网", "https://corporate.unioncoop.ae/"],
+  };
+
+  const makeCandidate = (name, type, stores, signal, modules) => ({
+    name, type, stores, signal, modules,
+    sourceLevel: "A级",
+    sourceTitle: candidateSources[name][0],
+    sourceUrl: candidateSources[name][1],
+    selectable: false,
+    risk: "现有系统、项目边界与采购节奏需要在客户沟通中进一步确认"
+  });
+
+  // Restored early-scan candidates are visual discovery leads only. They never unlock customer-level reports.
+  const candidateProfiles = {
+    chile: [
+      makeCandidate("SMU / Unimarc", "食品零售集团", "298 家 Unimarc", "门店扩张与全渠道运营", ["门店运营", "库存协同"]),
+      makeCandidate("Falabella Retail", "百货与全渠道零售", "102 家（智利/秘鲁/哥伦比亚合计）", "区域全渠道与数据协同", ["全渠道", "经营分析"])
+    ],
+    argentina: [
+      makeCandidate("Carrefour Argentina", "大型商超 / 便利业态", "全国门店网络", "多业态门店与履约协同", ["门店运营", "全渠道"]),
+      makeCandidate("Coto", "商超 / 零售服务", "全国门店网络", "库存与门店效率", ["智能补货", "门店运营"])
+    ],
+    brazil: [
+      makeCandidate("Grupo Mateus", "商超 / 现金批发", "全国门店网络", "扩店 + 供应链建设", ["供应链管理", "智能补货"]),
+      makeCandidate("Assaí Atacadista", "现金批发", "全国门店网络", "高速扩张 + 利润优化", ["POS / 智能收银", "经营分析"])
+    ],
+    peru: [
+      makeCandidate("InRetail Food Retail", "多品牌食品零售", "1,604 家（集团口径）", "多品牌门店与库存协同", ["库存协同", "经营分析"]),
+      makeCandidate("Tottus Perú", "大型商超 / 全渠道", "全国门店网络", "全渠道与会员运营", ["全渠道", "会员运营"])
+    ],
+    colombia: [
+      makeCandidate("Grupo Éxito", "多品牌食品零售", "全国门店网络", "多业态门店与数据协同", ["门店运营", "经营分析"]),
+      makeCandidate("Olímpica", "商超 / 药房零售", "400+", "区域门店网络与供应链", ["供应链管理", "智能补货"])
+    ],
+    usa: [
+      makeCandidate("H-E-B", "区域商超", "区域门店网络", "门店创新 + 数字化体验", ["门店管理", "会员运营"]),
+      makeCandidate("Giant Eagle", "区域商超", "区域门店网络", "系统现代化 + 履约", ["全渠道", "供应链管理"])
+    ],
+    canada: [
+      makeCandidate("Empire Company", "综合零售集团", "多品牌门店网络", "全渠道 + 门店现代化", ["全渠道", "门店运营"]),
+      makeCandidate("Giant Tiger", "折扣零售", "260+", "加盟协同 + 库存", ["智能补货", "经营分析"])
+    ],
+    australia: [
+      makeCandidate("Metcash", "批零集团", "独立零售网络", "加盟协同 + 供应链", ["供应链管理", "门店运营"]),
+      makeCandidate("Harris Farm Markets", "生鲜超市", "33 家门店", "生鲜损耗 + 会员", ["动态定价", "会员运营"])
+    ],
+    new_zealand: [
+      makeCandidate("Foodstuffs", "食品零售合作社", "300+ 北岛门店", "合作社门店与供应链协同", ["门店运营", "供应链管理"]),
+      makeCandidate("Woolworths New Zealand", "大型商超 / 加盟网络", "191 家核心门店", "全渠道与门店现代化", ["全渠道", "经营分析"])
+    ],
+    ireland: [
+      makeCandidate("Musgrave / SuperValu", "加盟食品零售", "222 家 SuperValu", "加盟门店与供应链协同", ["门店运营", "供应链管理"]),
+      makeCandidate("Dunnes Stores", "食品 / 百货零售", "全国门店网络", "会员与全渠道运营", ["会员运营", "全渠道"])
+    ],
+    uae: [
+      makeCandidate("LuLu Retail", "大型商超", "277 家泛海湾门店（2026-03）", "跨国扩张 + 供应链协同", ["供应链管理", "智能补货"]),
+      makeCandidate("Union Coop", "合作社商超", "区域门店网络", "全渠道 + 会员升级", ["全渠道", "会员运营"])
+    ]
+  };
+
   const makeCountry = ({ id, iso, name, en, region, coord, stores, companyKey, note }) => {
     const company = companyProfiles[companyKey];
     return {
@@ -93,13 +175,13 @@
       signalCount: company.signals.length,
       sourceCount: company.sources.length,
       demand: "真实资料",
-      entry: "待 Agent 分析",
+      entry: "待智能体分析",
       segments: company.formats,
       tagline: `${company.name} · ${stores}`,
       marketBrief: note,
       opportunities: company.signals,
       recommendations: company.recommendations,
-      pilot: "由 Agent 基于证据生成",
+      pilot: "由智能体基于证据生成",
       sources: company.sources,
       companyId: company.id,
       customers: [{
@@ -110,8 +192,9 @@
         sourceLevel: "A级",
         signal: company.signals[0],
         modules: company.modules,
-        risk: company.risk
-      }]
+        risk: company.risk,
+        selectable: true
+      }, ...(candidateProfiles[id] || []).slice(0, 2)]
     };
   };
 
@@ -126,8 +209,7 @@
     australia: makeCountry({ id: "australia", iso: "036", name: "澳大利亚", en: "Australia", region: "oceania", coord: [134.5, -25.5], stores: "561 家 CW 门店", companyKey: "sigma", note: "Sigma FY2026 公告披露澳大利亚 561 家 Chemist Warehouse 门店；另有 Amcal 和 Discount Drug Stores 加盟网络。" }),
     new_zealand: makeCountry({ id: "new_zealand", iso: "554", name: "新西兰", en: "New Zealand", region: "oceania", coord: [172.5, -41.2], stores: "75 家 CW 门店", companyKey: "sigma", note: "Sigma FY2026 公告披露新西兰 75 家 Chemist Warehouse 门店。" }),
     ireland: makeCountry({ id: "ireland", iso: "372", name: "爱尔兰", en: "Ireland", region: "europe", coord: [-8.0, 53.2], stores: "18 家 CW 门店", companyKey: "sigma", note: "Sigma FY2026 公告披露爱尔兰 18 家 Chemist Warehouse 门店。" }),
-    uae: makeCountry({ id: "uae", iso: "784", name: "阿联酋", en: "United Arab Emirates", region: "asia", coord: [54.4, 24.3], stores: "与中国合计 5 家", companyKey: "sigma", note: "Sigma FY2026 公告仅披露阿联酋与中国合计 5 家，未拆分国家数量。" }),
-    china: makeCountry({ id: "china", iso: "156", name: "中国", en: "China", region: "asia", coord: [104.2, 35.8], stores: "与阿联酋合计 5 家", companyKey: "sigma", note: "Sigma FY2026 公告仅披露中国与阿联酋合计 5 家；中国实体店逐步关闭，未来侧重线上业务。" })
+    uae: makeCountry({ id: "uae", iso: "784", name: "阿联酋", en: "United Arab Emirates", region: "asia", coord: [54.4, 24.3], stores: "5 家以内（官方合并口径）", companyKey: "sigma", note: "Sigma FY2026 公告披露阿联酋药房零售样例；原始资料未单列该国门店数量。" })
   };
 
   const regions = {
@@ -164,12 +246,12 @@
       opportunities: ["国际门店复制", "D365 多国家实例边界", "药房本地法规与履约"]
     },
     asia: {
-      id: "asia", name: "亚洲 / 中东", en: "Asia & Middle East", center: [78, 28], score: null, badge: "2 国",
-      color: "#F47C61", countryIds: ["china", "uae"],
+      id: "asia", name: "亚洲 / 中东", en: "Asia & Middle East", center: [54.4, 24.3], score: null, badge: "1 国",
+      color: "#F47C61", countryIds: ["uae"],
       customerNames: ["Sigma / Chemist Warehouse"], evidenceCount: 1, lastUpdated: "2026-08-27",
       headline: "Chemist Warehouse 小规模国际网络",
-      summary: "Sigma FY2026 仅披露阿联酋与中国合计 5 家门店，未拆分国家数量；中国实体店未来侧重线上业务。",
-      opportunities: ["线上业务转型", "多国家 D365 与库存边界", "药房合规和本地化"]
+      summary: "Sigma / Chemist Warehouse 在阿联酋的药房零售扩张样例；原始资料未单列当地门店数量。",
+      opportunities: ["国际门店复制", "D365 与库存边界", "药房合规和本地化"]
     }
   };
 
@@ -190,7 +272,7 @@
     { countryId: "canada", country: "加拿大", customer: "Loblaw", signal: "Google AI Commerce 与自动化 DC" }
   ];
 
-  const agentSteps = ["市场雷达", "客户池", "客户画像", "商机信号", "准入评估", "证据链", "能力匹配", "风险评估", "研究 Brief"];
+  const agentSteps = ["市场雷达", "客户池", "客户画像", "商机信号", "准入评估", "证据链", "能力匹配", "风险评估", "客户简报"];
 
   Object.assign(window, {
     OPPORTUNITY_DATA: { regions, countries, companyProfiles, continentFeatures, liveSignals, agentSteps }

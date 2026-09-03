@@ -78,9 +78,9 @@ export const regions: RegionRecord[] = [
   {
     id: "global",
     name: "全球重点真实样例",
-    countries: ["加拿大", "澳大利亚", "新西兰", "智利", "巴西", "秘鲁", "阿根廷", "哥伦比亚"],
+    countries: ["加拿大", "美国", "澳大利亚", "新西兰", "爱尔兰", "阿联酋", "智利", "巴西", "秘鲁", "阿根廷", "哥伦比亚"],
     customerIds: ["loblaw", "sigma-chemist", "cencosud"],
-    marketSummary: "首批真实样例覆盖北美、大洋洲和南美，分别代表全国性食品药房网络、药房批发加盟生态和多国家多业态零售集团。",
+    marketSummary: "首批真实样例覆盖北美、大洋洲、欧洲、中东和南美，分别代表全国性食品药房网络、药房批发加盟生态和多国家多业态零售集团。",
     digitalDemand: 88,
     marketAttractiveness: 90,
     entryFriction: 75,
@@ -110,6 +110,42 @@ export const regions: RegionRecord[] = [
     entryFriction: 78,
     evidenceConfidence: 92,
     regulationNotes: ["受控药品 Schedule 8", "GMP/GWP/GDP", "冷链温控与召回", "处方和健康数据"]
+  },
+  {
+    id: "ireland",
+    name: "爱尔兰",
+    countries: ["爱尔兰"],
+    customerIds: ["sigma-chemist"],
+    marketSummary: "Sigma FY2026 资料披露爱尔兰 18 家 Chemist Warehouse 门店；当前可围绕药房零售、库存和履约协同评估机会，但当地系统边界和采购计划仍需确认。",
+    digitalDemand: 81,
+    marketAttractiveness: 79,
+    entryFriction: 82,
+    evidenceConfidence: 83,
+    regulationNotes: ["欧盟 GDPR 与健康数据", "药品批次、效期和召回", "本地药房监管", "跨境数据与系统部署"]
+  },
+  {
+    id: "uae",
+    name: "阿联酋",
+    countries: ["阿联酋"],
+    customerIds: ["sigma-chemist"],
+    marketSummary: "Sigma FY2026 资料确认 Chemist Warehouse 已进入阿联酋，但未单列当地门店数量、系统架构或采购计划；当前应以药房零售和履约场景的市场验证为主。",
+    digitalDemand: 80,
+    marketAttractiveness: 82,
+    entryFriction: 85,
+    evidenceConfidence: 74,
+    regulationNotes: ["药品零售与进口许可", "健康和个人数据保护", "税务、支付与电子发票", "阿拉伯语本地化与本地部署边界"]
+  },
+  {
+    id: "usa",
+    name: "美国",
+    countries: ["美国"],
+    customerIds: ["cencosud"],
+    marketSummary: "Cencosud 官方资料披露其美国业务包含 The Fresh Market 门店网络；市场机会应聚焦美国业务的门店、库存和履约场景，不沿用南美洲国家结论。",
+    digitalDemand: 86,
+    marketAttractiveness: 88,
+    entryFriction: 79,
+    evidenceConfidence: 86,
+    regulationNotes: ["州级隐私与消费者保护", "支付和税务规则", "食品零售合规", "现有美国业务系统与集团平台边界"]
   },
   {
     id: "south-america",

@@ -1,4 +1,4 @@
-const { useEffect: useAppEffect, useState: useAppState } = React;
+const { useEffect: useAppEffect, useMemo: useAppMemo, useState: useAppState } = React;
 
 function Icon({ name, size = 18 }) {
   const shapes = {
@@ -44,14 +44,14 @@ function Header({ onScan, scanning, scanDisabled, agentStatus }) {
       <div className="brand-lockup">
         <div className="brand-mark"><Icon name="globe" size={22}></Icon><span></span></div>
         <div>
-          <div className="brand-line"><b>ATLAS</b><em>海外商机决策 Agent</em></div>
+          <div className="brand-line"><b>ATLAS</b><em>海外商机决策智能体</em></div>
           <p>从全球信号到销售行动，一次完成</p>
         </div>
       </div>
       <div className="header-actions">
         <div className="source-pill"><span></span>真实调研数据 · 2026-08-27</div>
-        <div className={`live-pill ${agentStatus?.ok ? "is-connected" : "is-offline"}`}><i></i>{agentStatus?.ok ? `pi Agent Core · ${agentStatus.effectiveMode}` : "Agent Core 连接中"}</div>
-        <button type="button" className="scan-button" onClick={onScan} disabled={scanning || scanDisabled} title="前端演示：整理整体市场与客户池，不运行后端 Agent">
+        <div className={`live-pill ${agentStatus?.ok ? "is-connected" : "is-offline"}`}><i></i>{agentStatus?.ok ? "智能分析服务 · 已就绪" : "智能分析服务连接中"}</div>
+        <button type="button" className="scan-button" onClick={onScan} disabled={scanning || scanDisabled} title="整理现有市场与客户资料">
           <Icon name="scan" size={17}></Icon>{scanning ? "扫描中" : "重新扫描市场"}
         </button>
       </div>
@@ -61,7 +61,7 @@ function Header({ onScan, scanning, scanDisabled, agentStatus }) {
 
 function AgentRail({ steps, activeStep }) {
   return (
-    <div className="agent-rail" aria-label="Agent 编排链路">
+    <div className="agent-rail" aria-label="智能分析流程">
       <div className="agent-steps">
         {steps.map((step, index) => (
           <React.Fragment key={step}>
@@ -105,7 +105,7 @@ function RegionPanel({ region, countries, onSelectCountry, pinned }) {
       </div>
 
       <section className="panel-section">
-        <div className="section-heading"><span>真实覆盖国家</span><small>点击后运行对应客户 Agent</small></div>
+        <div className="section-heading"><span>真实覆盖国家</span><small>点击查看对应客户资料</small></div>
         <div className="country-ranking">
           {region.countryIds.map((id, index) => {
             const country = countries[id];
@@ -121,7 +121,7 @@ function RegionPanel({ region, countries, onSelectCountry, pinned }) {
       </section>
 
       <section className="panel-section opportunity-strip">
-        <div className="section-heading"><span>调研已确认主题</span><small>运行 Agent 后形成推理结论</small></div>
+        <div className="section-heading"><span>调研已确认主题</span><small>完成智能分析后形成结论</small></div>
         <div className="opportunity-list">
           {region.opportunities.map((item, index) => (
             <div key={item}><i>{index + 1}</i><p>{item}</p></div>
@@ -161,13 +161,34 @@ function OpportunityOverview({ country }) {
   );
 }
 
+function CandidateCustomerCard({ customer, index }) {
+  return (
+    <article className="customer-card candidate-customer-card" data-candidate-customer={customer.name} aria-label={`${customer.name}，客户资料卡，未开放作战视图`}>
+      <div className="customer-card-head">
+        <span className="customer-index">{String(index + 1).padStart(2, "0")}</span>
+        <div><strong>{customer.name}</strong><small>{customer.type} · {customer.stores}</small></div>
+        <div className="customer-score"><span>来源</span><b>{customer.sourceLevel}</b></div>
+        <Icon name="check" size={15}></Icon>
+      </div>
+      <div className="customer-card-detail">
+        <div><span>业务观察</span><p>{customer.signal}</p></div>
+        <div><span>潜在切入</span><p>{customer.modules.join(" · ")}</p></div>
+        <div><span>关注事项</span><p>{customer.risk}</p></div>
+      </div>
+      <div className="customer-card-action candidate-card-source"><span>进入客户作战视图</span><small>销售建议 · 作战卡</small><Icon name="arrow" size={15}></Icon></div>
+    </article>
+  );
+}
+
 function CustomerRadar({ country, onSelectCustomer }) {
+  const confirmedCount = country.customers.filter(customer => customer.selectable !== false).length;
   return (
     <div className="tab-body">
-      <div className="customer-summary"><span><Icon name="users" size={18}></Icon></span><p>调研文档在该国家收录 <strong>{country.customers.length} 家真实客户样例</strong>；未运行 Agent 前不展示模拟排名。</p></div>
+      <div className="customer-summary"><span><Icon name="users" size={18}></Icon></span><p>当前客户池展示 <strong>{country.customers.length} 家零售企业</strong>；其中 <strong>{confirmedCount} 家</strong>已开放完整销售建议与作战卡。</p></div>
       <div className="customer-list">
-        {country.customers.map((customer, index) => (
-            <button type="button" className="customer-card customer-entry-card" data-customer-entry={country.companyId} key={customer.name} onClick={() => onSelectCustomer({ ...customer, customerId: country.companyId, countryId: country.id })}>
+        {country.customers.map((customer, index) => customer.selectable === false
+          ? <CandidateCustomerCard key={customer.name} customer={customer} index={index}></CandidateCustomerCard>
+          : <button type="button" className="customer-card customer-entry-card" data-customer-entry={country.companyId} key={customer.name} onClick={() => onSelectCustomer({ ...customer, customerId: country.companyId, countryId: country.id })}>
               <div className="customer-card-head">
                 <span className="customer-index">{String(index + 1).padStart(2, "0")}</span>
                 <div><strong>{customer.name}</strong><small>{customer.type} · {customer.stores}</small></div>
@@ -181,7 +202,7 @@ function CustomerRadar({ country, onSelectCustomer }) {
               </div>
               <div className="customer-card-action"><span>进入客户作战视图</span><small>销售建议 · 作战卡</small><Icon name="arrow" size={15}></Icon></div>
             </button>
-        ))}
+        )}
       </div>
     </div>
   );
@@ -201,9 +222,9 @@ function SalesAdvice({ country }) {
         <span>优先联系角色</span><div>{roles.map((role) => <b key={role}>{role}</b>)}</div>
       </div>
       <div className="email-preview">
-        <div><span><Icon name="mail" size={16}></Icon>英文开发邮件</span><small>等待 Agent</small></div>
-        <strong>不使用静态模板冒充模型结果</strong>
-        <p>点击底部“运行完整商机分析链路”后，Agent 会基于该客户真实证据生成英文邮件、拜访问题和下一步行动。</p>
+        <div><span><Icon name="mail" size={16}></Icon>英文开发邮件</span><small>待智能体分析</small></div>
+        <strong>完成分析后生成个性化邮件</strong>
+        <p>点击底部“运行完整商机分析链路”后，智能体会基于该客户真实证据生成英文邮件、拜访问题和下一步行动。</p>
       </div>
     </div>
   );
@@ -218,7 +239,7 @@ function BattleCard({ country, customer }) {
       </div>
       <div className="battle-block"><span>推荐切入模块</span><div className="module-chips">{lead.modules.map((module) => <b key={module}>{module}</b>)}</div></div>
       <div className="battle-block"><span>已确认事实</span><p>{country.opportunities[1] || country.opportunities[0]}</p></div>
-      <div className="battle-block"><span>决策联系人</span><p>待 Agent 根据客户画像和资料生成</p></div>
+      <div className="battle-block"><span>决策联系人</span><p>待智能体根据客户画像和资料分析</p></div>
       <div className="battle-block"><span>分析状态</span><p>尚未运行；不预置模拟试点或 ROI</p></div>
       <div className="battle-block risk"><span><Icon name="shield" size={16}></Icon>风险与未知</span><p>{lead.risk}</p></div>
     </div>
@@ -230,12 +251,12 @@ function ManagementBrief({ country, onCopy, onDownload }) {
     <div className="tab-body brief-page">
       <div className="brief-stamp">SOURCE DATA BRIEF · {country.en.toUpperCase()}</div>
       <h2>{country.name} 已核验资料摘要</h2>
-      <p className="brief-lead">当前国家报告已纳入潜在客户样本 {country.customers[0].name}：{country.customers[0].stores}；{country.pipeline}。准入、商机和行动结论将在 Agent 运行后生成，后续可继续扩充客户名单。</p>
+      <p className="brief-lead">当前国家报告已纳入潜在客户样本 {country.customers[0].name}：{country.customers[0].stores}；{country.pipeline}。准入、商机和行动结论将在智能分析后生成，后续可继续扩充客户名单。</p>
       <div className="brief-grid">
         <div><span>Verified facts</span><p>{country.opportunities.slice(0, 2).join("；")}。</p></div>
         <div><span>Research entry</span><p>{country.recommendations[0]}</p></div>
         <div><span>Sources</span><p>{country.sources.length} 个 A 级来源，均可回溯原文。</p></div>
-        <div><span>Next step</span><p>运行 Agent，生成准入建议、证据链、能力匹配、风险和行动材料。</p></div>
+        <div><span>Next step</span><p>启动智能分析，生成准入建议、证据链、能力匹配、风险和行动材料。</p></div>
       </div>
       <div className="brief-actions">
         <button type="button" onClick={onCopy}><Icon name="copy" size={16}></Icon>复制简报</button>
@@ -250,7 +271,7 @@ function LiveAgentResult({ report, country }) {
   return (
     <div className="tab-body live-agent-result">
       <div className="live-result-hero">
-        <div><span>PI AGENT CORE · {report.modelRun?.model || report.mode.toUpperCase()} · {report.modelRun?.thinkingEffort || "low"}</span><h2>{country?.name || report.countryName || report.marketRadar?.regionName}</h2><p className="live-result-subtitle">国家商机报告 · 当前潜在客户样本：{report.customerProfile.name}</p><MarkdownContent className="live-result-narrative" content={countryReportNarrative(report.finalNarrative)}></MarkdownContent></div>
+        <div><span>智能分析报告 · 已完成</span><h2>{country?.name || report.countryName || report.marketRadar?.regionName}</h2><p className="live-result-subtitle">国家商机报告 · 当前潜在客户样本：{report.customerProfile.name}</p><MarkdownContent className="live-result-narrative" content={countryReportNarrative(report.finalNarrative)}></MarkdownContent></div>
         <ScoreRing value={report.admission.referenceScore} size="compact"></ScoreRing>
       </div>
       <div className="live-result-stats">
@@ -265,7 +286,7 @@ function LiveAgentResult({ report, country }) {
           <div className="live-evidence-list">
             {report.evidenceChain.records.slice(0, 6).map((record) => (
               <a key={record.id} href={record.sourceUrl} target="_blank" rel="noreferrer">
-                <i>{record.sourceLevel}</i><div><b>{record.title}</b><p>{record.excerpt}</p><small>{record.publishedAt} · {record.kind === "fact" ? "已核验事实" : "Agent 推断"}</small></div>
+                <i>{record.sourceLevel}</i><div><b>{record.title}</b><p>{record.excerpt}</p><small>{record.publishedAt} · {record.kind === "fact" ? "已核验事实" : "分析推断"}</small></div>
               </a>
             ))}
           </div>
@@ -285,7 +306,7 @@ function LiveAgentResult({ report, country }) {
         </section>
       </div>
       <section className="live-brief-card">
-        <div className="section-heading"><span>客户研究 Brief</span><small>{brief.generatedAt.slice(0, 10)} 生成</small></div>
+        <div className="section-heading"><span>客户研究简报</span><small>{brief.generatedAt.slice(0, 10)} 生成</small></div>
         <MarkdownContent className="live-brief-summary" content={brief.executiveSummary}></MarkdownContent>
         <div className="live-brief-field"><b>建议切入</b><MarkdownContent inline content={brief.recommendedEntryPoints.join(" · ")}></MarkdownContent></div>
         <div className="live-brief-field"><b>下一步</b><MarkdownContent inline content={brief.nextActions.join("；")}></MarkdownContent></div>
@@ -300,7 +321,7 @@ function CountryPanel({ country, region, onBack, onGenerate, generating, notify,
   const selectCustomer = controlledSelectCustomer || setInternalCustomer;
   const tabs = selectedCustomer
     ? [["sales", "销售建议"], ["battle", "作战卡"]]
-    : [...(liveReport ? [["live", "Agent 实时结果"]] : []), ["overview", "市场与商机"], ["customers", "客户雷达"], ["brief", "管理层简报"]];
+    : [...(liveReport ? [["live", "智能分析结果"]] : []), ["overview", "市场与商机"], ["customers", "客户雷达"], ["brief", "管理层简报"]];
   const [tab, setTab] = useAppState("overview");
   const tabScrollRef = React.useRef(null);
   const navigationRef = React.useRef({ countryId: null, customerId: null, runId: null });
@@ -325,8 +346,8 @@ function CountryPanel({ country, region, onBack, onGenerate, generating, notify,
     : liveReport ? liveProfile.name : country.tagline;
   const headerMetrics = selectedCustomer
     ? liveReport ? [["分析状态", liveReport.admission.label], ["匹配能力", liveReport.productMatch.matches.length], ["行动建议", liveReport.researchBrief.nextActions.length], ["风险项", liveReport.riskAssessment.risks.length]]
-      : [["分析状态", "待 Agent"], ["已确认信号", country.signalCount], ["建议模块", selectedCustomer.modules?.length || 0], ["资料来源", country.sourceCount]]
-    : [["分析状态", liveReport?.admission.label ?? "待 Agent"], [liveReport ? "集团体量" : "客户体量", liveReport ? liveProfile.storeCountLabel.split("（")[0] : country.storeCount], ["资料摘要", liveReport?.opportunitySignals.length ?? country.signalCount], ["证据", liveReport ? `${liveReport.evidenceChain.coverage.sourceLevelA} A级` : `${country.sourceCount} A级`]];
+      : [["分析状态", "待智能体分析"], ["已确认信号", country.signalCount], ["建议模块", selectedCustomer.modules?.length || 0], ["资料来源", country.sourceCount]]
+    : [["分析状态", liveReport?.admission.label ?? "待智能体分析"], [liveReport ? "集团体量" : "客户体量", liveReport ? liveProfile.storeCountLabel.split("（")[0] : country.storeCount], ["资料摘要", liveReport?.opportunitySignals.length ?? country.signalCount], ["证据", liveReport ? `${liveReport.evidenceChain.coverage.sourceLevelA} A级` : `${country.sourceCount} A级`]];
 
   const briefText = liveReport ? buildReportManagementBrief(liveReport, country) : `${country.name}真实资料摘要\n客户：${country.customers[0].name}\n规模：${country.customers[0].stores}\n集团收入：${country.pipeline}\n已核验资料：${country.opportunities.join("；")}\n来源：${country.sources.map((source) => source.title).join("；")}`;
   const copyBrief = async () => {
@@ -352,7 +373,7 @@ function CountryPanel({ country, region, onBack, onGenerate, generating, notify,
       <div className="country-panel-head">
         <button type="button" className="back-link" onClick={selectedCustomer ? returnToCountry : onBack}><Icon name="back" size={16}></Icon>{selectedCustomer ? `${country.name} · 客户雷达` : `${region.name}雷达`}</button>
         <div className="country-head-main">
-          <div><div className="panel-kicker"><span style={{ background: region.color }}></span>{selectedCustomer ? `${country.en.toUpperCase()} · CUSTOMER PROFILE` : liveReport ? "LIVE EVIDENCE REPORT" : `${country.en.toUpperCase()} OPPORTUNITY`}</div><h1>{headerName}</h1><p>{headerSubtitle}</p></div>
+          <div><div className="panel-kicker"><span style={{ background: region.color }}></span>{selectedCustomer ? `${country.en.toUpperCase()} · CUSTOMER PROFILE` : liveReport ? "COUNTRY OPPORTUNITY REPORT" : `${country.en.toUpperCase()} OPPORTUNITY`}</div><h1>{headerName}</h1><p>{headerSubtitle}</p></div>
           {liveReport ? <ScoreRing value={liveReport.admission.referenceScore} size="compact"></ScoreRing> : <VerifiedBadge count={country.sourceCount}></VerifiedBadge>}
         </div>
         <div className="country-quick-metrics">
@@ -374,7 +395,7 @@ function CountryPanel({ country, region, onBack, onGenerate, generating, notify,
           </>}
       </div>
       <div className="panel-footer-action">
-        <div><Icon name="spark" size={18}></Icon><span><b>{selectedCustomer ? "客户作战 Agent" : liveReport ? "pi-agent-core 实时结果" : "真实证据 Agent"}</b><small>{selectedCustomer ? headerName : packageReady ? "真实证据作战包已就绪" : "基于调研资料运行完整分析"}</small></span></div>
+        <div><Icon name="spark" size={18}></Icon><span><b>{selectedCustomer ? "客户作战智能体" : liveReport ? "智能分析结果" : "商机分析智能体"}</b><small>{selectedCustomer ? headerName : packageReady ? "客户作战材料已就绪" : "基于调研资料运行完整分析"}</small></span></div>
         <div className="footer-buttons">
           {packageReady && !generating && (
             <button type="button" className="ghost" onClick={onViewPackage}>查看作战包</button>
@@ -389,13 +410,13 @@ function CountryPanel({ country, region, onBack, onGenerate, generating, notify,
 function AgentRunOverlay({ steps, active, mode, onClose, onViewPackage, statusMessage, error }) {
   const done = active >= steps.length;
   return (
-    <div className="agent-run-backdrop" role="dialog" aria-modal="true" aria-label="Agent 运行状态">
+    <div className="agent-run-backdrop" role="dialog" aria-modal="true" aria-label="智能分析状态">
       <div className="agent-run-card">
         {done && <button type="button" className="overlay-close" onClick={onClose}><Icon name="close" size={18}></Icon></button>}
         <div className={`agent-orb ${done && !error ? "is-done" : ""} ${error ? "is-error" : ""}`}>{done && !error ? <Icon name="check" size={27}></Icon> : <Icon name={error ? "close" : "spark"} size={25}></Icon>}</div>
-        <span className="run-eyebrow">PI AGENT CORE · EVIDENCE-FIRST ORCHESTRATOR</span>
-        <h2>{error ? "Agent 运行未完成" : done ? (mode === "scan" ? "真实市场扫描已完成" : "真实客户作战包已生成") : (mode === "scan" ? "正在运行市场与客户扫描" : "正在运行完整商机分析链路")}</h2>
-        <MarkdownContent className={`run-status ${done ? "run-conclusion" : ""}`} content={error || statusMessage || (done ? "证据链、准入评估、能力匹配、风险和客户 Brief 均已生成。" : `正在运行：${steps[Math.min(active, steps.length - 1)]} Agent`)}></MarkdownContent>
+        <span className="run-eyebrow">全球商机智能分析</span>
+        <h2>{error ? "智能分析未完成" : done ? (mode === "scan" ? "市场扫描已完成" : "客户作战材料已生成") : (mode === "scan" ? "正在分析市场与客户" : "正在运行完整商机分析链路")}</h2>
+        <MarkdownContent className={`run-status ${done ? "run-conclusion" : ""}`} content={error || statusMessage || (done ? "证据链、准入评估、能力匹配、风险和客户简报均已生成。" : `正在处理：${steps[Math.min(active, steps.length - 1)]}`)}></MarkdownContent>
         <div className="run-steps">
           {steps.map((step, index) => <i key={step} className={active > index ? "done" : active === index ? "active" : ""}><span>{active > index ? <Icon name="check" size={11}></Icon> : index + 1}</span><b>{step}</b></i>)}
         </div>
@@ -406,7 +427,7 @@ function AgentRunOverlay({ steps, active, mode, onClose, onViewPackage, statusMe
               <button type="button" className="run-complete-button ghost" onClick={onClose}>返回商机地图</button>
             )}
             <button type="button" className="run-complete-button" onClick={mode === "package" && !error ? onViewPackage : onClose}>
-              {mode === "package" && !error ? "查看真实 Agent 结果" : "返回商机地图"}
+              {mode === "package" && !error ? "查看智能分析结果" : "返回商机地图"}
               <Icon name="arrow" size={15}></Icon>
             </button>
           </div>
@@ -420,7 +441,7 @@ function buildLiveBattlePackage(report) {
   const brief = report.researchBrief;
   const profile = report.customerProfile;
   const artifacts = [
-    { id: "research", title: "客户研究 Brief", en: "LIVE CUSTOMER RESEARCH", sections: [
+    { id: "research", title: "客户研究简报", en: "CUSTOMER RESEARCH", sections: [
       { h: "执行摘要", paras: [brief.executiveSummary] },
       { h: "客户画像", list: [`总部：${profile.headquarters}`, `覆盖：${profile.countries.join("、")}`, `业态：${profile.formats.join("、")}`, `规模：${profile.storeCountLabel}；${profile.revenueLabel}`] },
       { h: "准入建议", paras: [`${report.admission.label}（参考分 ${report.admission.referenceScore}）`, report.admission.rationale, report.admission.disclaimer] }
@@ -435,7 +456,7 @@ function buildLiveBattlePackage(report) {
       { h: "解释边界", list: report.opportunitySignals.map((signal) => signal.interpretation) }
     ]},
     { id: "match", title: "Dmall 能力匹配", en: "CAPABILITY MATCH", sections: [
-      { h: "生成方式", paras: [materialSourceLabel(report.productMatch.generation), "模型建议需人工核验，不代表已确认项目或成交概率。"] },
+      { h: "生成方式", paras: [materialSourceLabel(report.productMatch.generation), "分析建议需人工核验，不代表已确认项目或成交概率。"] },
       { h: "切入定位", paras: [report.productMatch.positioning] },
       ...report.productMatch.matches.map((match) => ({ h: `${match.capabilityName}｜匹配参考 ${match.fitScore}`, paras: [...match.reasons, ...(match.pilotScope ? [`建议验证范围：${match.pilotScope}`] : []), `禁止直接宣称：${match.caution}`], list: match.prerequisites })),
       { h: "禁止宣称", list: report.productMatch.avoidClaims }
@@ -469,14 +490,14 @@ function buildBattlePackage(country, region, liveReport) {
   const modules = lead.modules.join("、");
   const artifacts = [
     {
-      id: "research", title: "客户研究 Brief", en: "CUSTOMER RESEARCH",
+      id: "research", title: "客户研究简报", en: "CUSTOMER RESEARCH",
       sections: [
         { h: "客户概览", list: [
           `${lead.name} — ${lead.type}，${country.name}市场，门店规模 ${lead.stores}`,
           `数字化成熟度：${country.demand === "强" ? "中高" : "中"}（基于扩店、招聘与财报信号综合判断）`,
           "关键决策角色：COO / CIO / Head of Digital / Supply Chain Director"
         ]},
-        { h: "近期关键信号", list: country.customers.map((item) => `${item.name}：${item.signal}`) },
+        { h: "近期关键信号", list: country.customers.filter((item) => item.selectable !== false).map((item) => `${item.name}：${item.signal}`) },
         { h: "痛点假设", list: [country.opportunities[0], country.opportunities[1]] },
         { h: "竞品与本地风险", paras: [country.entry === "高" ? "决策链长、既有系统集成深，需提前确认数据合规与本地部署要求，并锁定高层赞助人。" : "本地供应商替换阻力是主要风险，建议以可量化 ROI 的轻量试点降低进入门槛。"] }
       ]
@@ -526,7 +547,7 @@ function buildBattlePackage(country, region, liveReport) {
         { h: "基线指标", list: ["库存准确率", "缺货率 / 有货率", "门店人效（盘点、补货工时）", "生鲜 / 临期损耗率"] },
         { h: "价值杠杆（行业基准）", list: ["补货准确率 +8-12pt", "缺货率 -15% ~ -30%", "门店盘点工时 -40%", "出清损耗 -10% ~ -18%"] },
         { h: "投入项", list: ["软件许可（按门店 / 按模块）", "实施与培训", "系统集成与数据迁移"] },
-        { h: "回收模型", paras: [`以${country.name} ${country.pipeline} 的潜在线索池估算，单客户 12-18 个月回本为保守假设；试点期以库存准确率、缺货率、门店执行效率作为核心验证指标。`] }
+        { h: "回收测算", paras: [`以${country.name} ${country.pipeline} 的潜在线索池估算，单客户 12-18 个月回本为保守假设；试点期以库存准确率、缺货率、门店执行效率作为核心验证指标。`] }
       ]
     },
     {
@@ -593,7 +614,7 @@ function BattlePackageDrawer({ country, region, onClose, notify, liveReport }) {
           <div>
             <div className="panel-kicker"><span style={{ background: region.color }}></span>BD BATTLE PACKAGE · {country.en.toUpperCase()}</div>
             <h2>{country.name}作战包</h2>
-            <p>7 项材料 · 由 pi-agent-core 9 个工具阶段生成 · 目标客户 {liveReport?.customerProfile.name ?? country.customers[0].name}</p>
+            <p>7 项材料 · 由 9 个智能分析步骤生成 · 目标客户 {liveReport?.customerProfile.name ?? country.customers[0].name}</p>
           </div>
           <div className="package-head-actions">
             <button type="button" className="package-download" onClick={downloadAll}><Icon name="download" size={15}></Icon>下载全部</button>
@@ -685,7 +706,7 @@ function App() {
   const notify = (message) => setToast(message);
 
   const startBackendRun = async ({ targetCountryId, regionId, customerId, countryName }) => {
-    setRun({ source: "backend", mode: "package", step: 0, done: false, targetCountryId, statusMessage: "正在连接 pi-agent-core…" });
+    setRun({ source: "backend", mode: "package", step: 0, done: false, targetCountryId, statusMessage: "正在启动智能分析…" });
     try {
       const output = await window.AgentApi.startRun({
         regionId,
@@ -754,7 +775,7 @@ function App() {
   };
 
   return (
-    <main className={`app density-${t.density}`} style={themeStyle} data-screen-label="海外商机决策 Agent">
+    <main className={`app density-${t.density}`} style={themeStyle} data-screen-label="海外商机决策智能体">
       <Header onScan={startMarketScan} scanning={Boolean(marketScan && !marketScan.done)} scanDisabled={Boolean(marketScan || (run && !run.done) || pkgCountry)} agentStatus={agentStatus}></Header>
       <div className="app-stage">
         <section className="map-stage">
@@ -779,7 +800,7 @@ function App() {
           <AgentRail steps={agentSteps} activeStep={activeStep}></AgentRail>
         </section>
 
-        <aside className="intelligence-panel" data-screen-label="Agent 情报面板">
+        <aside className="intelligence-panel" data-screen-label="商机情报面板">
           {country ? (
             <CountryPanel country={country} region={regions[country.region]} onBack={backToRegion} onGenerate={startCountryPackage} generating={run?.mode === "package" && !run.done} notify={notify} packageReady={pkgReady.has(country.id)} onViewPackage={() => setPkgCountry(country.id)} liveReport={liveReports[country.id]} selectedCustomer={customerFocus?.countryId === country.id ? customerFocus : null} onSelectCustomer={setCustomerFocus}></CountryPanel>
           ) : marketOverview && !selectedRegion && !hoverRegion ? (
