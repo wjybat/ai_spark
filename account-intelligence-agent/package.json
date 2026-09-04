@@ -1,0 +1,42 @@
+{
+  "name": "customer-intelligence",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "dev": "next dev -p 3001",
+    "build": "next build",
+    "start": "next start -p 3001",
+    "worker": "tsx src/worker/main.ts",
+    "worker:once": "tsx src/worker/main.ts --once",
+    "seed": "tsx src/scripts/seed.ts",
+    "test": "vitest run",
+    "test:case": "tsx src/scripts/verify-wellcome-case.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@earendil-works/pi-ai": "0.84.4",
+    "@earendil-works/pi-coding-agent": "0.84.4",
+    "lucide-react": "^0.468.0",
+    "mammoth": "^1.10.0",
+    "next": "^15.5.2",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "typebox": "^1.3.25",
+    "undici": "^8.10.1",
+    "unpdf": "^1.2.2",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  },
+  "packageManager": "pnpm@11.17.0"
+}
