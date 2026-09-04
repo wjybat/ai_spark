@@ -36,13 +36,15 @@ function cardSummary(customer: Customer) {
 }
 function CompanyLogo({ name, large = false }: { name: string; large?: boolean }) {
   const key = name.toLowerCase();
+  const isWellcome = key.includes("wellcome") || name.includes("惠康");
   let mark: React.ReactNode = initials(name);
-  if (key.includes("tesco")) mark = <span className="tesco-mark">TESCO<i /></span>;
+  if (isWellcome) mark = <img src="/logos/wellcome.svg" alt="" />;
+  else if (key.includes("tesco")) mark = <span className="tesco-mark">TESCO<i /></span>;
   else if (key.includes("carrefour")) mark = <span className="carrefour-mark">◆</span>;
   else if (key === "walmart") mark = <span className="walmart-mark">✳</span>;
   else if (key === "lidl") mark = <span className="lidl-mark">LIDL</span>;
   else if (key === "metro") mark = <span className="metro-mark">M</span>;
-  return <div className={`company-logo ${large ? "large" : ""} logo-${name.length % 4}`}>{mark}</div>;
+  return <div className={`company-logo ${large ? "large" : ""} ${isWellcome ? "wellcome-logo" : `logo-${name.length % 4}`}`}>{mark}</div>;
 }
 
 export function CustomerWorkspace({ initialCustomerId }: { initialCustomerId?: string }) {
