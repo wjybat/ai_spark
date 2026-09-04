@@ -44,7 +44,7 @@ function Header({ onScan, scanning, scanDisabled, agentStatus }) {
       <div className="brand-lockup">
         <div className="brand-mark"><Icon name="globe" size={22}></Icon><span></span></div>
         <div>
-          <div className="brand-line"><b>ATLAS</b><em>海外商机决策智能体</em></div>
+          <div className="brand-line"><strong>海外商机洞察与决策智能体</strong></div>
           <p>从全球信号到销售行动，一次完成</p>
         </div>
       </div>
@@ -853,12 +853,12 @@ function App() {
   };
 
   return (
-    <main className={`app density-${t.density}`} style={themeStyle} data-screen-label="海外商机决策智能体">
+    <main className={`app density-${t.density}`} style={themeStyle} data-screen-label="海外商机洞察与决策智能体">
       <Header onScan={startMarketScan} scanning={Boolean(marketScan && !marketScan.done)} scanDisabled={Boolean(marketScan || (run && !run.done) || pkgCountry)} agentStatus={agentStatus}></Header>
       <div className="app-stage">
         <section className="map-stage">
           <div className="map-stage-copy">
-            <span>GLOBAL OPPORTUNITY ATLAS</span>
+            <span>GLOBAL OPPORTUNITY INTELLIGENCE</span>
             <h2>{selectedRegion ? `${regions[selectedRegion].name} · 重点国家` : "让全球商机变得可见"}</h2>
             <p>{selectedRegion ? "点击国家，查看客户、打法与下一步行动" : "拖动地球，悬停预览区域机会，点击锁定后下钻国家"}</p>
           </div>

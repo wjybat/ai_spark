@@ -122,19 +122,12 @@ button:focus-visible,
   gap: 10px;
 }
 
-.brand-line b {
-  font-family: "Bricolage Grotesque", sans-serif;
-  font-size: 18px;
-  letter-spacing: 0.08em;
-}
-
-.brand-line em {
-  font-style: normal;
-  font-size: 14px;
-  font-weight: 650;
-  color: color-mix(in srgb, var(--ink) 76%, transparent);
-  padding-left: 10px;
-  border-left: 1px solid var(--line);
+.brand-line strong {
+  font-family: "Bricolage Grotesque", "Noto Sans SC", sans-serif;
+  font-size: 17px;
+  font-weight: 680;
+  letter-spacing: -0.015em;
+  color: var(--ink);
 }
 
 .brand-lockup p {
