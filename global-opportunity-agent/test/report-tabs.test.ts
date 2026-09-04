@@ -128,10 +128,6 @@ describe("country-to-customer report hierarchy", { timeout: 20_000 }, () => {
     await enterCustomer();
     expect(container.querySelector('[data-view-level="customer"]')).not.toBeNull();
     expect(container.querySelector(".country-head-main h1")?.textContent).toBe("Cencosud");
-    const intelligenceLink = container.querySelector<HTMLAnchorElement>("[data-customer-intelligence-link]");
-    expect(intelligenceLink?.textContent).toContain("客户情报中心");
-    expect(intelligenceLink?.href).toBe("http://localhost:3001/customers");
-    expect(intelligenceLink?.target).toBe("_blank");
     expect([...container.querySelectorAll(".detail-tabs button")].map(item => item.textContent)).toEqual(["客户概览", "业务布局", "数字化与系统", "动态与组织", "资料来源", "销售建议", "作战卡"]);
     expect(body().querySelector('[data-customer-research-tab="profile"]')).not.toBeNull();
     expect(body().textContent).toContain(window.OPPORTUNITY_DATA.companyProfiles.cencosud.headquarters);
