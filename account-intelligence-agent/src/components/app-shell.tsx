@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, BrainCircuit, ChevronRight, CircleGauge, Database, FileText, Lightbulb, Menu, Plus, Search, Settings, Sparkles, UserPlus, Users, X } from "lucide-react";
+import { Bell, BrainCircuit, ChevronRight, CircleGauge, Database, FileText, Lightbulb, Menu, PanelLeftClose, PanelLeftOpen, Plus, Search, Settings, Sparkles, UserPlus, Users, X } from "lucide-react";
 import Link from "next/link";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { IngestModal } from "./ingest-modal";
@@ -19,6 +19,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [ingestOpen, setIngestOpen] = useState(false);
   const [newCustomerOpen, setNewCustomerOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [activeNav, setActiveNav] = useState("客户");
   const [globalQuery, setGlobalQuery] = useState("");
@@ -26,6 +27,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const searchRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    setSidebarCollapsed(window.localStorage.getItem("customer-sidebar-collapsed") === "true");
     const load = () => fetch("/api/v1/dashboard").then((response) => response.json()).then((data) => setIngestion(data.ingestion)).catch(() => undefined);
     const focusSearch = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
@@ -53,6 +55,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     window.dispatchEvent(new CustomEvent("global-customer-search", { detail: globalQuery.trim() }));
   }
 
+  function toggleSidebar() {
+    setSidebarCollapsed((value) => {
+      const next = !value;
+      window.localStorage.setItem("customer-sidebar-collapsed", String(next));
+      return next;
+    });
+  }
+
   function openSection(label: string, tab?: string) {
     if (!tab) return;
     setActiveNav(label);
@@ -60,7 +70,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     window.dispatchEvent(new CustomEvent("customer-tab-change", { detail: tab }));
   }
 
-  return <div className="app-shell">
+  return <div className={`app-shell ${sidebarCollapsed ? "sidebar-collapsed" : ""}`}>
     <header className="topbar">
       <button className="mobile-menu" onClick={() => setMenuOpen((value) => !value)} aria-label={menuOpen ? "关闭菜单" : "打开菜单"} aria-expanded={menuOpen}>{menuOpen ? <X size={20} /> : <Menu size={20} />}</button>
       <Link href="/customers" className="brand" aria-label="客户情报中心"><span className="brand-mark"><Sparkles size={22} /></span><span><strong>客户情报中心</strong><small>AI 驱动的客户洞察</small></span></Link>
@@ -71,9 +81,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <span className="avatar" role="img" aria-label="当前用户 JS">JS</span>
     </header>
     <aside className={`sidebar ${menuOpen ? "open" : ""}`} aria-label="主导航">
-      <nav>{nav.map(({ label, icon: Icon, tab, disabled }) => <button key={label} type="button" className={activeNav === label ? "active" : ""} disabled={disabled} title={disabled ? "该功能尚未开放" : undefined} onClick={() => openSection(label, tab)}><Icon size={18} />{label}{label !== "客户" && <ChevronRight className="nav-arrow" size={14} />}</button>)}</nav>
+      <button className="sidebar-toggle" type="button" onClick={toggleSidebar} aria-label={sidebarCollapsed ? "展开侧边栏" : "收起侧边栏"} aria-expanded={!sidebarCollapsed} title={sidebarCollapsed ? "展开侧边栏" : "收起侧边栏"}>{sidebarCollapsed ? <PanelLeftOpen size={15} /> : <PanelLeftClose size={15} />}</button>
+      <nav>{nav.map(({ label, icon: Icon, tab, disabled }) => <button key={label} type="button" className={activeNav === label ? "active" : ""} disabled={disabled} aria-label={label} title={disabled ? "该功能尚未开放" : sidebarCollapsed ? label : undefined} onClick={() => openSection(label, tab)}><Icon size={18} /><span className="nav-label">{label}</span>{label !== "客户" && <ChevronRight className="nav-arrow" size={14} />}</button>)}</nav>
       <div className="ingestion-status"><div className="status-title"><FileText size={15} />数据接入</div><div><span>今日</span><b>{ingestion.today}</b></div><div><span>本周</span><b>{ingestion.week}</b></div><div><span>来源总数</span><b>{ingestion.total.toLocaleString()}</b></div><p><i />系统运行正常</p></div>
-      <div className="sidebar-foot"><CircleGauge size={15} />MVP · 本地运行</div>
+      <div className="sidebar-foot"><CircleGauge size={15} /><span>MVP · 本地运行</span></div>
     </aside>
     {menuOpen && <button className="sidebar-scrim" aria-label="关闭菜单" onClick={() => setMenuOpen(false)} />}
     <main className="main-content">{children}</main>
