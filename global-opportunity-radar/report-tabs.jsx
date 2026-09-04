@@ -22,7 +22,7 @@ function reportGenerationNote(report) {
     : "各模块生成方式以来源标记为准；建议与邮件均需人工审核。";
 }
 function reportScope(report, country) {
-  return `报告国家：${country.name}；区域市场资料范围：${reportText(report.marketRadar?.regionName)}；当前潜在客户样本：${reportText(report.customerProfile?.name)}。国家报告可在后续客户发现阶段继续扩充企业名单。`;
+  return `目标客户：${reportText(report.customerProfile?.name)}；业务场景：${country.name}；区域市场背景：${reportText(report.marketRadar?.regionName)}。本结果针对该企业，国家管理层简报另行综合三家企业生成。`;
 }
 function countryReportNarrative(content) {
   return reportText(content).replace(/^\s*#{1,3}\s+([^\n]+)\n?/, "**$1**\n\n");

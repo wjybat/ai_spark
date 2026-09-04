@@ -15,6 +15,7 @@ import type { PipelineEvent, PipelineOutput } from "../types/domain.js";
 import { createOpportunityTools } from "./tools.js";
 import { materialGenerationInstructions } from "./generated-materials.js";
 import { dmallRouterProvider, DMALL_ROUTER_PROVIDER_ID } from "./dmall-router-provider.js";
+import { compatibleProvider, COMPATIBLE_PROVIDER_ID } from "./compatible-provider.js";
 
 export interface PipelineRequest {
   runId: string;
@@ -50,13 +51,10 @@ After all tools complete, provide a concise Chinese conclusion for sales.`;
 
 function countryReportInstructions(request: PipelineRequest): string {
   if (!request.countryName) return "";
-  return `\nThe primary report scope is the country ${request.countryName}.
-Region-level market results are supporting context, not the report title or final geographic scope.
-The selected customer ${request.customerId} is the initial potential-customer sample for this country, not the report's sole subject.
-Supporting customer evidence may cover multiple countries; label it as group-level evidence instead of changing the report's country scope.
-Frame the final Chinese narrative as a country opportunity report: country market context, current potential-customer set, customer-specific opportunities, risks and next actions.
-Do not title the final report with a company name. Explicitly distinguish country conclusions from facts that only apply to an individual customer.
-The customer pool may grow in later discovery stages, so do not imply that the current sample is exhaustive.\n`;
+  return `\nThe report subject is the selected enterprise ${request.customerId}, operating in ${request.countryName}.
+This is a customer battle package, not a country management brief. Focus on this enterprise's opportunities, capability fit, risks, outreach and actions.
+Use the country as local operating context. Label group-wide evidence explicitly and do not represent it as country-wide statistics.
+The separate country-brief workflow compares all three listed companies; do not claim that this one-company package covers that analysis.\n`;
 }
 
 function buildDemoResponses(regionId: string, customerId: string) {
@@ -110,6 +108,9 @@ export async function runOpportunityPipeline(request: PipelineRequest, sink: Pip
     faux.setResponses(buildDemoResponses(request.regionId, request.customerId));
     models.setProvider(faux.provider);
     model = faux.getModel();
+  } else if (config.provider === "openai-compatible") {
+    models.setProvider(compatibleProvider({ baseUrl: config.baseUrl, modelId: config.model }));
+    model = models.getModel(COMPATIBLE_PROVIDER_ID, config.model);
   } else if (config.provider === "dmall-router") {
     models.setProvider(dmallRouterProvider({ baseUrl: config.baseUrl, modelId: config.model }));
     model = models.getModel(DMALL_ROUTER_PROVIDER_ID, config.model);
@@ -245,7 +246,7 @@ export async function runOpportunityPipeline(request: PipelineRequest, sink: Pip
   }
 
   const customerNarrative = createFinalNarrative(workspace.researchBrief, workspace.productMatch);
-  const deterministicNarrative = request.countryName ? `${request.countryName}国家商机报告：当前纳入的首个潜在客户样本为 ${workspace.customerProfile.name}，后续客户发现可能扩充名单。${customerNarrative}` : customerNarrative;
+  const deterministicNarrative = request.countryName ? `${workspace.customerProfile.name} 客户作战分析（${request.countryName}业务场景）：${customerNarrative}` : customerNarrative;
   const modelNarrative = lastTurnText.trim();
   const finalNarrative = mode === "live" && modelNarrative ? modelNarrative : deterministicNarrative;
   return {

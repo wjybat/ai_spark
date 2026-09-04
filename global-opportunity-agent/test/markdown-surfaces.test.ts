@@ -19,7 +19,9 @@ window.ReactDOM = { createRoot: () => ({ render: () => undefined }) };
 // eval's strict scope differs from a browser <script>; publish the bundle as that script would.
 window.eval(readFileSync(new URL("assets/markdown-renderer.js", frontend), "utf8") + "\nwindow.AtlasMarkdown = AtlasMarkdown;");
 window.eval(readFileSync(new URL("data.js", frontend), "utf8"));
-for (const file of ["markdown.jsx", "report-tabs.jsx", "app.jsx"]) {
+window.eval(readFileSync(new URL("country-data.js", frontend), "utf8"));
+window.eval(readFileSync(new URL("country-brief-data.js", frontend), "utf8"));
+for (const file of ["markdown.jsx", "report-tabs.jsx", "country-market.jsx", "country-brief.jsx", "app.jsx"]) {
   window.eval(transformSync(readFileSync(new URL(file, frontend), "utf8"), { loader: "jsx", target: "es2020" }).code);
 }
 afterAll(() => window.close());

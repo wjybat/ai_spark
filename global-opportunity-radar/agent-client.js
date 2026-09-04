@@ -28,11 +28,11 @@
     return readJson(await fetch("/api/catalog", { headers: { Accept: "application/json" } }));
   }
 
-  async function startRun({ regionId, customerId, countryId, countryName, mode = "auto", onEvent }) {
+  async function startRun({ scope = "customer", regionId, customerId, countryId, countryName, mode = "auto", onEvent }) {
     const created = await readJson(await fetch("/api/agent/runs", {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify({ regionId, customerId, countryId, countryName, mode })
+      body: JSON.stringify(scope === "country" ? { scope, countryId, mode } : { scope, regionId, customerId, countryId, countryName, mode })
     }));
 
     return new Promise((resolve, reject) => {

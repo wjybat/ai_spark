@@ -10,6 +10,27 @@ afterEach(async () => {
 });
 
 describe("HTTP API", () => {
+  it("generates a country brief from the server-selected three dossiers and streams the national result", async()=>{
+    app=await buildApp({serveFrontend:false});
+    const research=await app.inject({method:"GET",url:"/api/countries/uae/research"});
+    expect(research.json().companies.map(c=>c.name)).toEqual(["Sigma Healthcare / Chemist Warehouse","LuLu Retail","Union Coop"]);
+    const created=await app.inject({method:"POST",url:"/api/agent/runs",payload:{scope:"country",countryId:"uae",mode:"demo"}});
+    expect(created.statusCode).toBe(202);
+    const runId=created.json().runId;
+    let result;
+    for(let attempt=0;attempt<80;attempt++){
+      result=(await app.inject({method:"GET",url:`/api/agent/runs/${runId}`})).json();
+      if(["completed","failed"].includes(result.status))break;
+      await new Promise(resolve=>setTimeout(resolve,30));
+    }
+    expect(result.status).toBe("completed");
+    expect(result.scope).toBe("country");
+    expect(result.output.analysis.companyAssessments).toHaveLength(3);
+    expect(result.output.customerProfile).toBeUndefined();
+    const stream=await app.inject({method:"GET",url:`/api/agent/runs/${runId}/events`});
+    expect(stream.body).toContain("event: run_complete");
+    expect(stream.body).toContain('"scope":"country"');
+  });
   it("exposes health, catalog, creates and completes an agent run", async () => {
     app = await buildApp({ serveFrontend: false });
     const health = await app.inject({ method: "GET", url: "/api/health" });
@@ -44,7 +65,7 @@ describe("HTTP API", () => {
     expect(output.customerId).toBe("loblaw");
     expect(output.countryId).toBe("canada");
     expect(output.countryName).toBe("加拿大");
-    expect(output.finalNarrative).toContain("加拿大国家商机报告");
+    expect(output.finalNarrative).toContain("客户作战分析（加拿大业务场景）");
     expect(output.evidenceChain.records.length).toBeGreaterThan(3);
   }, 20_000);
 });

@@ -28,6 +28,7 @@ function Globe({
   onSelectRegion,
   onSelectCountry,
   onBack,
+  onBackToRegion,
   motion
 }) {
   const wrapRef = useRef(null);
@@ -35,13 +36,47 @@ function Globe({
   const movedRef = useRef(false);
   const animRef = useRef(null);
   const rotationRef = useRef(DEFAULT_ROTATION);
+  const zoomRef = useRef(0.405);
+  const boundaryCache = useRef({});
   const [size, setSize] = useState(560);
   const [worldFeatures, setWorldFeatures] = useState([]);
   const [rotation, setRotation] = useState(DEFAULT_ROTATION);
+  const [zoom, setZoom] = useState(0.405);
+  const [boundaries, setBoundaries] = useState(null);
+  const [boundaryStatus, setBoundaryStatus] = useState("idle");
+  const [boundaryRetry, setBoundaryRetry] = useState(0);
+  const [selectedStoreId, setSelectedStoreId] = useState(null);
+  const countryMap = window.COUNTRY_MAPS?.[selectedCountry];
   const [hoverCountry, setHoverCountry] = useState(null);
   const [loadState, setLoadState] = useState("loading");
 
   rotationRef.current = rotation;
+  zoomRef.current = zoom;
+
+  useEffect(() => {
+    let alive = true;
+    setSelectedStoreId(null);
+    setBoundaries(null);
+    if (!countryMap) { setBoundaryStatus("idle"); return undefined; }
+    if (boundaryCache.current[selectedCountry]) {
+      setBoundaries(boundaryCache.current[selectedCountry]); setBoundaryStatus("ready"); return undefined;
+    }
+    setBoundaryStatus("loading");
+    fetch(countryMap.boundaryUrl)
+      .then(response => { if (!response.ok) throw new Error("boundary data unavailable"); return response.json(); })
+      .then(topology => {
+        const object = topology.objects.subdivisions;
+        const result = {
+          countryId:selectedCountry,
+          outline:topojson.merge(topology, object.geometries),
+          borders:topojson.mesh(topology, object, (a,b) => a!==b)
+        };
+        boundaryCache.current[selectedCountry] = result;
+        if (alive) {setBoundaries(result);setBoundaryStatus("ready");}
+      })
+      .catch(() => {if (alive) setBoundaryStatus("error");});
+    return () => {alive=false;};
+  }, [selectedCountry, boundaryRetry]);
 
   useEffect(() => {
     const node = wrapRef.current;
@@ -76,18 +111,20 @@ function Globe({
     return () => { alive = false; };
   }, []);
 
-  // 选中 / 取消选中区域时，沿最短经度路径平滑 tween 到目标视角
+  // Animate rotation and scale together through global → continent → country.
   useEffect(() => {
-    const target = selectedRegion
-      ? (() => { const center = regions[selectedRegion].center; return { lon: -center[0], lat: -center[1] }; })()
-      : DEFAULT_ROTATION;
+    const target = countryMap ? window.CountryMapUtils.camera(countryMap) : selectedRegion
+      ? (() => { const center = regions[selectedRegion].center; return { lon: -center[0], lat: -center[1], zoom:0.49 }; })()
+      : {...DEFAULT_ROTATION,zoom:0.405};
     if (animRef.current) cancelAnimationFrame(animRef.current);
-    if (!motion) {
+    if (!motion || window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
       setRotation(target);
+      setZoom(target.zoom);
       return undefined;
     }
     const from = { ...rotationRef.current };
-    const dLon = ((target.lon - from.lon + 540) % 360) - 180;
+    const fromZoom = zoomRef.current;
+    const dLon = (((target.lon - from.lon) % 360 + 540) % 360) - 180;
     const dLat = target.lat - from.lat;
     const start = performance.now();
     const duration = 900;
@@ -100,12 +137,13 @@ function Globe({
         const next = { lon: from.lon + dLon * eased, lat: from.lat + dLat * eased };
         rotationRef.current = next;
         setRotation(next);
+        setZoom(fromZoom + (target.zoom-fromZoom)*eased);
       }
       if (progress < 1) animRef.current = requestAnimationFrame(tick);
     };
     animRef.current = requestAnimationFrame(tick);
     return () => { if (animRef.current) cancelAnimationFrame(animRef.current); };
-  }, [selectedRegion, motion]);
+  }, [selectedRegion, selectedCountry, motion]);
 
   // 待机自转：全球视图下缓慢旋转，拖拽或悬停区域时暂停
   useEffect(() => {
@@ -132,7 +170,7 @@ function Globe({
   }, [motion, selectedRegion, hoverRegion]);
 
   const model = useMemo(() => {
-    const scale = size * (selectedRegion ? 0.49 : 0.405);
+    const scale = size * zoom;
     const projection = d3.geoOrthographic()
       .translate([size / 2, size / 2])
       .scale(scale)
@@ -144,7 +182,7 @@ function Globe({
       path: d3.geoPath(projection),
       graticule: d3.geoGraticule10()
     };
-  }, [rotation, selectedRegion, size]);
+  }, [rotation, zoom, size]);
 
   const targetCountries = useMemo(() => {
     if (!selectedRegion) return [];
@@ -194,8 +232,8 @@ function Globe({
       try { event.currentTarget.setPointerCapture(event.pointerId); } catch (error) { /* noop */ }
     }
     setRotation({
-      lon: dragRef.current.rotation.lon + dx * 0.24,
-      lat: Math.max(-67, Math.min(67, dragRef.current.rotation.lat - dy * 0.2))
+      lon: dragRef.current.rotation.lon + dx * 0.24 * Math.min(1,0.49/zoom),
+      lat: Math.max(-85, Math.min(85, dragRef.current.rotation.lat - dy * 0.2 * Math.min(1,0.49/zoom)))
     });
   };
 
@@ -217,10 +255,14 @@ function Globe({
   };
 
   const highlightedRegion = selectedRegion || hoverRegion;
-  const hqPoint = selectedRegion && visible(HQ_COORD) ? model.projection(HQ_COORD) : null;
+  const hqPoint = selectedRegion && !selectedCountry && visible(HQ_COORD) ? model.projection(HQ_COORD) : null;
+  const countryBoundaries = boundaries?.countryId === selectedCountry ? boundaries : null;
+  const stores = countryMap ? window.CountryMapUtils.layout(countryMap.stores,model.projection,size,visible) : [];
+  const selectedStore = countryMap?.stores.find(store=>store.id===selectedStoreId);
+  const selectStore = (event,id) => {event.stopPropagation();if(!movedRef.current)setSelectedStoreId(current=>current===id?null:id);};
 
   return (
-    <div className="globe-wrap" ref={wrapRef} data-screen-label="商机地球">
+    <div className={`globe-wrap ${countryMap ? "is-country-focus" : ""}`} ref={wrapRef} data-screen-label="商机地球" data-focus-country={selectedCountry || ""} data-zoom={zoom.toFixed(3)}>
       <div className="globe-aura" aria-hidden="true"></div>
       <svg
         className={`globe-svg ${motion ? "is-live" : ""}`}
@@ -228,7 +270,7 @@ function Globe({
         height={size}
         viewBox={`0 0 ${size} ${size}`}
         role="img"
-        aria-label={selectedRegion ? `${regions[selectedRegion].name}真实客户国家分布` : "完整世界地图，仅调研覆盖国家可交互"}
+        aria-label={countryMap ? `${countries[selectedCountry].name}行政区划与三家客户代表门店城市分布` : selectedRegion ? `${regions[selectedRegion].name}零售市场与已收录国家分布` : "完整世界地图，可通过区域导航查看大洲市场简报"}
         onPointerDown={startDrag}
         onPointerMove={moveDrag}
         onPointerUp={endDrag}
@@ -252,14 +294,16 @@ function Globe({
             <feMerge><feMergeNode in="blur"></feMergeNode><feMergeNode in="SourceGraphic"></feMergeNode></feMerge>
           </filter>
           <clipPath id="sphereClip"><path d={model.path({ type: "Sphere" })}></path></clipPath>
+          <clipPath id="countryViewport"><rect width={size} height={size} rx="16"></rect></clipPath>
         </defs>
 
+        <g clipPath={countryMap ? "url(#countryViewport)" : undefined}>
         <path className="sphere-shadow" d={model.path({ type: "Sphere" })} filter="url(#earthShadow)"></path>
         <path className="sphere-ocean" d={model.path({ type: "Sphere" })}></path>
         <g clipPath="url(#sphereClip)">
           <path className="graticule" d={model.path(model.graticule)}></path>
           {/* 完整地理底图与业务交互层分开：所有国家可见，仅调研覆盖国家可点击。 */}
-          {worldFeatures.map((feature, index) => (
+          {worldFeatures.filter(feature=>!countryBoundaries || String(feature.id).padStart(3,"0")!==countries[selectedCountry].iso).map((feature, index) => (
             <path key={`land-${feature.id ?? index}`} className="world-land" data-country-iso={String(feature.id).padStart(3, "0")} aria-hidden="true" d={model.path(feature)}></path>
           ))}
 
@@ -293,14 +337,14 @@ function Globe({
             );
           })}
 
-          {selectedRegion && targetCountries.map((country) => (
+          {selectedRegion && !selectedCountry && targetCountries.map((country) => (
             <path
               key={`arc-${country.id}`}
               className="hq-arc"
               d={model.path({ type: "LineString", coordinates: [HQ_COORD, country.coord] })}
             ></path>
           ))}
-          {selectedRegion && targetCountries.map((country) => {
+          {selectedRegion && !selectedCountry && targetCountries.map((country) => {
             const feature = worldByIso[country.iso];
             if (!feature) return null;
             const isSelected = selectedCountry === country.id;
@@ -317,6 +361,12 @@ function Globe({
               ></path>
             );
           })}
+          {countryMap && (
+            <g className="country-detail" data-boundary-country={countryBoundaries?.countryId}>
+              <path className="country-focus-land" d={model.path(countryBoundaries?.outline || worldByIso[countries[selectedCountry].iso])}></path>
+              {countryBoundaries && <path className="country-admin-borders" d={model.path(countryBoundaries.borders)}></path>}
+            </g>
+          )}
           <path className="earth-shade" d={model.path({ type: "Sphere" })}></path>
         </g>
         <path className="sphere-outline" d={model.path({ type: "Sphere" })}></path>
@@ -328,7 +378,7 @@ function Globe({
           </g>
         )}
 
-        {selectedRegion && targetCountries.map((country) => {
+        {selectedRegion && !selectedCountry && targetCountries.map((country) => {
           if (!visible(country.coord)) return null;
           const point = model.projection(country.coord);
           if (!point) return null;
@@ -360,9 +410,24 @@ function Globe({
             </g>
           );
         })}
+        </g>
+        {countryMap && <g className="store-map-layer">
+          {stores.map(store => <path key={`line-${store.id}`} className="store-leader" stroke={store.color} d={`M${store.point.join(",")} L${store.anchor.join(",")}`}></path>)}
+          {/* One city dot for colocated stores; each merchant retains its own label and leader. */}
+          {stores.filter((s,i,list)=>list.findIndex(other=>other.coord.join()===s.coord.join())===i).map(store => <g key={`city-${store.id}`} className="store-city-dot" transform={`translate(${store.point.join(" ")})`}>
+            <circle r="9" fill={store.color} opacity=".18"></circle><circle r="4.5" fill={store.color}></circle>
+          </g>)}
+          {stores.map(store => <g key={store.id} className={`store-map-label ${selectedStoreId===store.id ? "is-selected" : ""}`} transform={`translate(${store.label.x} ${store.label.y})`} role="button" tabIndex="0" aria-label={`${store.customerName}，${store.city}，${store.name}`} aria-pressed={selectedStoreId===store.id} onPointerDown={event=>{event.stopPropagation();movedRef.current=false;}} onClick={event=>selectStore(event,store.id)} onKeyDown={event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();movedRef.current=false;selectStore(event,store.id);}}}>
+            <rect className="store-label-bg" width={store.label.width} height={store.label.height} rx="10"></rect>
+            <rect x="0" y="13" width="3" height="24" rx="1.5" fill={store.color}></rect>
+            <text x="12" y="21" className="store-brand" fontSize={store.brand.length>16?11.5:13}>{store.brand}</text>
+            <text x="12" y="39" className="store-city">{store.city}</text>
+            <text x="12" y="54" className="store-group">{store.groupLabel}</text>
+          </g>)}
+        </g>}
       </svg>
 
-      <div className="region-quick-nav" aria-label="区域快捷导航">
+      {!countryMap && <div className="region-quick-nav" aria-label="区域快捷导航">
         {Object.keys(regions).map((id) => {
           const item = regions[id];
           const active = selectedRegion === id;
@@ -379,19 +444,32 @@ function Globe({
             </button>
           );
         })}
-      </div>
+      </div>}
+
+      {countryMap && <div className="country-map-status" aria-live="polite">
+        {boundaryStatus==="error" ? <button onClick={()=>setBoundaryRetry(value=>value+1)}>重新加载行政区划</button> : <><span className="admin-line-key"></span>{boundaryStatus==="loading" ? "加载行政区划…" : "行政区划"}<span className="store-dot-key"></span>代表门店 · 3</>}
+      </div>}
+
+      {selectedStore && <aside className="store-detail-card" aria-label="代表门店详情">
+        <button className="store-detail-close" aria-label="关闭门店详情" onClick={()=>setSelectedStoreId(null)}>×</button>
+        <span>{selectedStore.customerName}</span>
+        <h3>{selectedStore.name}</h3>
+        <p>{selectedStore.city} · {countries[selectedCountry].name}</p>
+        {selectedStore.relation && <p>{selectedStore.relation}</p>}
+        <a href={selectedStore.sourceUrl} target="_blank" rel="noopener noreferrer">查看门店资料 ↗</a>
+      </aside>}
 
       <div className="globe-toolbar">
         {selectedRegion ? (
           <div className="globe-toolbar-left">
-            <button type="button" className="globe-tool" onClick={onBack}>
+            <button type="button" className="globe-tool" onClick={countryMap ? onBackToRegion : onBack}>
               <GlobeIcon name="back" size={16}></GlobeIcon>
-              返回全球
+              {countryMap ? `返回${regions[selectedRegion].name}` : "返回全球"}
             </button>
             <div className="pin-badge">
               <i style={{ background: regions[selectedRegion].color }}></i>
-              已锁定 · {regions[selectedRegion].name}
-              <em>Esc 或再次点击区域可解锁</em>
+              {countryMap ? countries[selectedCountry].name : `已锁定 · ${regions[selectedRegion].name}`}
+              {!countryMap && <em>Esc 或再次点击区域可解锁</em>}
             </div>
           </div>
         ) : (

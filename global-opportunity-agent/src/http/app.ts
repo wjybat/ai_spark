@@ -6,8 +6,10 @@ import { buildEvidenceChain } from "../analysis/index.js";
 import { config, hasLiveCredential, resolveMode } from "../config.js";
 import { capabilities, customers, regions } from "../data/knowledge.js";
 import { RunStore } from "./run-store.js";
+import { countryBriefCatalog, getCountryContext } from "../data/country-research.js";
 
 interface CreateRunBody {
+  scope?: "country" | "customer";
   regionId?: string;
   customerId?: string;
   countryId?: string;
@@ -18,6 +20,7 @@ interface CreateRunBody {
 function serializeRun(run: ReturnType<RunStore["create"]>) {
   return {
     id: run.id,
+    scope: run.scope,
     regionId: run.regionId,
     customerId: run.customerId,
     countryId: run.countryId,
@@ -53,6 +56,7 @@ export async function buildApp(options: { serveFrontend?: boolean } = {}): Promi
   });
 
   app.get("/api/catalog", async () => ({
+    countryBriefs: countryBriefCatalog,
     regions: regions.map((region) => ({
       id: region.id,
       name: region.name,
@@ -89,13 +93,14 @@ export async function buildApp(options: { serveFrontend?: boolean } = {}): Promi
 
   app.post<{ Body: CreateRunBody }>("/api/agent/runs", async (request, reply) => {
     const body = request.body ?? {};
-    if (!body.regionId || !body.customerId) {
+    if (body.scope !== "country" && (!body.regionId || !body.customerId)) {
       return reply.code(400).send({ error: "regionId and customerId are required" });
     }
     try {
       const run = store.create({
-        regionId: body.regionId,
-        customerId: body.customerId,
+        ...(body.scope ? { scope: body.scope } : {}),
+        ...(body.regionId ? {regionId: body.regionId} : {}),
+        ...(body.customerId ? {customerId: body.customerId} : {}),
         ...(body.countryId ? { countryId: body.countryId } : {}),
         ...(body.countryName ? { countryName: body.countryName } : {}),
         ...(body.mode ? { mode: body.mode } : {}),
@@ -105,6 +110,11 @@ export async function buildApp(options: { serveFrontend?: boolean } = {}): Promi
     } catch (error) {
       return reply.code(400).send({ error: error instanceof Error ? error.message : String(error) });
     }
+  });
+
+  app.get<{Params:{countryId:string}}>("/api/countries/:countryId/research",async(request,reply)=>{
+    try {const {draft,...context}=getCountryContext(request.params.countryId);return context;}
+    catch(error){return reply.code(404).send({error:error instanceof Error?error.message:String(error)});}
   });
 
   app.get<{ Params: { runId: string } }>("/api/agent/runs/:runId", async (request, reply) => {

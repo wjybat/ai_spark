@@ -28,8 +28,8 @@ describe("live model-authored tool workflow (scripted provider, no network)", { 
   it("passes real prior evidence and capability context to generation, then carries generated matching into Brief", async () => {
     fixture.responses = [...prefix(), context => {
       expect(context.systemPrompt).toContain("Dmall capability catalog");
-      expect(context.systemPrompt).toContain("primary report scope is the country 巴西");
-      expect(context.systemPrompt).toContain("initial potential-customer sample");
+      expect(context.systemPrompt).toContain("selected enterprise cencosud, operating in 巴西");
+      expect(context.systemPrompt).toContain("customer battle package, not a country management brief");
       const previous = JSON.stringify(context.messages);
       expect(previous).toContain("cencosud-q2-2026");
       expect(previous).toContain("SAP");

@@ -25,7 +25,9 @@ beforeAll(async () => {
   Object.assign(window, { React, ReactDOM: { createRoot: () => ({ render: () => undefined }) } });
   window.eval(readFileSync(new URL("assets/markdown-renderer.js", frontend), "utf8") + "\nwindow.AtlasMarkdown = AtlasMarkdown;");
   window.eval(readFileSync(new URL("data.js", frontend), "utf8"));
-  for (const file of ["markdown.jsx", "report-tabs.jsx", "app.jsx"]) {
+  window.eval(readFileSync(new URL("country-data.js", frontend), "utf8"));
+window.eval(readFileSync(new URL("country-brief-data.js", frontend), "utf8"));
+  for (const file of ["markdown.jsx", "report-tabs.jsx", "country-market.jsx", "country-brief.jsx", "app.jsx"]) {
     window.eval(transformSync(readFileSync(new URL(file, frontend), "utf8"), { loader: "jsx", target: "es2020" }).code);
   }
   Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText } });
@@ -77,9 +79,60 @@ async function enterCustomer() {
   await act(async () => entry!.click());
 }
 async function returnToCountry(countryName = "巴西") { await click(`${countryName} · 客户雷达`); }
+function nationalReport(id = "brazil", version = "FIRST") {
+  const c=country(id), research=c.research;
+  const analysis=JSON.parse(JSON.stringify(research.managementDraft));
+  analysis.executiveSummary=`NATIONAL_${version}：${analysis.executiveSummary}`;
+  return {scope:"country",countryId:id,countryName:c.name,runId:`national-${version}`,completedAt:"2026-09-04T12:00:00Z",generation:{source:"llm"},analysis,companies:research.companies,evidence:research.companies.flatMap(c=>c.evidence)};
+}
 
 // Each case mounts and switches several Markdown-heavy views; allow for a busy dev machine.
 describe("country-to-customer report hierarchy", { timeout: 20_000 }, () => {
+  it("presents both national chapters for exactly the existing eleven countries without confusing customer and market counts", async () => {
+    const countries = Object.values(window.OPPORTUNITY_DATA.countries);
+    expect(countries.map(c => c.id).sort()).toEqual(["argentina","australia","brazil","canada","chile","colombia","ireland","new_zealand","peru","uae","usa"]);
+    expect(Object.keys(window.OPPORTUNITY_DATA.regions)).toHaveLength(5);
+    for (const item of countries) {
+      await mount(undefined, { country: item });
+      expect(container.querySelector(".detail-tabs .is-active")?.textContent).toBe("国家概况");
+      expect(body().querySelector(`[data-country-overview="${item.id}"]`)).not.toBeNull();
+      expect(body().textContent).toContain(item.research.summary);
+      expect(body().textContent).toContain(item.research.sample.stores);
+      expect(container.querySelector(".country-quick-metrics")?.textContent).toContain("线下门店 · 估算");
+      expect(container.querySelector(".country-quick-metrics")?.textContent).not.toContain(item.storeCount);
+      expect(body().querySelectorAll(".national-metrics article")).toHaveLength(3);
+      expect(body().querySelectorAll('[role="meter"]')).toHaveLength(4);
+      expect(body().querySelectorAll(".national-signals article")).toHaveLength(3);
+      expect(body().textContent).toContain("未收录具体招聘或招标事件");
+      for (const metric of item.research.metrics) {
+        if (metric.basis === "公开资料") expect(metric.source.url).toMatch(/^https:\/\//);
+        else expect(metric.basis).toBe("演示估算");
+      }
+      await click("市场与商机");
+      expect(body().querySelector(`[data-country-radar="${item.id}"]`)).not.toBeNull();
+      for (const heading of ["为什么值得看","机会在哪里","风险与应对","适合切入的零售场景"]) expect(body().textContent).toContain(heading);
+      expect(body().textContent).toContain(item.research.nextStep);
+      expect(body().querySelectorAll(".national-scenarios article")).toHaveLength(3);
+      await click("查看本国客户雷达 →");
+      expect(container.querySelector(".detail-tabs .is-active")?.textContent).toBe("客户雷达");
+    }
+  });
+
+  it("retains national facts and country scores alongside a generated customer report", async () => {
+    await mount(report);
+    await click("国家概况");
+    expect(body().textContent).toContain(country().research.summary);
+    expect(body().textContent).not.toContain("MARKET_FIRST");
+    await click("市场与商机");
+    expect(body().querySelector('[data-country-radar="brazil"]')).not.toBeNull();
+    expect(body().querySelector(".national-score")?.textContent).toContain("84");
+    expect(body().querySelector(".national-live-supplement")).toBeNull();
+    expect(body().textContent).not.toContain("MARKET_FIRST");
+    await mount(undefined, { country: country("uae") });
+    expect(body().textContent).toContain("单国门店数未单独披露");
+    expect(body().textContent).not.toContain("MARKET_FIRST");
+  });
+
   it("fills every country with one actionable customer and two display-only candidates", async () => {
     const collectedProfiles = Object.values(window.OPPORTUNITY_DATA.companyProfiles);
     expect(collectedProfiles).toHaveLength(3);
@@ -119,10 +172,10 @@ describe("country-to-customer report hierarchy", { timeout: 20_000 }, () => {
 
   it("keeps the customer pool at country level and opens the collected customer chapters after clicking a company", async () => {
     await mount();
-    expect(container.querySelectorAll(".detail-tabs button")).toHaveLength(3);
+    expect(container.querySelectorAll(".detail-tabs button")).toHaveLength(4);
     expect(container.querySelector('[data-view-level="country"]')).not.toBeNull();
-    expect(body().textContent).toContain(country().marketBrief);
-    expect([...container.querySelectorAll(".detail-tabs button")].map(item => item.textContent)).toEqual(["市场与商机", "客户雷达", "管理层简报"]);
+    expect(body().textContent).toContain(country().research.summary);
+    expect([...container.querySelectorAll(".detail-tabs button")].map(item => item.textContent)).toEqual(["国家概况", "市场与商机", "客户雷达", "管理层简报"]);
     await click("客户雷达");
     expect(container.querySelectorAll("article[data-candidate-customer]")).toHaveLength(2);
     await enterCustomer();
@@ -147,10 +200,12 @@ describe("country-to-customer report hierarchy", { timeout: 20_000 }, () => {
     expect(container.querySelector('[data-view-level="country"]')).not.toBeNull();
     expect(container.querySelector(".detail-tabs .is-active")?.textContent).toBe("客户雷达");
     await click("管理层简报");
-    expect(body().querySelector(".brief-page h2")?.textContent).toContain("巴西");
-    expect(body().querySelector(".brief-page h2")?.textContent).not.toContain("Cencosud");
-    await click("复制简报");
-    expect(writeText).toHaveBeenCalledWith(expect.stringContaining("巴西真实资料摘要"));
+    expect(body().querySelectorAll(".brief-placeholder")).toHaveLength(6);
+    expect(body().querySelector(".brief-executive")).toBeNull();
+    expect(body().querySelector("[data-brief-analysis]")).toBeNull();
+    expect(body().textContent).not.toContain(country().research.managementDraft.executiveSummary);
+    expect([...body().querySelectorAll("button")].some(button=>button.textContent==="复制国家简报")).toBe(false);
+    expect(window.countryBriefText(country())).toBe("");
   });
 
   it("backfills country views, then opens customer-specific sales and battle views", async () => {
@@ -158,28 +213,14 @@ describe("country-to-customer report hierarchy", { timeout: 20_000 }, () => {
     await mount(report);
     expect(container.textContent).not.toMatch(/待 Agent|Agent Core|pi-agent|LLM|xhigh|P0\s*2[–-]10/i);
     expect(container.querySelectorAll(".detail-tabs button")).toHaveLength(4);
-    expect(body().querySelector(".live-result-hero > div > h2")?.textContent).toBe("巴西");
-    expect(body().querySelector(".live-result-narrative > p > strong")?.textContent).toBe("NARRATIVE_FIRST");
-    const cases = [
-      ["市场与商机", "overview", "MARKET_FIRST", "SIGNAL_FIRST"],
-      ["客户雷达", "customers", "POOL_FIRST", null],
-      ["管理层简报", "brief", "SUMMARY_FIRST", "NARRATIVE_FIRST"],
-    ];
-    for (const [label, tab, first, second] of cases) {
+    for (const label of ["市场与商机", "客户雷达", "管理层简报"]) {
       body().scrollTop = 200;
       await click(label);
       expect(body().scrollTop).toBe(0);
-      expect(body().querySelector("[data-report-tab]")?.getAttribute("data-report-tab")).toBe(tab);
-      expect(body().querySelector("[data-report-run]")?.getAttribute("data-report-run")).toBe(report.runId);
-      expect(body().textContent).toContain(first);
-      if (second) expect(body().textContent).toContain(second);
-      else expect(body().textContent).not.toContain("PROFILE_FIRST");
-      expect(body().textContent).toContain("报告国家：巴西");
-      expect(body().textContent).toContain("当前潜在客户样本：Cencosud");
-      expect(body().textContent).not.toMatch(/尚未运行|等待 Agent|不使用静态模板/);
+      expect(body().querySelector("[data-report-run]")).toBeNull();
+      expect(body().textContent).not.toContain("NARRATIVE_FIRST");
     }
-    expect(body().querySelector(".report-management table")).not.toBeNull();
-    expect(body().querySelector(".report-management h1")?.textContent).toBe("巴西 · 管理层简报");
+    expect(body().querySelectorAll(".brief-placeholder")).toHaveLength(6);
     await click("客户雷达");
     expect(container.querySelectorAll("article[data-candidate-customer]")).toHaveLength(2);
     await enterCustomer();
@@ -203,49 +244,93 @@ describe("country-to-customer report hierarchy", { timeout: 20_000 }, () => {
     expect(body().textContent).toContain("MATCH_FIRST");
     expect(body().textContent).toContain("MITIGATION_FIRST");
     await returnToCountry();
-    await click("智能分析结果");
-    expect(body().querySelector(".live-agent-result")).not.toBeNull();
+    await click("管理层简报");
+    expect(body().querySelector(".country-management")).not.toBeNull();
     expect(body().querySelector(".report-tabs")).toBeNull();
   });
 
   it("copies exactly the displayed brief source, removes downloads, and reports clipboard failure honestly", async () => {
-    await mount(report);
+    const national=nationalReport();
+    await mount(report,{countryReport:national});
     await click("管理层简报");
-    const expected = window.buildReportManagementBrief(report, country());
-    expect(expected).toContain("# 巴西 · 管理层简报");
-    expect(expected).not.toContain("# Cencosud · 管理层简报");
-    expect(body().querySelector(".report-management")?.innerHTML).toBe(window.AtlasMarkdown.renderMarkdown(expected));
-    await click("复制简报");
+    const expected = window.countryBriefText(country(),national);
+    expect(expected).toContain("巴西管理层简报");
+    expect(body().textContent).toContain(national.analysis.executiveSummary);
+    await click("复制国家简报");
     expect(writeText).toHaveBeenLastCalledWith(expected);
-    expect(expected).toContain("**NARRATIVE_FIRST**");
-    expect(expected).toContain("**谨慎跟进**");
+    expect(expected).toContain("NATIONAL_FIRST");
+    expect(expected).toContain("Grupo Mateus");
     expect(report.finalNarrative).toContain("## NARRATIVE_FIRST");
-    expect(expected).toContain(report.runId);
+    expect(expected).toContain("Assaí Atacadista");
     expect(expected).not.toContain("巴西真实资料摘要");
     expect(container.textContent).not.toMatch(/下载 Markdown|下载文本版|下载全部/);
     writeText.mockRejectedValueOnce(new Error("denied"));
-    await click("复制简报");
+    await click("复制国家简报");
     expect(notify).toHaveBeenLastCalledWith("复制失败，请允许浏览器访问剪贴板");
   });
 
-  it("keeps the last success during reruns, replaces all views after success, and does not leak into another country", async () => {
-    await mount(report);
+  it("reveals and focuses the generated brief even when its tab is already selected", async () => {
+    const national = {...nationalReport(), startedAt:"2026-09-04T11:58:39Z", generation:{source:"llm",model:"qwen3.7-flash"}};
+    await mount(undefined, {countryReport:national});
+    await click("查看国家简报");
+    for (const entry of ["查看国家简报", "管理层简报", "查看国家简报"]) {
+      body().scrollTop = 1600;
+      await click(entry);
+      expect(body().scrollTop).toBe(0);
+      expect(window.document.activeElement).toBe(body().querySelector(".brief-result-heading"));
+    }
+    const status = body().querySelector('.brief-generation-status.is-ready')!;
+    expect(status.textContent).toContain("国家简报已更新");
+    expect(status.textContent).not.toContain("qwen3.7-flash");
+    expect(status.textContent).toContain("1 分 21 秒");
+    expect(body().querySelector("[data-brief-analysis]")?.textContent).toContain("NATIONAL_FIRST");
+    expect(body().querySelector(".brief-source-section")?.textContent).not.toContain("NATIONAL_FIRST");
+    body().scrollTop = 900;
+    await mount(undefined, {countryReport:national,briefRequest:1});
+    expect(body().scrollTop).toBe(0);
+    await click("市场与商机");
+    await click("查看国家简报");
+    expect(body().querySelector(".brief-result-heading")?.textContent).toBe("国家简报已更新");
+  });
+
+  it("shows only section placeholders until generation succeeds, with audience-facing status labels", async () => {
+    await mount();
     await click("管理层简报");
-    await mount(report, { generating: true });
-    expect(body().textContent).toContain("正在更新 · 当前显示上次结果");
-    expect(body().textContent).toContain("NARRATIVE_FIRST");
+    expect(body().querySelector(".brief-result-heading")?.textContent).toBe("国家简报待生成");
+    expect(body().querySelectorAll(".brief-placeholder")).toHaveLength(6);
+    expect(body().querySelector(".brief-source-section")).toBeNull();
+    expect(body().textContent).not.toContain(country().research.managementDraft.executiveSummary);
+    const run = {steps:["国家", "企业一", "企业二", "企业三", "综合"],step:3,done:false,statusMessage:"正在研究企业三"};
+    await mount(undefined,{generating:true,briefRun:run});
+    expect(body().querySelector('[role="progressbar"]')?.getAttribute("aria-valuenow")).toBe("3");
+    expect(body().querySelector(".brief-generation-status")?.textContent).toContain("正在研究企业三");
+    expect(body().querySelectorAll(".brief-placeholder")).toHaveLength(6);
+    expect(body().querySelector("[data-brief-analysis]")).toBeNull();
+    await mount(undefined,{countryReport:nationalReport(),briefRun:{...run,done:true}});
+    expect(body().querySelector(".brief-result-heading")?.textContent).toBe("国家简报已更新");
+    expect(body().querySelector("[data-brief-analysis]")?.textContent).toContain("智能体生成简报");
+    expect(body().querySelectorAll(".brief-placeholder")).toHaveLength(0);
+    expect(body().querySelector(".brief-generation-status")?.textContent).not.toMatch(/AI|预览|上方|下方|自动更新|模型|正文/);
+  });
+
+  it("keeps the last success during reruns, replaces all views after success, and does not leak into another country", async () => {
+    const national=nationalReport();
+    await mount(report,{countryReport:national});
+    await click("管理层简报");
+    await mount(report, { countryReport:national,generating: true });
+    expect(body().textContent).toContain("正在生成国家简报");
+    expect(body().querySelector(".brief-generation-meta")?.textContent).toContain("上次更新");
+    expect(body().textContent).toContain("NATIONAL_FIRST");
     // A failed rerun leaves the previous successful report in the existing App cache.
-    await mount(report, { generating: false });
-    expect(body().textContent).toContain("NARRATIVE_FIRST");
+    await mount(report, { countryReport:national,generating: false });
+    expect(body().textContent).toContain("NATIONAL_FIRST");
     const updated = JSON.parse(JSON.stringify(report).replaceAll("FIRST", "SECOND"));
     updated.runId = "tabs-second-run";
-    await mount(updated);
-    for (const label of ["市场与商机", "客户雷达", "管理层简报"]) {
-      await click(label);
-      expect(body().querySelector("[data-report-run]")?.getAttribute("data-report-run")).toBe("tabs-second-run");
-      expect(body().textContent).toContain("SECOND");
-      expect(body().textContent).not.toContain("FIRST");
-    }
+    await mount(updated,{countryReport:nationalReport("brazil","SECOND")});
+    expect(container.querySelector(".detail-tabs .is-active")?.textContent).toBe("管理层简报");
+    expect(body().querySelector("[data-brief-run]")?.getAttribute("data-brief-run")).toBe("national-SECOND");
+    expect(body().textContent).toContain("NATIONAL_SECOND");
+    expect(body().textContent).not.toContain("NATIONAL_FIRST");
     await click("客户雷达");
     await enterCustomer();
     for (const label of ["销售建议", "作战卡"]) {
@@ -256,11 +341,11 @@ describe("country-to-customer report hierarchy", { timeout: 20_000 }, () => {
     }
     await returnToCountry();
     await click("管理层简报");
-    await click("复制简报");
-    expect(writeText).toHaveBeenLastCalledWith(expect.stringContaining("NARRATIVE_SECOND"));
+    await click("复制国家简报");
+    expect(writeText).toHaveBeenLastCalledWith(expect.stringContaining("NATIONAL_SECOND"));
     await mount(undefined, { country: country("canada") });
-    expect(container.querySelectorAll(".detail-tabs button")).toHaveLength(3);
-    expect(body().textContent).toContain(country("canada").marketBrief);
+    expect(container.querySelectorAll(".detail-tabs button")).toHaveLength(4);
+    expect(body().textContent).toContain(country("canada").research.summary);
     expect(body().textContent).not.toMatch(/FIRST|SECOND|Cencosud/);
   });
 
@@ -277,7 +362,7 @@ describe("country-to-customer report hierarchy", { timeout: 20_000 }, () => {
     await mount(empty);
     for (const label of ["市场与商机", "客户雷达", "管理层简报"]) {
       await click(label);
-      expect(body().textContent).toMatch(/未返回|待确认/);
+      expect(body().textContent).not.toContain("SAFE");
       expect(body().textContent).not.toContain(country().marketBrief);
       expect(body().querySelector("script,img,[onerror]")).toBeNull();
     }
@@ -295,8 +380,9 @@ describe("country-to-customer report hierarchy", { timeout: 20_000 }, () => {
     await mount(output, { country: country(countryId) });
     for (const label of ["市场与商机", "客户雷达", "管理层简报"]) {
       await click(label);
-      expect(body().querySelector("[data-report-run]")?.getAttribute("data-report-run")).toBe(output.runId);
-      expect(body().textContent).toContain(output.customerProfile.name);
+      expect(body().querySelector("[data-report-run]")).toBeNull();
+      if(label === "客户雷达") expect(body().textContent).toContain(output.customerProfile.name);
+      if(label === "管理层简报") expect(body().querySelectorAll(".brief-placeholder")).toHaveLength(6);
       expect(body().textContent).not.toContain("Cencosud");
     }
     await click("客户雷达");

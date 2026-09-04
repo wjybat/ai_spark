@@ -5,6 +5,7 @@ import { createRoot } from "react-dom/client";
 import { transformSync } from "esbuild";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { runOpportunityPipeline } from "../src/agent/orchestrator.js";
+import { runCountryBrief } from "../src/agent/country-brief.js";
 
 const frontend = new URL("../../global-opportunity-radar/", import.meta.url);
 const dom = new JSDOM('<div id="root"></div>', { runScripts: "outside-only", url: "http://localhost/" });
@@ -13,6 +14,7 @@ const fetchMock = vi.fn(async (url: string) => ({ ok: true, json: async () => ur
 let root: ReturnType<typeof createRoot>;
 let container: HTMLDivElement;
 let report;
+let national;
 
 class TestEventSource {
   static CLOSED = 2;
@@ -42,11 +44,12 @@ beforeAll(async () => {
   });
   for (const name of ["TweaksPanel", "TweakSection", "TweakColor", "TweakRadio", "TweakToggle"]) window[name] = () => null;
   window.eval(readFileSync(new URL("assets/markdown-renderer.js", frontend), "utf8") + "\nwindow.AtlasMarkdown = AtlasMarkdown;");
-  for (const file of ["data.js", "agent-client.js"]) window.eval(readFileSync(new URL(file, frontend), "utf8"));
-  for (const file of ["markdown.jsx", "report-tabs.jsx", "market-scan.jsx", "app.jsx"]) {
+  for (const file of ["data.js", "continent-data.js", "country-data.js", "country-brief-data.js", "agent-client.js"]) window.eval(readFileSync(new URL(file, frontend), "utf8"));
+  for (const file of ["markdown.jsx", "report-tabs.jsx", "market-scan.jsx", "country-market.jsx", "country-brief.jsx", "app.jsx"]) {
     window.eval(transformSync(readFileSync(new URL(file, frontend), "utf8"), { loader: "jsx", target: "es2020" }).code);
   }
-  report = await runOpportunityPipeline({ runId: "existing-customer-run", regionId: "canada", customerId: "loblaw", mode: "demo" }, () => undefined);
+  report = await runOpportunityPipeline({ runId: "existing-customer-run", regionId: "canada", customerId: "loblaw", countryId:"canada",countryName:"加拿大", mode: "demo" }, () => undefined);
+  national = await runCountryBrief({runId:"country-run",countryId:"canada",mode:"demo"},()=>undefined);
 }, 20_000);
 
 beforeEach(async () => {
@@ -80,15 +83,15 @@ describe("local market scan demo", { timeout: 20_000 }, () => {
     await click("展开信息");
     expect(container.querySelector(".app-stage")?.classList.contains("is-panel-collapsed")).toBe(false);
     expect(container.querySelector("#opportunity-intelligence-panel")?.getAttribute("aria-hidden")).toBe("false");
-    expect(container.textContent).toContain("南美洲真实客户覆盖");
+    expect(container.textContent).toContain("南美洲零售市场简报");
     expect(container.textContent).not.toContain("全球商机概览");
-    expect(container.textContent).not.toContain("北美洲真实客户覆盖");
+    expect(container.textContent).not.toContain("北美洲零售市场简报");
     expect(container.textContent).not.toContain("调研已确认主题");
     await act(async () => button("测试悬停北美洲").dispatchEvent(new window.MouseEvent("mouseover", { bubbles: true })));
-    expect(container.textContent).toContain("北美洲真实客户覆盖");
+    expect(container.textContent).toContain("北美洲零售市场简报");
     await act(async () => button("测试悬停北美洲").dispatchEvent(new window.MouseEvent("mouseout", { bubbles: true })));
-    expect(container.textContent).toContain("南美洲真实客户覆盖");
-    expect(container.textContent).not.toContain("北美洲真实客户覆盖");
+    expect(container.textContent).toContain("南美洲零售市场简报");
+    expect(container.textContent).not.toContain("北美洲零售市场简报");
     await click("收起");
     expect(container.querySelector(".app-stage")?.classList.contains("is-panel-collapsed")).toBe(true);
   });
@@ -149,14 +152,51 @@ describe("local market scan demo", { timeout: 20_000 }, () => {
     expect(window.document.activeElement).toBe(button("查看整体市场"));
   });
 
-  it("keeps generating after minimization, refreshes the page on completion, and preserves that result after a local scan", async () => {
+  it("replaces empty sections with all model-authored content and reveals it from the completion button", async () => {
     await click("测试选择加拿大");
-    await click("生成 BD 作战包");
-    expect(container.textContent).toContain("正在运行完整商机分析链路");
+    await click("管理层简报");
+    expect(container.querySelector(".brief-result-heading")?.textContent).toBe("国家简报待生成");
+    expect(container.querySelectorAll(".brief-placeholder")).toHaveLength(6);
+    expect(container.querySelector("[data-brief-analysis]")).toBeNull();
+    await click("生成国家简报");
+    const result = structuredClone(national);
+    result.generation.source = "llm";
+    result.generation.model = "qwen3.7-flash";
+    const a = result.analysis;
+    a.executiveSummary = "LIVE_SUMMARY";
+    a.regionalPriority.rationale = "LIVE_PRIORITY";
+    a.opportunityLogic = "LIVE_OPPORTUNITY";
+    a.companyAssessments.forEach((company,index) => company.opportunity = `LIVE_COMPANY_${index}`);
+    a.keySignals[0].detail = "LIVE_SIGNAL";
+    a.risks[0].detail = "LIVE_RISK";
+    a.nextActions[0].action = "LIVE_ACTION";
+    a.confidence.rationale = "LIVE_CONFIDENCE";
+    await act(async () => TestEventSource.instances[0].complete(result));
+    const scroll = container.querySelector(".country-tab-scroll")!;
+    scroll.scrollTop = 1200;
+    await click("查看国家管理层简报");
+    expect(container.querySelector(".agent-run-backdrop")).toBeNull();
+    expect(scroll.scrollTop).toBe(0);
+    expect(window.document.activeElement).toBe(container.querySelector(".brief-result-heading"));
+    expect(container.querySelector(".brief-result-heading")?.textContent).toBe("国家简报已更新");
+    expect(container.querySelectorAll(".brief-placeholder")).toHaveLength(0);
+    const body = container.querySelector("[data-brief-analysis]")!.textContent;
+    for (const marker of ["SUMMARY","PRIORITY","OPPORTUNITY","COMPANY_0","COMPANY_1","COMPANY_2","SIGNAL","RISK","ACTION","CONFIDENCE"]) expect(body).toContain(`LIVE_${marker}`);
+    expect(body).not.toContain(national.analysis.executiveSummary);
+    scroll.scrollTop = 1500;
+    await click("查看国家简报");
+    expect(scroll.scrollTop).toBe(0);
+  });
+
+  it("routes country generation over three companies, preserves it on rerun failure and keeps customer generation independent", async () => {
+    await click("测试选择加拿大");
+    expect(button("生成 BD 作战包")).toBeUndefined();
+    await click("生成国家简报");
+    expect(container.textContent).toContain("正在综合三家企业生成国家简报");
     expect(container.textContent).not.toMatch(/P0\s*2[–-]10/i);
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock.mock.calls[0][0]).toBe("/api/agent/runs");
-    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ regionId: "canada", customerId: "loblaw", countryId: "canada", countryName: "加拿大", mode: "auto" });
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({scope:"country",countryId:"canada",mode:"auto"});
     expect(TestEventSource.instances).toHaveLength(1);
     expect(button("重新扫描市场").disabled).toBe(true);
     await click("最小化");
@@ -169,32 +209,45 @@ describe("local market scan demo", { timeout: 20_000 }, () => {
     await click("最小化");
     await click("重新扫描市场");
     expect(container.querySelector(".market-scan-card")).toBeNull();
-    await act(async () => TestEventSource.instances[0].complete(report));
+    await act(async () => TestEventSource.instances[0].complete(national));
     expect(container.querySelector(".agent-run-backdrop")).toBeNull();
-    expect(container.querySelectorAll(".agent-step.is-done")).toHaveLength(9);
-    expect(container.textContent).toContain("智能分析报告 · 已完成");
+    expect(container.querySelectorAll(".agent-step.is-done")).toHaveLength(5);
+    expect(container.querySelector(".detail-tabs .is-active")?.textContent).toBe("管理层简报");
+    expect(container.querySelectorAll("[data-brief-company]")).toHaveLength(3);
+    const original=container.querySelector(".country-management")!.innerHTML;
+    await click("重新生成国家简报");
+    await act(async()=>TestEventSource.instances[1].emit("run_error",{type:"run_error",message:"测试服务暂不可用"}));
+    await act(async()=>container.querySelector<HTMLButtonElement>(".overlay-close")!.click());
+    expect(container.querySelector(".country-management")!.innerHTML).toBe(original);
     expect(container.textContent).not.toMatch(/下载 Markdown|下载文本版|下载全部/);
     await click("客户雷达");
     await act(async () => container.querySelector<HTMLButtonElement>('[data-customer-entry="loblaw"]')!.click());
     expect(container.querySelector('[data-view-level="customer"]')).not.toBeNull();
     expect(container.querySelector(".country-head-main h1")?.textContent).toBe("Loblaw Companies Limited");
     expect([...container.querySelectorAll(".detail-tabs button")].map(item => item.textContent)).toEqual(["客户概览", "业务布局", "数字化与系统", "动态与组织", "资料来源", "销售建议", "作战卡"]);
+    expect(button("生成国家简报")).toBeUndefined();
+    await click("生成 BD 作战包");
+    expect(JSON.parse(fetchMock.mock.calls[2][1].body)).toEqual({scope:"customer",regionId:"canada",customerId:"loblaw",countryId:"canada",countryName:"加拿大",mode:"auto"});
+    await click("最小化");
+    await act(async()=>TestEventSource.instances[2].complete(report));
+    expect(button("查看作战包")).toBeTruthy();
     await act(async () => window.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true })));
     expect(container.querySelector('[data-view-level="country"]')).not.toBeNull();
     expect(container.querySelector(".country-head-main h1")?.textContent).toBe("加拿大");
     expect(container.querySelector(".detail-tabs .is-active")?.textContent).toBe("客户雷达");
     await click("管理层简报");
-    const original = container.querySelector(".report-management")?.innerHTML;
+    expect(container.querySelector(".country-management")!.innerHTML).toBe(original);
     fetchMock.mockClear();
     await click("重新扫描市场");
     await finishScan();
     await click("查看整体市场");
     await act(async () => container.querySelector<HTMLButtonElement>('[data-market-customer="loblaw"]')!.click());
-    expect(button("查看作战包")).toBeTruthy();
+    expect(button("查看国家简报")).toBeTruthy();
+    expect(button("查看作战包")).toBeUndefined();
     await click("管理层简报");
-    expect(container.querySelector("[data-report-run]")?.getAttribute("data-report-run")).toBe("existing-customer-run");
-    expect(container.querySelector(".report-management")?.innerHTML).toBe(original);
+    expect(container.querySelector("[data-brief-run]")?.getAttribute("data-brief-run")).toBe("country-run");
+    expect(container.querySelector(".country-management")?.innerHTML).toBe(original);
     expect(fetchMock).not.toHaveBeenCalled();
-    expect(TestEventSource.instances).toHaveLength(1);
+    expect(TestEventSource.instances).toHaveLength(3);
   });
 });

@@ -2,11 +2,15 @@ import { randomUUID } from "node:crypto";
 import { runOpportunityPipeline } from "../agent/orchestrator.js";
 import { customerById, regionById } from "../data/knowledge.js";
 import type { PipelineEvent, PipelineOutput } from "../types/domain.js";
+import type { CountryBriefOutput } from "../types/country.js";
+import { getCountryContext } from "../data/country-research.js";
+import { runCountryBrief } from "../agent/country-brief.js";
 
 export type RunStatus = "queued" | "running" | "completed" | "failed";
 
 export interface RunRecord {
   id: string;
+  scope: "country" | "customer";
   regionId: string;
   customerId: string;
   countryId?: string;
@@ -16,7 +20,7 @@ export interface RunRecord {
   createdAt: string;
   updatedAt: string;
   events: PipelineEvent[];
-  output?: PipelineOutput;
+  output?: PipelineOutput | CountryBriefOutput;
   error?: string;
 }
 
@@ -26,7 +30,21 @@ export class RunStore {
   private readonly runs = new Map<string, RunRecord>();
   private readonly listeners = new Map<string, Set<Listener>>();
 
-  create(input: { regionId: string; customerId: string; countryId?: string; countryName?: string; mode?: "auto" | "demo" | "live" }): RunRecord {
+  create(input: { scope?: "country" | "customer"; regionId?: string; customerId?: string; countryId?: string; countryName?: string; mode?: "auto" | "demo" | "live" }): RunRecord {
+    if (input.scope && input.scope !== "country" && input.scope !== "customer") throw new Error("Unknown run scope");
+    if (input.mode && !["auto","demo","live"].includes(input.mode)) throw new Error("Unknown run mode");
+    if (input.scope === "country") {
+      if (!input.countryId) throw new Error("countryId is required for a country brief");
+      if (input.customerId) throw new Error("Country briefs select all three companies on the server; do not provide customerId");
+      const context = getCountryContext(input.countryId);
+      if (input.countryName && input.countryName !== context.countryName) throw new Error("countryId and countryName do not match");
+      const now = new Date().toISOString();
+      const record:RunRecord={id:randomUUID(),scope:"country",regionId:context.regionId,customerId:"",countryId:context.countryId,countryName:context.countryName,requestedMode:input.mode??"auto",status:"queued",createdAt:now,updatedAt:now,events:[]};
+      this.runs.set(record.id,record);
+      this.push(record.id,{runId:record.id,type:"run_created",timestamp:now,message:"country brief accepted; three company dossiers selected"});
+      return record;
+    }
+    if (!input.regionId || !input.customerId) throw new Error("regionId and customerId are required for a customer package");
     const region = regionById.get(input.regionId);
     if (!region) throw new Error(`Unknown region: ${input.regionId}`);
     const customer = customerById.get(input.customerId);
@@ -37,9 +55,14 @@ export class RunStore {
     if (Boolean(input.countryId) !== Boolean(input.countryName)) throw new Error("countryId and countryName must be provided together");
     if (input.countryName && !customer.countries.includes(input.countryName)) throw new Error(`Customer ${input.customerId} is not known in country ${input.countryName}`);
     if (input.countryId && !/^[a-z][a-z0-9_-]*$/.test(input.countryId)) throw new Error("countryId has an invalid format");
+    if (input.countryId) {
+      const context = getCountryContext(input.countryId);
+      if (context.countryName !== input.countryName || context.companies[0]!.id !== input.customerId) throw new Error("Customer package must target the first collected company in the selected country");
+    }
     const now = new Date().toISOString();
     const record: RunRecord = {
       id: randomUUID(),
+      scope: "customer",
       regionId: input.regionId,
       customerId: input.customerId,
       ...(input.countryId ? { countryId: input.countryId } : {}),
@@ -79,7 +102,7 @@ export class RunStore {
     if (run.status !== "queued") throw new Error(`Run ${id} is already ${run.status}`);
     run.status = "running";
     run.updatedAt = new Date().toISOString();
-    void runOpportunityPipeline(
+    const execution = run.scope === "country" ? runCountryBrief({runId:run.id,countryId:run.countryId!,mode:run.requestedMode},async event=>this.push(id,event)) : runOpportunityPipeline(
       {
         runId: run.id,
         regionId: run.regionId,
@@ -89,8 +112,8 @@ export class RunStore {
         mode: run.requestedMode,
       },
       async (event) => this.push(id, event),
-    )
-      .then((output) => {
+    );
+    void execution.then((output) => {
         run.output = output;
         run.status = "completed";
         run.updatedAt = new Date().toISOString();
@@ -98,7 +121,7 @@ export class RunStore {
           runId: id,
           type: "run_complete",
           timestamp: run.updatedAt,
-          stage: 9,
+          stage: run.scope === "country" ? 5 : 9,
           message: output.finalNarrative,
           data: output,
         });

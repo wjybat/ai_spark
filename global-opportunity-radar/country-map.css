@@ -1,0 +1,37 @@
+.globe-wrap.is-country-focus { padding:132px 12px 56px; grid-template-rows:minmax(0,1fr); }
+.is-country-focus .globe-svg { width:100%; height:100%; max-width:100%; max-height:100%; overflow:hidden; }
+.is-country-focus .sphere-shadow { filter:none; }
+.is-country-focus .pin-badge { animation:country-map-reveal 180ms ease both; }
+.is-country-focus .globe-tool { white-space:nowrap; flex-shrink:0; }
+.is-country-focus .graticule { opacity:.5; }
+.is-country-focus .world-land { fill:#f0efdf; stroke:#9cb6aa; opacity:.7; }
+.country-focus-land { fill:#bddbc9; stroke:#477e68; stroke-width:1.3; vector-effect:non-scaling-stroke; }
+.country-admin-borders { fill:none; stroke:#5a8a74; stroke-width:.65; stroke-opacity:.8; vector-effect:non-scaling-stroke; pointer-events:none; }
+.store-leader { fill:none; stroke-width:1.1; stroke-opacity:.8; pointer-events:none; vector-effect:non-scaling-stroke; }
+.store-city-dot { pointer-events:none; }
+.store-city-dot circle:last-child { stroke:#fffdf7; stroke-width:1.5; }
+.store-map-label { cursor:pointer; outline:none; }
+.store-label-bg { fill:#fffdf7; fill-opacity:.97; stroke:#c1d3c9; stroke-width:1; }
+.store-map-label:hover .store-label-bg, .store-map-label:focus-visible .store-label-bg, .store-map-label.is-selected .store-label-bg { stroke:#24443d; stroke-width:2; }
+.store-brand { font-family:"Bricolage Grotesque","Noto Sans SC",sans-serif; font-weight:700; fill:#24443d; }
+.store-city { font-family:"Noto Sans SC",sans-serif; font-size:11px; fill:#627e73; }
+.store-group { font-family:"Bricolage Grotesque","Noto Sans SC",sans-serif; font-size:9px; fill:#789185; }
+.country-map-status { position:absolute; top:112px; left:34px; z-index:5; display:flex; align-items:center; gap:7px; color:#5c7d70; font-size:10px; pointer-events:none; }
+.country-map-status button { pointer-events:auto; border:1px solid #bfd0c5; background:#fffdf7; border-radius:8px; padding:5px 10px; color:#24443d; cursor:pointer; }
+.admin-line-key { width:17px; height:1px; background:#5a8a74; }
+.store-dot-key { width:6px; height:6px; border-radius:50%; background:#d46a4f; margin-left:12px; }
+.store-detail-card { position:absolute; z-index:9; left:28px; right:28px; bottom:66px; max-width:360px; padding:18px 40px 17px 19px; background:rgba(255,253,247,.98); border:1px solid #b7cfc1; border-radius:15px; box-shadow:0 12px 35px #24443d19; animation:country-map-reveal 180ms ease both; }
+.store-detail-card>span { display:block; color:#668276; font-size:10px; }
+.store-detail-card h3 { font-family:"Bricolage Grotesque","Noto Sans SC",sans-serif; margin:7px 0; font-size:17px; line-height:1.35; color:#24443d; }
+.store-detail-card p { margin:5px 0; font-size:11px; color:#58766a; }
+.store-detail-card a { display:inline-block; margin-top:8px; color:#326b57; font-size:11px; text-decoration:none; border-bottom:1px solid #b1c8bb; }
+.store-detail-close { position:absolute; right:10px; top:10px; width:28px; height:28px; border-radius:50%; border:0; background:#eaf1e9; color:#45695c; cursor:pointer; font-size:20px; }
+.has-country-map .map-stage-copy { right:24px; }
+@media(max-width:700px) {
+  .country-map-status { left:22px; top:102px; }
+  .globe-wrap.is-country-focus { padding:120px 4px 55px; }
+  .store-detail-card { left:18px; right:18px; padding:14px 35px 14px 15px; }
+  .store-detail-card h3 { font-size:15px; }
+}
+@keyframes country-map-reveal { from {opacity:0;transform:translateY(7px);} to {opacity:1;transform:translateY(0);} }
+@media(prefers-reduced-motion:reduce) { .store-detail-card, .is-country-focus .pin-badge { animation:none; } }

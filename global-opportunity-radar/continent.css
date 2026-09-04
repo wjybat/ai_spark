@@ -1,0 +1,135 @@
+/* The globe remains the visual signature; the brief uses its regional colours. */
+.continent-panel { height: 100%; min-height: 0; display: flex; flex-direction: column; color: var(--ink); }
+.continent-head { flex: 0 0 auto; padding: 26px 30px 0; background: var(--panel); }
+.continent-head .panel-kicker { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+.continent-title { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 12px; }
+.continent-title h1 { font-family: "Bricolage Grotesque", "Noto Sans SC", sans-serif; font-size: clamp(25px, 2.5vw, 36px); font-weight: 650; letter-spacing: -.045em; margin: 0; }
+.continent-title h1 > span { display: block; font-size: 11px; font-weight: 500; letter-spacing: .12em; margin-top: 5px; color: var(--muted, #6e8f87); }
+.continent-edition { border-left: 2px solid var(--continent-color); padding-left: 12px; color: var(--ink); font: 10px/1.5 "IBM Plex Mono", monospace; letter-spacing: .14em; }
+.continent-edition b { font-size: 15px; font-weight: 500; }
+.continent-thesis { font-size: 13px; line-height: 1.7; margin: 14px 0; font-weight: 600; }
+.continent-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-block: 1px solid var(--line); }
+.continent-metrics .metric-cell { padding-block: 12px; }
+.continent-metrics .metric-cell strong { font-size: clamp(16px, 1.5vw, 22px); letter-spacing: -.04em; }
+.continent-metrics .metric-cell span { color: #647b74; font-size: 9px; }
+.continent-metrics .metric-cell small { color: #647b74; }
+.continent-tabs { display: flex; gap: 24px; margin-top: 6px; border-bottom: 1px solid var(--line); }
+.continent-tabs button { display: flex; align-items: center; gap: 7px; cursor: pointer; border: 0; border-bottom: 2px solid transparent; padding: 13px 0 11px; background: transparent; font-size: 12px; color: #627970; white-space: nowrap; }
+.continent-tabs button.is-active { border-bottom-color: var(--ink); color: var(--ink); font-weight: 700; }
+.continent-tabs small { border-radius: 4px; padding: 1px 5px; background: color-mix(in srgb, var(--continent-color) 18%, white); font: 10px "IBM Plex Mono", monospace; }
+.continent-body { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 22px 30px 28px; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+.continent-body:focus-visible { outline-offset: -3px; }
+.continent-section + .continent-section { margin-top: 24px; }
+.continent-section .section-heading { margin-bottom: 12px; }
+.continent-section .section-heading small { color: #647b74; }
+.continent-copy { margin: 0 0 10px; font-size: 12px; line-height: 1.85; color: #506b61; }
+.continent-formats { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+.continent-formats span { font-size: 10px; padding: 5px 9px; border-radius: 5px; background: color-mix(in srgb, var(--continent-color) 12%, white); color: var(--ink); }
+.continent-fact { margin: 20px 0 24px; padding: 16px 18px; border-left: 3px solid var(--continent-color); background: color-mix(in srgb, var(--continent-color) 9%, #fff); border-radius: 0 8px 8px 0; }
+.continent-fact-caption { color: #62796f; font-size: 10px; }
+.continent-fact > div { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 12px; margin-top: 5px; }
+.continent-fact strong { font: 600 24px "IBM Plex Mono", "Noto Sans SC", monospace; letter-spacing: -.06em; }
+.continent-fact > div > span { font-size: 11px; font-weight: 600; }
+.continent-fact p { color: #62796f; font-size: 10px; line-height: 1.7; margin: 7px 0; }
+.continent-source-link { display: inline-flex; align-items: center; gap: 5px; max-width: 100%; color: #436b5c; font-size: 10px; line-height: 1.6; text-decoration: underline; text-underline-offset: 3px; overflow-wrap: anywhere; }
+.continent-source-link:hover { color: var(--ink); }
+.continent-panel a:focus-visible, .continent-panel summary:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+.continent-dimensions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.continent-dimension { padding: 13px; border: 1px solid var(--line); border-radius: 8px; background: #ffffff70; }
+.continent-dimension > div:first-child { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.continent-dimension > div:first-child > span { font-size: 11px; }
+.continent-dimension strong { font: 600 18px "IBM Plex Mono", monospace; }
+.continent-dimension strong small { font-size: 9px; color: #708178; font-weight: 400; }
+.continent-dimension > b { font-size: 11px; font-weight: 500; }
+.continent-dimension p { font-size: 11px; line-height: 1.8; margin: 7px 0 0; color: #597064; }
+.continent-meter { height: 4px; overflow: hidden; border-radius: 4px; background: #e7ece7; margin: 10px 0 7px; }
+.continent-meter i { display: block; height: 100%; background: #66897a; border-radius: inherit; }
+.is-risk .continent-meter i { background: #bd8058; }
+.continent-dimensions.is-compact { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.is-compact .continent-dimension { padding: 0; border: 0; background: transparent; }
+.is-compact .continent-dimension > div:first-child { display: block; }
+.is-compact .continent-dimension strong { display: block; margin-top: 5px; font-size: 22px; }
+.is-compact .continent-dimension > b { font-size: 10px; color: #647b70; }
+.continent-text-button { display: flex; gap: 6px; align-items: center; background: none; border: 0; padding: 10px 0 0; font-size: 10px; cursor: pointer; color: #456e5d; }
+.continent-focus { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
+.continent-focus > div { border-top: 2px solid color-mix(in srgb, var(--continent-color) 60%, white); padding-top: 9px; }
+.continent-focus strong { display: block; font-size: 11px; }
+.continent-focus span { display: block; color: #62796f; font-size: 10px; line-height: 1.6; margin-top: 4px; }
+.continent-retailers { font-size: 11px; line-height: 1.9; color: #506b61; margin: 13px 0 0; }
+.continent-retailers b { display: block; font-size: 10px; color: #647b70; font-weight: 400; }
+.continent-panel .country-row { padding-block: 10px; }
+.continent-panel .country-row-main small { white-space: normal; line-height: 1.6; }
+.continent-date-window { display: flex; align-items: center; gap: 8px; font: 11px "IBM Plex Mono", monospace; padding: 12px; border-radius: 6px; background: color-mix(in srgb, var(--continent-color) 12%, white); margin: 12px 0; }
+.continent-date-window b { margin-left: auto; font-size: 10px; white-space: nowrap; }
+.continent-event { display: grid; grid-template-columns: 46px minmax(0, 1fr); gap: 16px; padding: 20px 0; border-bottom: 1px solid var(--line); }
+.continent-event-month { border-top: 3px solid var(--continent-color); padding-top: 5px; }
+.continent-event-month strong { font: 600 26px "IBM Plex Mono", monospace; letter-spacing: -.06em; }
+.continent-event-month strong small { font-size: 9px; margin-left: 2px; font-weight: 400; }
+.continent-event-month > span { display: block; font: 10px "IBM Plex Mono", monospace; color: #647b70; margin-top: 4px; }
+.continent-event-date { display: flex; flex-wrap: wrap; gap: 5px; font: 10px "IBM Plex Mono", monospace; color: #647b70; }
+.continent-event h2, .continent-signals h2, .continent-risks h2 { margin: 7px 0; font-size: 13px; line-height: 1.6; font-weight: 650; }
+.continent-event-city { font-size: 11px; }
+.continent-event-detail > p { font-size: 10px; line-height: 1.8; color: #647b70; margin: 7px 0; }
+.continent-event-action { font-size: 11px; line-height: 1.8; color: #506b61; padding: 8px 10px; background: #f1f5f1; border-radius: 5px; margin: 10px 0; }
+.continent-event-action b { display: block; font-size: 10px; }
+.continent-footnote { font-size: 10px; line-height: 1.8; color: #647b70; margin: 12px 0 0; }
+.continent-signals { display: grid; gap: 12px; }
+.continent-signals article { border: 1px solid var(--line); border-radius: 8px; padding: 14px; }
+.continent-signal-tags { display: flex; justify-content: space-between; align-items: center; }
+.continent-signal-tags > span { font-size: 10px; padding: 3px 7px; border-radius: 4px; background: color-mix(in srgb, var(--continent-color) 14%, white); }
+.continent-signal-tags small { font-size: 9px; color: #647b70; }
+.continent-signals p, .continent-risks p { color: #506b61; font-size: 11px; line-height: 1.8; margin: 0 0 9px; }
+.continent-signal-action { display: flex; gap: 7px; align-items: baseline; font-size: 11px; line-height: 1.8; margin-bottom: 10px; }
+.continent-signal-action .icon { align-self: flex-start; margin-top: 3px; }
+.continent-risks article { display: flex; gap: 11px; border-bottom: 1px solid var(--line); padding: 13px 0; }
+.continent-risks article > .icon { color: #ac7957; margin-top: 9px; }
+.continent-risks h2 { margin-top: 3px; }
+.continent-risks article span { font-size: 11px; line-height: 1.8; }
+.continent-risks article span b { font-weight: 500; color: #946844; margin-right: 8px; }
+.continent-next-step { background: color-mix(in srgb, var(--continent-color) 13%, white); padding: 16px; margin-top: 20px; border-radius: 8px; }
+.continent-next-step > span { font-size: 10px; color: #647b70; }
+.continent-next-step p { font-size: 12px; line-height: 1.8; margin: 5px 0 0; }
+.continent-method { border-top: 1px solid var(--line); margin-top: 25px; font-size: 10px; color: #647b70; }
+.continent-method summary { cursor: pointer; padding: 14px 0; }
+.continent-method summary > span { float: right; font: 9px "IBM Plex Mono", monospace; }
+.continent-method p { font-size: 10px; line-height: 1.9; }
+.continent-method > div { display: grid; gap: 8px; }
+@media (max-width: 1240px) { .continent-head { padding: 24px 22px 0; } .continent-body { padding: 20px 22px 26px; } }
+@media (max-height: 800px) and (min-width: 761px) { .continent-head { padding-top: 18px; } .continent-title { margin-top: 8px; } .continent-title h1 { font-size: 26px; } .continent-thesis { margin-block: 9px; } .continent-metrics .metric-cell { padding-block: 9px; } .continent-tabs button { padding-block: 10px; } }
+@media (max-width: 760px) {
+  .app { min-width: 0; }
+  .app-header { padding-inline: 14px; height: 68px; }
+  .brand-line strong { font-size: 12px; }
+  .brand-lockup { gap: 7px; }
+  .brand-lockup p { font-size: 9px; }
+  .brand-mark { width: 32px; height: 32px; }
+  .header-actions .live-pill { display: none; }
+  .scan-button { padding-inline: 9px; font-size: 10px; }
+  .scan-button .icon { display: none; }
+  .app-stage, .app-stage.is-panel-collapsed { display: block; height: calc(100% - 68px); }
+  .map-stage { width: 100%; height: 100%; grid-template-columns: minmax(0, 1fr); }
+  .globe-wrap { width: 100%; min-width: 0; }
+  .intelligence-panel { position: absolute; inset: 55px 0 0; z-index: 12; background: #fffffd; }
+  .app-stage.is-panel-collapsed .intelligence-panel { transform: translateY(20px); }
+  .panel-collapse-toggle, .app-stage.is-panel-collapsed .panel-collapse-toggle { top: 12px; right: 14px; }
+  .region-quick-nav { top: 12px; left: 12px; right: 95px; max-width: calc(100vw - 107px); flex-direction: row; flex-wrap: nowrap; overflow-x: auto; align-items: center; padding-bottom: 8px; gap: 6px; z-index: 15; }
+  .region-chip { flex-shrink: 0; height: 28px; padding-inline: 9px; }
+  .region-chip b { display: none; }
+  .map-stage-copy { top: 80px; left: 20px; }
+  .map-stage-copy h2 { font-size: 23px; }
+  .map-stage-copy p { max-width: 300px; }
+  .region-legend { display: none; }
+  .globe-toolbar { left: 14px; right: 14px; }
+  .pin-badge em { display: none; }
+  .continent-head { padding: 16px 18px 0; }
+  .continent-title h1 { font-size: 27px; }
+  .continent-title h1 > span { font-size: 10px; }
+  .continent-thesis { font-size: 12px; margin-block: 10px; }
+  .continent-metrics .metric-cell { padding-block: 10px; }
+  .continent-metrics .metric-cell strong { font-size: 18px; }
+  .continent-body { padding: 18px; }
+  .continent-head .lock-tag { font-size: 8px; }
+  .continent-focus { gap: 8px; }
+  .continent-date-window { font-size: 10px; }
+  .continent-event { grid-template-columns: 39px minmax(0, 1fr); gap: 10px; }
+}

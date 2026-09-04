@@ -146,7 +146,7 @@
     risk: "现有系统、项目边界与采购节奏需要在客户沟通中进一步确认"
   });
 
-  // Restored early-scan candidates are visual discovery leads only. They never unlock customer-level reports.
+  // Candidates stay read-only at customer level; all three dossiers enter country-brief synthesis.
   const candidateProfiles = {
     chile: [
       makeCandidate("SMU / Unimarc", "食品零售集团", "298 家 Unimarc", "门店扩张与全渠道运营", ["门店运营", "库存协同"]),
