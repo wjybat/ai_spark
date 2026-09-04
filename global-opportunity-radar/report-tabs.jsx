@@ -1,4 +1,4 @@
-// All five views read one completed PipelineOutput; static research is only a pre-run view.
+// Completed report views read one PipelineOutput; collected research remains available before a run.
 function reportList(value) { return Array.isArray(value) ? value : []; }
 function reportText(value) { return value == null || value === "" ? "未返回，待确认" : String(value); }
 function reportLevel(value) { return ({ high: "高", medium: "中", low: "低", watch: "观察", positive: "积极", neutral: "中性", risk: "风险", unknown: "待确认" })[value] || reportText(value); }
@@ -92,7 +92,6 @@ function ReportCustomers({ report, country, onSelectCustomer }) {
   const profile = report.customerProfile || {};
   const analyzedCustomers = reportList(pool.customers).filter(customer => customer.customerId === report.customerId);
   const candidates = reportList(country?.customers).filter(customer => customer.selectable === false).slice(0, Math.max(0, 3 - analyzedCustomers.length));
-  const currentInPool = analyzedCustomers.length > 0;
   const enterProfile = (customer = {}) => onSelectCustomer?.({
     customerId: report.customerId, name: profile.name, type: reportList(profile.formats).join(" / "), stores: profile.storeCountLabel,
     sourceLevel: `${report.evidenceChain?.coverage?.sourceLevelA || 0} A级`, ...customer,
@@ -106,21 +105,9 @@ function ReportCustomers({ report, country, onSelectCustomer }) {
         <div className="report-field"><b>集团规模</b><ReportText value={customer.storeCountLabel}></ReportText></div>
         <div className="report-field"><b>集团收入</b><ReportText value={customer.revenueLabel}></ReportText></div>
         <ReportText value={customer.reason}></ReportText><ReportList items={customer.digitalFoundation}></ReportList>
-        <div className="customer-card-action"><span>进入客户作战视图</span><small>销售建议 · 作战卡</small><Icon name="arrow" size={15}></Icon></div>
+        <div className="customer-card-action"><span>进入客户作战视图</span><small>概览 · 系统 · 动态 · 建议</small><Icon name="arrow" size={15}></Icon></div>
       </button>)}{candidates.map((customer, index) => <CandidateCustomerCard key={customer.name} customer={customer} index={analyzedCustomers.length + index}></CandidateCustomerCard>)}</div>
-      {!analyzedCustomers.length && <p className="report-empty">本次结果未返回该国家的已分析客户；可从下方客户画像进入当前样本。</p>}
-    </ReportSection>
-    <ReportSection title={`${reportText(profile.name)} · 客户画像`} meta="仅本次研究客户的完整结果">
-      {!currentInPool && <button type="button" className="report-profile-entry" data-customer-entry={report.customerId} onClick={() => enterProfile()}><Icon name="users" size={17}></Icon><span><strong>{profile.name}</strong><small>进入销售建议与作战卡</small></span><Icon name="arrow" size={15}></Icon></button>}
-      <div className="report-grid">
-        {[ ["集团规模", profile.storeCountLabel], ["集团收入", `${reportText(profile.revenueLabel)} · ${reportText(profile.revenuePeriod)}`], ["总部", profile.headquarters], ["覆盖国家", reportList(profile.countries).join(" · ")], ["零售业态", reportList(profile.formats).join(" · ")], ["业务范围", reportList(profile.businessAreas).join(" · ")] ].map(([label, value]) => <div className="report-card" key={label}><b>{label}</b><ReportText value={value}></ReportText></div>)}
-      </div>
-      <div className="report-field"><b>组织与 IT 基础</b><ReportText value={profile.organization}></ReportText></div>
-      <div className="report-grid"><ReportSection title="数字化基础"><ReportList items={profile.digitalFoundation}></ReportList></ReportSection><ReportSection title="已知系统"><ReportList items={profile.knownSystems}></ReportList></ReportSection></div>
-      <ReportSection title="近期动态"><ReportList items={profile.recentDynamics}></ReportList></ReportSection>
-      <ReportSection title="决策角色（非已确认联系人）"><ReportList items={profile.decisionRoles}></ReportList></ReportSection>
-      <ReportSection title="画像信息缺口"><ReportList items={profile.unknowns}></ReportList></ReportSection>
-      <ReportEvidenceRefs ids={profile.evidenceIds} report={report}></ReportEvidenceRefs>
+      {!analyzedCustomers.length && <><p className="report-empty">本次结果未返回该国家的已分析客户，当前研究客户仍可单独查看。</p><button type="button" className="report-profile-entry" data-customer-entry={report.customerId} onClick={() => enterProfile()}><Icon name="users" size={17}></Icon><span><strong>{profile.name}</strong><small>查看本次研究客户的完整资料</small></span><Icon name="arrow" size={15}></Icon></button></>}
     </ReportSection>
   </>;
 }

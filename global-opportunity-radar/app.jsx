@@ -200,12 +200,87 @@ function CustomerRadar({ country, onSelectCustomer }) {
                   <div><span>文档建议切入</span><p>{customer.modules.join(" · ")}</p></div>
                   <div><span>风险与未知</span><p>{customer.risk}</p></div>
               </div>
-              <div className="customer-card-action"><span>进入客户作战视图</span><small>销售建议 · 作战卡</small><Icon name="arrow" size={15}></Icon></div>
+              <div className="customer-card-action"><span>进入客户作战视图</span><small>概览 · 系统 · 动态 · 建议</small><Icon name="arrow" size={15}></Icon></div>
             </button>
         )}
       </div>
     </div>
   );
+}
+
+function CustomerResearchView({ tab, country, customer, sourceProfile, liveReport }) {
+  const hasLiveProfile = liveReport?.customerProfile?.customerId === customer.customerId;
+  const liveProfile = hasLiveProfile ? liveReport.customerProfile : null;
+  const profile = liveProfile || {
+    name: sourceProfile.name,
+    headquarters: sourceProfile.headquarters,
+    countries: sourceProfile.countries,
+    formats: sourceProfile.formats,
+    storeCountLabel: sourceProfile.groupStores,
+    revenueLabel: sourceProfile.revenue,
+    revenuePeriod: "最新已收录公开口径",
+    businessAreas: sourceProfile.businessAreas,
+    digitalFoundation: sourceProfile.digitalFoundation,
+    knownSystems: sourceProfile.knownSystems,
+    organization: sourceProfile.organization,
+    recentDynamics: sourceProfile.recentDynamics,
+    decisionRoles: sourceProfile.decisionRoles,
+    unknowns: sourceProfile.unknowns,
+  };
+  const evidence = hasLiveProfile
+    ? reportList(liveReport.evidenceChain?.records)
+    : reportList(sourceProfile.sources).map((source, index) => ({ ...source, id: `source-${index + 1}`, sourceLevel: source.level, sourceUrl: source.url, kind: "fact" }));
+  const positioning = hasLiveProfile ? liveReport.productMatch?.positioning : sourceProfile.strategicSummary;
+  const pageContent = {
+    profile: <>
+      <div className="customer-research-hero">
+        <div><small>前置资料搜集 · 客户概览</small><h2>{profile.name}</h2><p>{sourceProfile.type}</p></div>
+        <span><b>{evidence.filter(item => (item.sourceLevel || item.level) === "A").length}</b> 项 A 级来源</span>
+      </div>
+      <div className="report-grid customer-profile-grid">
+        {[
+          ["当前市场", country.name], ["集团总部", profile.headquarters], ["集团规模", profile.storeCountLabel],
+          ["收入规模", `${profile.revenueLabel}${profile.revenuePeriod ? ` · ${profile.revenuePeriod}` : ""}`],
+          ["覆盖国家", reportList(profile.countries).join(" · ")], ["零售业态", reportList(profile.formats).join(" · ")]
+        ].map(([label, value]) => <article className="report-card" key={label}><b>{label}</b><ReportText value={value}></ReportText></article>)}
+      </div>
+    </>,
+    business: <>
+      <ReportSection title="业务版图" meta="公开资料归纳的主要经营板块">
+        <div className="customer-research-chips">{reportList(profile.businessAreas).map(item => <span key={item}>{item}</span>)}</div>
+      </ReportSection>
+      <ReportSection title="客户经营特征" meta="用于确定后续研究方向">
+        <div className="customer-research-callout"><Icon name="signal" size={17}></Icon><ReportText value={positioning}></ReportText></div>
+      </ReportSection>
+      <ReportSection title="业态组合"><ReportList items={profile.formats}></ReportList></ReportSection>
+    </>,
+    digital: <>
+      <div className="report-grid customer-research-columns">
+        <ReportSection title="数字化基础"><ReportList items={profile.digitalFoundation}></ReportList></ReportSection>
+        <ReportSection title="已知系统"><ReportList items={profile.knownSystems}></ReportList></ReportSection>
+      </div>
+      <ReportSection title="组织与技术能力"><div className="customer-research-callout"><Icon name="users" size={17}></Icon><ReportText value={profile.organization}></ReportText></div></ReportSection>
+      <p className="customer-research-note">系统名称来自公开资料，仅表示已发现的技术基础，不代表当前版本、部署范围或采购意向。</p>
+    </>,
+    dynamics: <>
+      <ReportSection title="近期经营与管理动态" meta={`${reportList(profile.recentDynamics).length} 条已收录线索`}><ReportList items={profile.recentDynamics}></ReportList></ReportSection>
+      <ReportSection title="优先关注角色" meta="角色线索，不代表已确认联系人"><div className="customer-role-chips">{reportList(profile.decisionRoles).map(role => <span key={role}>{role}</span>)}</div></ReportSection>
+      <ReportSection title="仍需补充的信息"><ReportList items={profile.unknowns}></ReportList></ReportSection>
+    </>,
+    evidence: <>
+      <ReportSection title="资料来源" meta={`${evidence.length} 条可回溯记录`}>
+        <div className="report-stack">{evidence.map((record, index) => <article className="report-card customer-source-card" key={record.id || record.sourceUrl || index}>
+          <div className="report-card-heading"><strong>{record.title}</strong><span className="report-badge">{record.sourceLevel || record.level || "A"}级 · {record.kind === "inference" ? "分析推断" : "公开资料"}</span></div>
+          <ReportText value={record.excerpt || "用于支持客户规模、业务布局、数字化基础与近期动态的前置调研资料。"}></ReportText>
+          {record.publishedAt && <small>发布于 {record.publishedAt} · 收录于 {record.retrievedAt || "资料库"}</small>}
+          {(record.sourceUrl || record.url) && <a className="report-source-link" href={record.sourceUrl || record.url} target="_blank" rel="noopener noreferrer">查看原始资料 ↗</a>}
+        </article>)}</div>
+      </ReportSection>
+      <ReportSection title="资料使用说明"><p className="customer-research-note">客户资料来自前置搜集环节；事实、推断和信息缺口分开展示，销售行动与能力匹配需在智能分析后结合当前国家进一步判断。</p></ReportSection>
+    </>
+  }[tab];
+
+  return <div className="tab-body customer-research-page" data-customer-research-tab={tab} data-report-run={hasLiveProfile ? liveReport.runId : "source-data"}>{pageContent}</div>;
 }
 
 function SalesAdvice({ country }) {
@@ -320,7 +395,7 @@ function CountryPanel({ country, region, onBack, onGenerate, generating, notify,
   const selectedCustomer = controlledCustomer === undefined ? internalCustomer : controlledCustomer;
   const selectCustomer = controlledSelectCustomer || setInternalCustomer;
   const tabs = selectedCustomer
-    ? [["sales", "销售建议"], ["battle", "作战卡"]]
+    ? [["profile", "客户概览"], ["business", "业务布局"], ["digital", "数字化与系统"], ["dynamics", "动态与组织"], ["evidence", "资料来源"], ["sales", "销售建议"], ["battle", "作战卡"]]
     : [...(liveReport ? [["live", "智能分析结果"]] : []), ["overview", "市场与商机"], ["customers", "客户雷达"], ["brief", "管理层简报"]];
   const [tab, setTab] = useAppState("overview");
   const tabScrollRef = React.useRef(null);
@@ -329,24 +404,25 @@ function CountryPanel({ country, region, onBack, onGenerate, generating, notify,
   useAppEffect(() => {
     const current = { countryId: country.id, customerId: selectedCustomer?.customerId || null, runId: liveReport?.runId || null };
     const previous = navigationRef.current;
-    if (previous.countryId !== current.countryId) setTab(current.customerId ? "sales" : current.runId ? "live" : "overview");
-    else if (current.customerId && previous.customerId !== current.customerId) setTab("sales");
+    if (previous.countryId !== current.countryId) setTab(current.customerId ? "profile" : current.runId ? "live" : "overview");
+    else if (current.customerId && previous.customerId !== current.customerId) setTab("profile");
     else if (!current.customerId && previous.customerId) setTab("customers");
     else if (!current.customerId && previous.runId !== current.runId) setTab(current.runId ? "live" : "overview");
     navigationRef.current = current;
   }, [country.id, liveReport?.runId, selectedCustomer?.customerId]);
   useAppEffect(() => { if (tabScrollRef.current) tabScrollRef.current.scrollTop = 0; }, [tab, country.id, liveReport?.runId, selectedCustomer?.customerId]);
 
-  const enterCustomer = (customer) => { selectCustomer({ ...customer, countryId: country.id }); setTab("sales"); };
+  const enterCustomer = (customer) => { selectCustomer({ ...customer, countryId: country.id }); setTab("profile"); };
   const returnToCountry = () => { selectCustomer(null); setTab("customers"); };
   const liveProfile = liveReport?.customerProfile;
+  const sourceProfile = Object.values(window.OPPORTUNITY_DATA.companyProfiles).find(profile => profile.id === (selectedCustomer?.customerId || country.companyId));
   const headerName = selectedCustomer ? (liveProfile?.customerId === selectedCustomer.customerId ? liveProfile.name : selectedCustomer.name) : country.name;
   const headerSubtitle = selectedCustomer
     ? liveProfile?.customerId === selectedCustomer.customerId ? `${country.name} · ${liveProfile.formats.slice(0, 3).join(" / ")}` : `${country.name} · ${selectedCustomer.type}`
     : liveReport ? liveProfile.name : country.tagline;
   const headerMetrics = selectedCustomer
-    ? liveReport ? [["分析状态", liveReport.admission.label], ["匹配能力", liveReport.productMatch.matches.length], ["行动建议", liveReport.researchBrief.nextActions.length], ["风险项", liveReport.riskAssessment.risks.length]]
-      : [["分析状态", "待智能体分析"], ["已确认信号", country.signalCount], ["建议模块", selectedCustomer.modules?.length || 0], ["资料来源", country.sourceCount]]
+    ? liveReport ? [["分析状态", liveReport.admission.label], ["集团规模", liveProfile.storeCountLabel.split("（")[0]], ["覆盖国家", liveProfile.countries.length], ["资料来源", liveReport.evidenceChain.records.length]]
+      : [["资料状态", "已收录"], ["集团规模", sourceProfile.groupStores], ["覆盖国家", sourceProfile.countries.length], ["资料来源", sourceProfile.sources.length]]
     : [["分析状态", liveReport?.admission.label ?? "待智能体分析"], [liveReport ? "集团体量" : "客户体量", liveReport ? liveProfile.storeCountLabel.split("（")[0] : country.storeCount], ["资料摘要", liveReport?.opportunitySignals.length ?? country.signalCount], ["证据", liveReport ? `${liveReport.evidenceChain.coverage.sourceLevelA} A级` : `${country.sourceCount} A级`]];
 
   const briefText = liveReport ? buildReportManagementBrief(liveReport, country) : `${country.name}真实资料摘要\n客户：${country.customers[0].name}\n规模：${country.customers[0].stores}\n集团收入：${country.pipeline}\n已核验资料：${country.opportunities.join("；")}\n来源：${country.sources.map((source) => source.title).join("；")}`;
@@ -385,9 +461,11 @@ function CountryPanel({ country, region, onBack, onGenerate, generating, notify,
       </nav>
       <div className="country-tab-scroll" ref={tabScrollRef}>
         {!selectedCustomer && tab === "live" && liveReport && <LiveAgentResult report={liveReport} country={country}></LiveAgentResult>}
-        {selectedCustomer ? (liveReport
-          ? <ReportTab tab={tab} report={liveReport} country={country} generating={generating} onCopy={copyBrief} onDownload={downloadBrief}></ReportTab>
-          : <>{tab === "sales" && <SalesAdvice country={country}></SalesAdvice>}{tab === "battle" && <BattleCard country={country} customer={selectedCustomer}></BattleCard>}</>)
+        {selectedCustomer ? (["profile", "business", "digital", "dynamics", "evidence"].includes(tab)
+          ? <CustomerResearchView tab={tab} country={country} customer={selectedCustomer} sourceProfile={sourceProfile} liveReport={liveReport}></CustomerResearchView>
+          : liveReport
+            ? <ReportTab tab={tab} report={liveReport} country={country} generating={generating} onCopy={copyBrief} onDownload={downloadBrief}></ReportTab>
+            : <>{tab === "sales" && <SalesAdvice country={country}></SalesAdvice>}{tab === "battle" && <BattleCard country={country} customer={selectedCustomer}></BattleCard>}</>)
           : liveReport && tab !== "live" ? <ReportTab tab={tab} report={liveReport} country={country} generating={generating} onCopy={copyBrief} onDownload={downloadBrief} onSelectCustomer={enterCustomer}></ReportTab> : <>
           {tab === "overview" && <OpportunityOverview country={country}></OpportunityOverview>}
           {tab === "customers" && <CustomerRadar country={country} onSelectCustomer={enterCustomer}></CustomerRadar>}

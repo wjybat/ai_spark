@@ -9,6 +9,16 @@
       formats: ["超市", "百货", "家居改善", "购物中心", "金融服务"],
       modules: ["Open Platform", "OMS / 全渠道履约", "WMS / 智能补货", "区域商品与库存服务"],
       risk: "已有 SAP、区域平台和本地系统；POS/OMS/WMS/CDP 版本及供应商待确认",
+      headquarters: "智利圣地亚哥",
+      countries: ["智利", "阿根廷", "巴西", "秘鲁", "哥伦比亚", "美国"],
+      businessAreas: ["多国家零售生态", "区域电商", "Prime 订阅", "Cenco Media", "暗店履约", "自助结账"],
+      digitalFoundation: ["区域客户与数据平台战略", "LTM 电商 16.81 亿美元", "3,100 万活跃忠诚客户", "1,255 台自助结账设备"],
+      knownSystems: ["SAP ERP/FICO", "SAP HANA", "SAP Ariba", "Fiori", "区域平台与本地系统"],
+      organization: "CencoDay 2026 公布区域技术平台、数据治理、安全与跨职能平台化组织。",
+      recentDynamics: ["Costanera 暗店月订单超过 15 万", "Easy 新配送中心", "St. Marche 并购整合潜在线索", "Regional Commercial Decision Engine", "Customer & Data Platform", "Regional Security and Resilience"],
+      decisionRoles: ["CIO", "COO", "Regional Technology Lead", "E-commerce & Fulfilment Lead"],
+      unknowns: ["当前 POS/OMS/WMS/CDP 供应商与版本", "区域平台的上线国家和系统边界", "并购整合项目预算与时间表", "采购与决策链"],
+      strategicSummary: "区域平台化与多国家复制是主线，适合从 OMS/WMS、库存服务和 Open Platform 外围集成切入。",
       signals: [
         "2Q26 电商销售同比增长 14.6%",
         "约 3,100 万活跃忠诚客户",
@@ -16,9 +26,9 @@
         "CencoDay 2026 披露区域商业决策引擎和客户数据平台"
       ],
       sources: [
-        { title: "Cencosud 2025 Integrated Annual Report", url: "https://www.cencosud.com/cencosud/site/docs/20260410/20260410085306/integrated_report_cencosud_2025.pdf", level: "A" },
-        { title: "Cencosud CencoDay 2026", url: "https://www.cencosud.com/cencosud/site/docs/20260114/20260114114256/1__ceo___cencoday_2026_1.pdf", level: "A" },
-        { title: "Cencosud 2Q26 Earnings Release", url: "https://www.cencosud.com/cencosud/site/docs/20260610/20260610154219/press_release_cencosud_2q26__eng_.pdf", level: "A" }
+        { title: "Cencosud 2025 Integrated Annual Report", url: "https://www.cencosud.com/cencosud/site/docs/20260410/20260410085306/integrated_report_cencosud_2025.pdf", level: "A", excerpt: "披露 FY2025 收入及年末 1,398 家零售门店/地点。" },
+        { title: "Cencosud CencoDay 2026", url: "https://www.cencosud.com/cencosud/site/docs/20260114/20260114114256/1__ceo___cencoday_2026_1.pdf", level: "A", excerpt: "披露区域商业决策引擎、客户与数据平台及区域安全韧性方向。" },
+        { title: "Cencosud 2Q26 Earnings Release", url: "https://www.cencosud.com/cencosud/site/docs/20260610/20260610154219/press_release_cencosud_2q26__eng_.pdf", level: "A", excerpt: "披露电商增长、活跃忠诚客户和自助结账设备等经营数据。" }
       ],
       recommendations: [
         "确认区域商业决策引擎、暗店、新配送中心和现有系统边界",
@@ -35,6 +45,16 @@
       formats: ["零售药房", "药品批发", "加盟零售", "3PL/4PL", "健康服务"],
       modules: ["药房履约", "WMS / 智能补货", "订单与库存协同", "EDI / Open Platform"],
       risk: "D365、Manhattan 和自有 Integration Services 的生产边界待确认；药品、冷链和健康数据合规门槛高",
+      headquarters: "澳大利亚墨尔本",
+      countries: ["澳大利亚", "新西兰", "爱尔兰", "阿联酋"],
+      businessAreas: ["药品批发与全国配送", "加盟药房", "线上商城", "Click & Collect", "国际扩张", "温控物流"],
+      digitalFoundation: ["Dynamics 365 Finance/SCM/Commerce/POS", "XML/EDI 集成", "全国温控设施", "超过 5.32 亿件年度配送处理量"],
+      knownSystems: ["Dynamics 365", "历史 Manhattan SCALE", "Manhattan Active Inventory", "Sigma Integration Services", "Pharmx/SPS Commerce"],
+      organization: "Microsoft 案例和 Sigma 官方物流资料确认其具备核心系统、集成服务与技术团队。",
+      recentDynamics: ["2025 年 2 月合并完成", "澳新及国际扩张", "新西兰和爱尔兰扩张", "英国合资进入计划", "药房、批发、物流和健康服务整合"],
+      decisionRoles: ["Group CIO", "COO", "Head of Supply Chain", "Head of Digital Commerce", "Pharmacy Operations Lead"],
+      unknowns: ["D365 当前版本、实例与法人映射", "Manhattan 当前生产状态", "药房系统与 WMS 的责任边界", "受控药品和冷链能力适配差距", "预算和采购周期"],
+      strategicSummary: "药房合规履约、仓店协同和 EDI 共存是现实切口，D365 与既有 WMS 应作为集成边界。",
       signals: [
         "2025 年 2 月 Sigma 与 Chemist Warehouse 完成合并",
         "FY2026 Chemist Warehouse 全球约 659 家门店",
@@ -42,10 +62,10 @@
         "全国温控设施、Schedule 8、XML 和 Integration Services 已确认"
       ],
       sources: [
-        { title: "Sigma Healthcare FY26 Release", url: "https://investorcentre.sigmahealthcare.com.au/static-files/afe6b331-0ca1-44ae-97c9-d823cbd4b8dd", level: "A" },
-        { title: "Microsoft: Chemist Warehouse cloud transformation", url: "https://news.microsoft.com/en-au/features/chemist-warehouse-prescribes-cloud-transformation-to-boost-customer-wellbeing/", level: "A" },
-        { title: "Manhattan: Chemist Warehouse inventory success", url: "https://www.manh.com/en-sg/resources/press-releases/2018/10/25/manhattan-associates-delivers-prescription-chemist-warehouse", level: "A" },
-        { title: "Sigma 3PL/4PL and Integration Services", url: "https://sigmahealthcare.com.au/logistics/", level: "A" }
+        { title: "Sigma Healthcare FY26 Release", url: "https://investorcentre.sigmahealthcare.com.au/static-files/afe6b331-0ca1-44ae-97c9-d823cbd4b8dd", level: "A", excerpt: "披露合并后的集团收入、全球门店规模及国际业务布局。" },
+        { title: "Microsoft: Chemist Warehouse cloud transformation", url: "https://news.microsoft.com/en-au/features/chemist-warehouse-prescribes-cloud-transformation-to-boost-customer-wellbeing/", level: "A", excerpt: "确认 Dynamics 365 Finance、SCM、Commerce 与 POS 转型基础。" },
+        { title: "Manhattan: Chemist Warehouse inventory success", url: "https://www.manh.com/en-sg/resources/press-releases/2018/10/25/manhattan-associates-delivers-prescription-chemist-warehouse", level: "A", excerpt: "确认 Manhattan SCALE 与 Active Inventory 的库存和补货实践。" },
+        { title: "Sigma 3PL/4PL and Integration Services", url: "https://sigmahealthcare.com.au/logistics/", level: "A", excerpt: "确认温控、药品合规、XML/EDI 与自有集成服务能力。" }
       ],
       recommendations: [
         "确认 D365 实例、Manhattan 当前状态和各集成系统责任边界",
@@ -62,6 +82,16 @@
       formats: ["食品零售", "药房", "健康服务", "折扣零售", "电商", "零售媒体"],
       modules: ["Open Platform", "OMS / 全渠道履约", "库存服务", "自动化 DC 上层编排"],
       risk: "SAP/OCI、Google/Vertex AI、Shakudo 与内部数字团队并行；各省隐私和健康数据边界待确认",
+      headquarters: "加拿大安大略省布兰普顿",
+      countries: ["加拿大"],
+      businessAreas: ["食品与药房双网络", "PC Express", "PC Optimum", "Loblaw Advance", "AI Commerce", "自动化配送中心"],
+      digitalFoundation: ["SAP/OCI", "Google Vertex AI", "内部 Loblaw Digital", "PC Optimum 1,800 万+活跃会员", "PC Express"],
+      knownSystems: ["SAP ERP/SAP for Retail", "Oracle Exadata on OCI", "Google Vertex AI", "Shakudo", "自动化 DC 系统（供应商待确认）"],
+      organization: "Loblaw Digital、PC Express、PC Optimum、Loblaw Advance 与 Connected Healthcare 构成明确数字能力体系。",
+      recentDynamics: ["2025 年新开 77 家", "2026 年计划 70 家新店和 191 家翻新", "Caledon 自动化 DC 建设", "Google AI Mode/Gemini 商业合作", "扩大 Vertex AI 覆盖商品、供应链和门店"],
+      decisionRoles: ["CIO", "COO", "Stores & Merchandising Solutions VP", "Supply Chain Technology Lead", "Loblaw Digital Lead"],
+      unknowns: ["AI Mode/UCP 实际上线范围", "PC Express 是否有统一 OMS/DOM", "自动化 DC 的 WMS/WCS/ASRS 与集成商", "各省隐私和健康数据边界", "预算、RFP 与采购周期"],
+      strategicSummary: "Open Platform、OMS/履约、库存服务和自动化 DC 上层编排匹配度高，但必须与现有平台和内部数字团队共存。",
       signals: [
         "FY2025 新开 77 家门店",
         "2026 年计划约 70 家新店和 191 家翻新",
@@ -69,10 +99,10 @@
         "Caledon 自动化配送中心建设中"
       ],
       sources: [
-        { title: "Loblaw 2025 Annual Report", url: "https://dis-prod.assetful.loblaw.ca/content/dam/loblaw-companies-limited/creative-assets/loblaw-ca/investor-relations-reports/annual/2025/LCL_2025%20Annual%20Report.pdf", level: "A" },
-        { title: "Loblaw Google AI Commerce", url: "https://www.loblaw.ca/en/loblaw-accelerates-the-adoption-of-ai-driven-digital-commerce-in-canada-with-google-collaboration/", level: "A" },
-        { title: "Oracle: Loblaw SAP systems on OCI", url: "https://www.prnewswire.com/news-releases/loblaw-rings-up-oracle-cloud-infrastructure-to-modernize-its-it-infrastructure-301929743.html", level: "A" },
-        { title: "Groceryshop 2026 speaker list", url: "https://groceryshop.com/speaker-list", level: "A" }
+        { title: "Loblaw 2025 Annual Report", url: "https://dis-prod.assetful.loblaw.ca/content/dam/loblaw-companies-limited/creative-assets/loblaw-ca/investor-relations-reports/annual/2025/LCL_2025%20Annual%20Report.pdf", level: "A", excerpt: "披露 FY2025 零售收入、2,504 家门店、会员规模及扩店计划。" },
+        { title: "Loblaw Google AI Commerce", url: "https://www.loblaw.ca/en/loblaw-accelerates-the-adoption-of-ai-driven-digital-commerce-in-canada-with-google-collaboration/", level: "A", excerpt: "确认 Google AI Mode、Gemini 和 Vertex AI 的商业合作与应用方向。" },
+        { title: "Oracle: Loblaw SAP systems on OCI", url: "https://www.prnewswire.com/news-releases/loblaw-rings-up-oracle-cloud-infrastructure-to-modernize-its-it-infrastructure-301929743.html", level: "A", excerpt: "确认 SAP 数据库迁移至 Oracle Exadata Database Service on OCI。" },
+        { title: "Groceryshop 2026 speaker list", url: "https://groceryshop.com/speaker-list", level: "A", excerpt: "提供零售媒体业务相关管理角色的公开活动触达线索。" }
       ],
       recommendations: [
         "确认 AI Mode/UCP、PC Express OMS 和自动化 DC 系统边界",

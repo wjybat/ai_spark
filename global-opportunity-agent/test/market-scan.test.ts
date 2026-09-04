@@ -143,7 +143,7 @@ describe("local market scan demo", { timeout: 20_000 }, () => {
     await act(async () => container.querySelector<HTMLButtonElement>('[data-customer-entry="loblaw"]')!.click());
     expect(container.querySelector('[data-view-level="customer"]')).not.toBeNull();
     expect(container.querySelector(".country-head-main h1")?.textContent).toBe("Loblaw Companies Limited");
-    expect([...container.querySelectorAll(".detail-tabs button")].map(item => item.textContent)).toEqual(["销售建议", "作战卡"]);
+    expect([...container.querySelectorAll(".detail-tabs button")].map(item => item.textContent)).toEqual(["客户概览", "业务布局", "数字化与系统", "动态与组织", "资料来源", "销售建议", "作战卡"]);
     await act(async () => window.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true })));
     expect(container.querySelector('[data-view-level="country"]')).not.toBeNull();
     expect(container.querySelector(".country-head-main h1")?.textContent).toBe("加拿大");

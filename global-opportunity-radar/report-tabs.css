@@ -101,6 +101,87 @@
 .report-management { font-size: 13px; }
 .report-management h1 { font-size: 23px; }
 
+.customer-research-page {
+  display: grid;
+  gap: 20px;
+  font-size: 13px;
+  line-height: 1.76;
+}
+
+.customer-research-hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 17px 18px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--mint) 64%, white), rgba(255, 255, 255, 0.72));
+}
+
+.customer-research-hero small {
+  color: var(--muted);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+}
+
+.customer-research-hero h2 {
+  margin: 4px 0 3px;
+  font-size: 21px;
+  line-height: 1.25;
+}
+
+.customer-research-hero p { margin: 0; color: var(--muted); }
+.customer-research-hero > span { flex: 0 0 auto; display: grid; justify-items: end; color: var(--muted); font-size: 10.5px; }
+.customer-research-hero > span b { color: var(--accent); font-family: "IBM Plex Mono", monospace; font-size: 22px; line-height: 1.1; }
+.customer-profile-grid { margin-top: -8px; }
+.customer-profile-grid .report-card > b { display: block; margin-bottom: 5px; color: var(--muted); font-size: 11px; }
+
+.customer-research-columns > .report-section {
+  padding: 14px;
+  border: 1px solid var(--soft-line);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.48);
+}
+
+.customer-research-chips,
+.customer-role-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.customer-research-chips span,
+.customer-role-chips span {
+  padding: 7px 10px;
+  border: 1px solid var(--soft-line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.62);
+  color: var(--ink);
+  font-size: 12px;
+}
+
+.customer-role-chips span {
+  border-color: color-mix(in srgb, var(--accent) 20%, var(--line));
+  background: color-mix(in srgb, var(--accent) 6%, white);
+}
+
+.customer-research-callout {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 9px;
+  padding: 14px;
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--mint) 48%, white);
+}
+
+.customer-research-callout > .icon { margin-top: 2px; color: var(--accent); }
+.customer-research-callout .markdown-content { font-size: 13px; }
+.customer-research-note { margin: 0; color: var(--muted); font-size: 11.5px; line-height: 1.7; }
+.customer-source-card > small { display: block; margin-top: 7px; }
+
+.country-panel-shell.is-customer-level .detail-tabs { gap: 15px; }
+
 @media (max-width: 1240px) {
   .report-grid { grid-template-columns: 1fr; }
   .report-field { grid-template-columns: 76px minmax(0, 1fr); }

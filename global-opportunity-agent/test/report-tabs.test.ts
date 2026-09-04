@@ -81,6 +81,18 @@ async function returnToCountry(countryName = "巴西") { await click(`${countryN
 // Each case mounts and switches several Markdown-heavy views; allow for a busy dev machine.
 describe("country-to-customer report hierarchy", { timeout: 20_000 }, () => {
   it("fills every country with one actionable customer and two display-only candidates", async () => {
+    const collectedProfiles = Object.values(window.OPPORTUNITY_DATA.companyProfiles);
+    expect(collectedProfiles).toHaveLength(3);
+    for (const profile of collectedProfiles) {
+      expect(profile.headquarters).toBeTruthy();
+      expect(profile.businessAreas.length).toBeGreaterThan(3);
+      expect(profile.digitalFoundation.length).toBeGreaterThan(3);
+      expect(profile.knownSystems.length).toBeGreaterThan(3);
+      expect(profile.recentDynamics.length).toBeGreaterThan(3);
+      expect(profile.decisionRoles.length).toBeGreaterThan(3);
+      expect(profile.unknowns.length).toBeGreaterThan(3);
+      expect(profile.sources.every(source => source.excerpt && source.url.startsWith("https://"))).toBe(true);
+    }
     for (const item of Object.values(window.OPPORTUNITY_DATA.countries)) {
       expect(item.customers).toHaveLength(3);
       expect(item.customers.filter(customer => customer.selectable !== false)).toHaveLength(1);
@@ -105,7 +117,7 @@ describe("country-to-customer report hierarchy", { timeout: 20_000 }, () => {
     for (const card of container.querySelectorAll("article[data-candidate-customer]")) expect(card.textContent).toContain("来源A级");
   });
 
-  it("keeps country information at country level and exposes sales/battle only after clicking a company", async () => {
+  it("keeps the customer pool at country level and opens the collected customer chapters after clicking a company", async () => {
     await mount();
     expect(container.querySelectorAll(".detail-tabs button")).toHaveLength(3);
     expect(container.querySelector('[data-view-level="country"]')).not.toBeNull();
@@ -116,7 +128,18 @@ describe("country-to-customer report hierarchy", { timeout: 20_000 }, () => {
     await enterCustomer();
     expect(container.querySelector('[data-view-level="customer"]')).not.toBeNull();
     expect(container.querySelector(".country-head-main h1")?.textContent).toBe("Cencosud");
-    expect([...container.querySelectorAll(".detail-tabs button")].map(item => item.textContent)).toEqual(["销售建议", "作战卡"]);
+    expect([...container.querySelectorAll(".detail-tabs button")].map(item => item.textContent)).toEqual(["客户概览", "业务布局", "数字化与系统", "动态与组织", "资料来源", "销售建议", "作战卡"]);
+    expect(body().querySelector('[data-customer-research-tab="profile"]')).not.toBeNull();
+    expect(body().textContent).toContain(window.OPPORTUNITY_DATA.companyProfiles.cencosud.headquarters);
+    await click("业务布局");
+    expect(body().textContent).toContain(window.OPPORTUNITY_DATA.companyProfiles.cencosud.businessAreas[0]);
+    await click("数字化与系统");
+    expect(body().textContent).toContain(window.OPPORTUNITY_DATA.companyProfiles.cencosud.knownSystems[0]);
+    await click("动态与组织");
+    expect(body().textContent).toContain(window.OPPORTUNITY_DATA.companyProfiles.cencosud.decisionRoles[0]);
+    await click("资料来源");
+    expect(body().textContent).toContain(window.OPPORTUNITY_DATA.companyProfiles.cencosud.sources[0].title);
+    await click("销售建议");
     expect(body().textContent).toContain(country().recommendations[0]);
     await click("作战卡");
     expect(body().textContent).toContain("Cencosud");
@@ -139,7 +162,7 @@ describe("country-to-customer report hierarchy", { timeout: 20_000 }, () => {
     expect(body().querySelector(".live-result-narrative > p > strong")?.textContent).toBe("NARRATIVE_FIRST");
     const cases = [
       ["市场与商机", "overview", "MARKET_FIRST", "SIGNAL_FIRST"],
-      ["客户雷达", "customers", "POOL_FIRST", "PROFILE_FIRST"],
+      ["客户雷达", "customers", "POOL_FIRST", null],
       ["管理层简报", "brief", "SUMMARY_FIRST", "NARRATIVE_FIRST"],
     ];
     for (const [label, tab, first, second] of cases) {
@@ -149,7 +172,8 @@ describe("country-to-customer report hierarchy", { timeout: 20_000 }, () => {
       expect(body().querySelector("[data-report-tab]")?.getAttribute("data-report-tab")).toBe(tab);
       expect(body().querySelector("[data-report-run]")?.getAttribute("data-report-run")).toBe(report.runId);
       expect(body().textContent).toContain(first);
-      expect(body().textContent).toContain(second);
+      if (second) expect(body().textContent).toContain(second);
+      else expect(body().textContent).not.toContain("PROFILE_FIRST");
       expect(body().textContent).toContain("报告国家：巴西");
       expect(body().textContent).toContain("当前潜在客户样本：Cencosud");
       expect(body().textContent).not.toMatch(/尚未运行|等待 Agent|不使用静态模板/);
@@ -160,8 +184,19 @@ describe("country-to-customer report hierarchy", { timeout: 20_000 }, () => {
     expect(container.querySelectorAll("article[data-candidate-customer]")).toHaveLength(2);
     await enterCustomer();
     expect(container.querySelector(".country-head-main h1")?.textContent).toBe(report.customerProfile.name);
-    expect(container.querySelectorAll(".detail-tabs button")).toHaveLength(2);
-    expect(body().querySelector("[data-report-tab]")?.getAttribute("data-report-tab")).toBe("sales");
+    expect(container.querySelectorAll(".detail-tabs button")).toHaveLength(7);
+    expect(body().querySelector("[data-customer-research-tab]")?.getAttribute("data-customer-research-tab")).toBe("profile");
+    expect(body().querySelector("[data-report-run]")?.getAttribute("data-report-run")).toBe(report.runId);
+    await click("业务布局");
+    expect(body().textContent).toContain(report.customerProfile.businessAreas[0]);
+    await click("数字化与系统");
+    expect(body().textContent).toContain("PROFILE_FIRST");
+    expect(body().textContent).toContain(report.customerProfile.knownSystems[0]);
+    await click("动态与组织");
+    expect(body().textContent).toContain(report.customerProfile.recentDynamics[0]);
+    await click("资料来源");
+    expect(body().textContent).toContain(report.evidenceChain.records[0].title);
+    await click("销售建议");
     expect(body().textContent).toContain("EMAIL_FIRST");
     expect(body().textContent).toContain(report.researchBrief.firstMeetingQuestions[0]);
     await click("作战卡");
@@ -277,6 +312,18 @@ describe("country-to-customer report hierarchy", { timeout: 20_000 }, () => {
     await click("客户雷达");
     await enterCustomer();
     expect(container.querySelector(".country-head-main h1")?.textContent).toBe(output.customerProfile.name);
+    expect(container.querySelectorAll(".detail-tabs button")).toHaveLength(7);
+    for (const [label, expected] of [
+      ["客户概览", output.customerProfile.headquarters],
+      ["业务布局", output.customerProfile.businessAreas[0]],
+      ["数字化与系统", output.customerProfile.knownSystems[0]],
+      ["动态与组织", output.customerProfile.recentDynamics[0]],
+      ["资料来源", output.evidenceChain.records[0].title],
+    ]) {
+      await click(label);
+      expect(body().textContent).toContain(expected);
+      expect(body().querySelector("[data-report-run]")?.getAttribute("data-report-run")).toBe(output.runId);
+    }
     for (const label of ["销售建议", "作战卡"]) {
       await click(label);
       expect(body().querySelector("[data-report-run]")?.getAttribute("data-report-run")).toBe(output.runId);
