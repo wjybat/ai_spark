@@ -1,4 +1,5 @@
 const { useEffect: useAppEffect, useMemo: useAppMemo, useState: useAppState } = React;
+const CUSTOMER_INTELLIGENCE_URL = window.CUSTOMER_INTELLIGENCE_URL || "http://localhost:3001/customers";
 
 function Icon({ name, size = 18 }) {
   const shapes = {
@@ -475,6 +476,7 @@ function CountryPanel({ country, region, onBack, onGenerate, generating, notify,
       <div className="panel-footer-action">
         <div><Icon name="spark" size={18}></Icon><span><b>{selectedCustomer ? "客户作战智能体" : liveReport ? "智能分析结果" : "商机分析智能体"}</b><small>{selectedCustomer ? headerName : packageReady ? "客户作战材料已就绪" : "基于调研资料运行完整分析"}</small></span></div>
         <div className="footer-buttons">
+          {selectedCustomer && <a className="customer-intelligence-link" data-customer-intelligence-link href={CUSTOMER_INTELLIGENCE_URL} target="_blank" rel="noopener noreferrer">客户情报中心<Icon name="arrow" size={15}></Icon></a>}
           {packageReady && !generating && (
             <button type="button" className="ghost" onClick={onViewPackage}>查看作战包</button>
           )}

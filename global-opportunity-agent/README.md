@@ -30,6 +30,12 @@ npm run dev
 
 重新运行期间保留上次成功结果，成功后整体替换，失败不覆盖。结果目前按国家保存在当前页面内存中，刷新后需要重新运行；切换到未运行的国家仍显示调研资料。
 
+## 客户情报中心入口
+
+进入客户作战视图后，底部会显示“客户情报中心”入口，并在新标签页打开持续经营工作台。默认地址为 `http://localhost:3001/customers`，因此本地联调时需要同时启动 `account-intelligence-agent`。部署环境可在加载 `app.jsx` 前设置 `window.CUSTOMER_INTELLIGENCE_URL` 覆盖目标地址。
+
+当前入口只负责页面跳转，不同步客户身份和材料；后续再通过正式移交接口打通数据。
+
 ## 公司 AI Router Live 模式
 
 项目内置 Dmall AI Router provider，使用 OpenAI Responses 协议：
