@@ -1004,7 +1004,8 @@
 
 .panel-footer-action > div,
 .panel-footer-action > div > span,
-.panel-footer-action button {
+.panel-footer-action button,
+.panel-footer-action .customer-intelligence-link {
   display: flex;
   align-items: center;
 }
@@ -1034,7 +1035,8 @@
   white-space: nowrap;
 }
 
-.panel-footer-action button {
+.panel-footer-action button,
+.panel-footer-action .customer-intelligence-link {
   flex: 0 0 auto;
   height: 38px;
   gap: 8px;
@@ -1045,8 +1047,20 @@
   color: #fff;
   font-size: 10px;
   font-weight: 700;
+  text-decoration: none;
   cursor: pointer;
   box-shadow: 0 8px 18px color-mix(in srgb, var(--accent) 24%, transparent);
+}
+
+.panel-footer-action .customer-intelligence-link {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  box-shadow: none;
+}
+
+.panel-footer-action .customer-intelligence-link:hover {
+  background: color-mix(in srgb, var(--mint) 40%, transparent);
 }
 
 .panel-footer-action button:disabled {
