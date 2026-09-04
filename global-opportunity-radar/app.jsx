@@ -50,6 +50,7 @@ function Header({ onScan, scanning, scanDisabled, agentStatus }) {
       </div>
       <div className="header-actions">
         <div className={`live-pill ${agentStatus?.ok ? "is-connected" : "is-offline"}`}><i></i>{agentStatus?.ok ? "智能分析服务 · 已就绪" : "智能分析服务连接中"}</div>
+        <a className="customer-intelligence-header-link" data-customer-intelligence-link href={CUSTOMER_INTELLIGENCE_URL} target="_blank" rel="noopener noreferrer"><Icon name="users" size={16}></Icon>客户情报中心</a>
         <button type="button" className="scan-button" onClick={onScan} disabled={scanning || scanDisabled} title="整理现有市场与客户资料">
           <Icon name="scan" size={17}></Icon>{scanning ? "扫描中" : "重新扫描市场"}
         </button>
@@ -519,7 +520,6 @@ function CountryPanel({ country, region, onBack, onGenerate, generating, notify,
       <div className="panel-footer-action">
         <div><Icon name="spark" size={18}></Icon><span><b>{selectedCustomer ? "客户作战智能体" : "国家简报智能体"}</b><small>{selectedCustomer ? headerName : "综合本国三家企业资料"}</small></span></div>
         <div className="footer-buttons">
-          {selectedCustomer && <a className="customer-intelligence-link" data-customer-intelligence-link href={CUSTOMER_INTELLIGENCE_URL} target="_blank" rel="noopener noreferrer">客户情报中心<Icon name="arrow" size={15}></Icon></a>}
           {selectedCustomer && packageReady && !generating && (
             <button type="button" className="ghost" onClick={onViewPackage}>查看作战包</button>
           )}
