@@ -208,7 +208,7 @@ describe("country-to-customer report hierarchy", { timeout: 20_000 }, () => {
     expect(body().querySelector(".report-tabs")).toBeNull();
   });
 
-  it("copies and downloads exactly the displayed brief source; reports clipboard failure honestly", async () => {
+  it("copies exactly the displayed brief source, removes downloads, and reports clipboard failure honestly", async () => {
     await mount(report);
     await click("管理层简报");
     const expected = window.buildReportManagementBrief(report, country());
@@ -222,20 +222,10 @@ describe("country-to-customer report hierarchy", { timeout: 20_000 }, () => {
     expect(report.finalNarrative).toContain("## NARRATIVE_FIRST");
     expect(expected).toContain(report.runId);
     expect(expected).not.toContain("巴西真实资料摘要");
-    const createUrl = vi.fn(() => "blob:report-test");
-    Object.defineProperty(URL, "createObjectURL", { configurable: true, value: createUrl });
-    Object.defineProperty(URL, "revokeObjectURL", { configurable: true, value: vi.fn() });
-    let filename = "";
-    vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(function () { filename = this.download; });
-    await click("下载 Markdown");
-    expect(filename).toBe("Brazil-management-brief.md");
-    const blob = createUrl.mock.calls[0][0] as Blob;
-    expect(blob.type).toBe("text/markdown;charset=utf-8");
-    const source = await new Promise(resolve => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.readAsText(blob); });
-    expect(source).toBe(expected);
+    expect(container.textContent).not.toMatch(/下载 Markdown|下载文本版|下载全部/);
     writeText.mockRejectedValueOnce(new Error("denied"));
     await click("复制简报");
-    expect(notify).toHaveBeenLastCalledWith("复制失败，请下载简报，或允许浏览器访问剪贴板");
+    expect(notify).toHaveBeenLastCalledWith("复制失败，请允许浏览器访问剪贴板");
   });
 
   it("keeps the last success during reruns, replaces all views after success, and does not leak into another country", async () => {

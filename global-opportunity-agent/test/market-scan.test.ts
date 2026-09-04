@@ -22,6 +22,7 @@ class TestEventSource {
   constructor(public url: string) { TestEventSource.instances.push(this); }
   addEventListener(type: string, listener: (event: { data: string }) => void) { this.listeners.set(type, listener); }
   close() { this.readyState = TestEventSource.CLOSED; }
+  emit(type: string, data: unknown) { this.listeners.get(type)?.({ data: JSON.stringify(data) }); }
   complete(data: unknown) { this.listeners.get("run_complete")?.({ data: JSON.stringify({ type: "run_complete", data }) }); }
 }
 
@@ -34,7 +35,10 @@ beforeAll(async () => {
     fetch: fetchMock, EventSource: TestEventSource,
     TWEAK_DEFAULTS: { palette: ["#F47C61", "#DDF2EC", "#F7F3E8", "#24443D", "#6E8F87"], density: "stage", motion: false },
     useTweaks: (defaults) => [defaults, () => undefined],
-    Globe: ({ onSelectCountry }) => React.createElement("button", { onClick: () => onSelectCountry("canada") }, "测试选择加拿大"),
+    Globe: ({ onSelectCountry, onHoverRegion }) => React.createElement(React.Fragment, null,
+      React.createElement("button", { onClick: () => onSelectCountry("canada") }, "测试选择加拿大"),
+      React.createElement("button", { onMouseEnter: () => onHoverRegion("north_america"), onMouseLeave: () => onHoverRegion(null) }, "测试悬停北美洲"),
+    ),
   });
   for (const name of ["TweaksPanel", "TweakSection", "TweakColor", "TweakRadio", "TweakToggle"]) window[name] = () => null;
   window.eval(readFileSync(new URL("assets/markdown-renderer.js", frontend), "utf8") + "\nwindow.AtlasMarkdown = AtlasMarkdown;");
@@ -69,6 +73,26 @@ async function tick() { await act(async () => vi.advanceTimersByTimeAsync(1100))
 async function finishScan() { for (let i = 0; i < 4; i += 1) await tick(); }
 
 describe("local market scan demo", { timeout: 20_000 }, () => {
+  it("starts with the intelligence panel collapsed and opens on South America", async () => {
+    expect(container.querySelector(".app-stage")?.classList.contains("is-panel-collapsed")).toBe(true);
+    expect(container.querySelector("#opportunity-intelligence-panel")?.getAttribute("aria-hidden")).toBe("true");
+    expect(container.textContent).not.toContain("真实调研数据");
+    await click("展开信息");
+    expect(container.querySelector(".app-stage")?.classList.contains("is-panel-collapsed")).toBe(false);
+    expect(container.querySelector("#opportunity-intelligence-panel")?.getAttribute("aria-hidden")).toBe("false");
+    expect(container.textContent).toContain("南美洲真实客户覆盖");
+    expect(container.textContent).not.toContain("全球商机概览");
+    expect(container.textContent).not.toContain("北美洲真实客户覆盖");
+    expect(container.textContent).not.toContain("调研已确认主题");
+    await act(async () => button("测试悬停北美洲").dispatchEvent(new window.MouseEvent("mouseover", { bubbles: true })));
+    expect(container.textContent).toContain("北美洲真实客户覆盖");
+    await act(async () => button("测试悬停北美洲").dispatchEvent(new window.MouseEvent("mouseout", { bubbles: true })));
+    expect(container.textContent).toContain("南美洲真实客户覆盖");
+    expect(container.textContent).not.toContain("北美洲真实客户覆盖");
+    await click("收起");
+    expect(container.querySelector(".app-stage")?.classList.contains("is-panel-collapsed")).toBe(true);
+  });
+
   it("advances four nodes without any API calls, then opens the overall market and customer pool", async () => {
     expect(window.OPPORTUNITY_DATA.countries.china).toBeUndefined();
     expect(window.OPPORTUNITY_DATA.regions.asia.countryIds).toEqual(["uae"]);
@@ -125,7 +149,7 @@ describe("local market scan demo", { timeout: 20_000 }, () => {
     expect(window.document.activeElement).toBe(button("查看整体市场"));
   });
 
-  it("preserves the real BD request, blocks scanning during it, and keeps that result after a local scan", async () => {
+  it("keeps generating after minimization, refreshes the page on completion, and preserves that result after a local scan", async () => {
     await click("测试选择加拿大");
     await click("生成 BD 作战包");
     expect(container.textContent).toContain("正在运行完整商机分析链路");
@@ -135,10 +159,21 @@ describe("local market scan demo", { timeout: 20_000 }, () => {
     expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ regionId: "canada", customerId: "loblaw", countryId: "canada", countryName: "加拿大", mode: "auto" });
     expect(TestEventSource.instances).toHaveLength(1);
     expect(button("重新扫描市场").disabled).toBe(true);
+    await click("最小化");
+    expect(container.querySelector(".agent-run-backdrop")).toBeNull();
+    expect(button("查看进度")).toBeTruthy();
+    await act(async () => TestEventSource.instances[0].emit("tool_progress", { type: "tool_progress", stage: 4, label: "商机信号", data: { progress: 75 } }));
+    expect(container.querySelectorAll(".agent-step")[3].classList.contains("is-running")).toBe(true);
+    await click("查看进度");
+    expect(container.textContent).toContain("商机信号 · 75%");
+    await click("最小化");
     await click("重新扫描市场");
     expect(container.querySelector(".market-scan-card")).toBeNull();
     await act(async () => TestEventSource.instances[0].complete(report));
-    await click("返回商机地图");
+    expect(container.querySelector(".agent-run-backdrop")).toBeNull();
+    expect(container.querySelectorAll(".agent-step.is-done")).toHaveLength(9);
+    expect(container.textContent).toContain("智能分析报告 · 已完成");
+    expect(container.textContent).not.toMatch(/下载 Markdown|下载文本版|下载全部/);
     await click("客户雷达");
     await act(async () => container.querySelector<HTMLButtonElement>('[data-customer-entry="loblaw"]')!.click());
     expect(container.querySelector('[data-view-level="customer"]')).not.toBeNull();

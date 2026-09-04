@@ -5,6 +5,13 @@
   background: var(--panel);
   backdrop-filter: blur(28px);
   box-shadow: -18px 0 60px rgba(69, 104, 95, 0.045);
+  transition: opacity 180ms ease, transform 260ms cubic-bezier(0.22, 0.9, 0.3, 1);
+}
+
+.app-stage.is-panel-collapsed .intelligence-panel {
+  opacity: 0;
+  transform: translateX(28px);
+  pointer-events: none;
 }
 
 .panel-content {
@@ -982,14 +989,9 @@
   cursor: pointer;
 }
 
-.brief-actions button.primary {
-  background: var(--ink);
-  color: var(--canvas);
-  border-color: var(--ink);
-}
-
 .panel-footer-action {
-  min-height: 57px;
+  height: var(--bottom-bar-height);
+  min-height: var(--bottom-bar-height);
   display: flex;
   align-items: center;
   justify-content: space-between;

@@ -166,7 +166,7 @@ function ReportBattle({ report }) {
   </>;
 }
 
-// The management view, clipboard and download share this Markdown source.
+// The management view and clipboard share this Markdown source.
 function buildReportManagementBrief(report, country) {
   const brief = report.researchBrief || {};
   const bulletList = (items) => reportList(items).length ? items.map(item => `- ${item}`).join("\n") : "未返回，待确认。";
@@ -193,19 +193,19 @@ function buildReportManagementBrief(report, country) {
     "## 证据索引", bulletList(evidence),
   ].join("\n\n");
 }
-function ReportManagement({ report, country, onCopy, onDownload }) {
+function ReportManagement({ report, country, onCopy }) {
   return <>
-    <div className="brief-actions report-brief-actions"><button type="button" onClick={onCopy}><Icon name="copy" size={16}></Icon>复制简报</button><button type="button" className="primary" onClick={onDownload}><Icon name="download" size={16}></Icon>下载 Markdown</button></div>
+    <div className="brief-actions report-brief-actions"><button type="button" onClick={onCopy}><Icon name="copy" size={16}></Icon>复制简报</button></div>
     <MarkdownContent className="report-management" content={buildReportManagementBrief(report, country)}></MarkdownContent>
   </>;
 }
 
-function ReportTab({ tab, report, country, generating, onCopy, onDownload, onSelectCustomer }) {
+function ReportTab({ tab, report, country, generating, onCopy, onSelectCustomer }) {
   const View = { overview: ReportMarket, customers: ReportCustomers, sales: ReportSales, battle: ReportBattle, brief: ReportManagement }[tab];
   if (!View) return null;
   return <div className="tab-body report-tabs" data-report-tab={tab} data-report-run={report.runId} key={report.runId}>
     <div className="report-provenance"><div><strong>{generating ? "正在更新 · 当前显示上次结果" : "分析已完成 · 最新结果"}</strong><span>{reportMode(report)}</span></div><details className="report-meta-details"><summary>查看报告口径与生成信息</summary><small>完成于 {reportText(report.completedAt)} · 报告编号 {reportText(report.runId)}</small><p>{reportScope(report, country)}</p><small>{reportGenerationNote(report)}</small></details></div>
-    <View report={report} country={country} onCopy={onCopy} onDownload={onDownload} onSelectCustomer={onSelectCustomer}></View>
+    <View report={report} country={country} onCopy={onCopy} onSelectCustomer={onSelectCustomer}></View>
   </div>;
 }
 

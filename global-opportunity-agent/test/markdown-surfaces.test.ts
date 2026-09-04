@@ -88,11 +88,12 @@ describe("Agent output surfaces", () => {
     assertMarkdown(root.querySelector(".run-conclusion"));
   });
 
-  it("renders package body and list items, preserving the copy/download source", () => {
+  it("renders package body and list items while preserving the copy source", () => {
     const country = window.OPPORTUNITY_DATA.countries.brazil;
     const region = window.OPPORTUNITY_DATA.regions.south_america;
     const root = render(window.BattlePackageDrawer, { country, region, liveReport: report });
     assertMarkdown(root.querySelector(".package-section > .markdown-content"));
+    expect(root.textContent).not.toMatch(/下载全部|下载文本版|下载 Markdown/);
     const artifacts = window.buildLiveBattlePackage(report);
     expect(artifacts.find(item => item.id === "actions").text).toContain(source);
     expect(artifacts.find(item => item.id === "research").text).toContain(source);

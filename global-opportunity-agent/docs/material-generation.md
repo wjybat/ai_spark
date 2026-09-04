@@ -21,7 +21,7 @@
 
 ## 真实运行验证 · 2026-08-31
 
-- 模型：现有 Dmall Router / `gpt-5.6-luna`，本地配置的 `xhigh`。
+- 模型：现有 Dmall Router / `gpt-5.6-luna`，默认推理强度为 `high`。
 - 客户：Cencosud；范围：南美。
 - 完整九阶段耗时约 116.6 秒，工具校验/执行失败 0 次。
 - 模型选择：Open Platform 86、Data Cloud / 经营分析 83、OMS / 全渠道履约 79；不是原规则矩阵的 95/93/88 排名。

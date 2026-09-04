@@ -14,7 +14,6 @@ function Icon({ name, size = 18 }) {
     users: <><circle cx="9" cy="8" r="3"></circle><path d="M3.5 19c.4-4 2.2-6 5.5-6s5.1 2 5.5 6"></path><path d="M16 6.3a3 3 0 0 1 0 5.4M16.5 14c2.4.4 3.7 2.1 4 5"></path></>,
     mail: <><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m4 7 8 6 8-6"></path></>,
     copy: <><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"></path></>,
-    download: <><path d="M12 3v12M7 10l5 5 5-5"></path><path d="M5 21h14"></path></>,
     check: <><path d="m5 12 4 4L19 6"></path></>,
     close: <><path d="m6 6 12 12M18 6 6 18"></path></>,
     layers: <><path d="m12 3 9 5-9 5-9-5 9-5Z"></path><path d="m3 12 9 5 9-5M3 16l9 5 9-5"></path></>
@@ -49,7 +48,6 @@ function Header({ onScan, scanning, scanDisabled, agentStatus }) {
         </div>
       </div>
       <div className="header-actions">
-        <div className="source-pill"><span></span>真实调研数据 · 2026-08-27</div>
         <div className={`live-pill ${agentStatus?.ok ? "is-connected" : "is-offline"}`}><i></i>{agentStatus?.ok ? "智能分析服务 · 已就绪" : "智能分析服务连接中"}</div>
         <button type="button" className="scan-button" onClick={onScan} disabled={scanning || scanDisabled} title="整理现有市场与客户资料">
           <Icon name="scan" size={17}></Icon>{scanning ? "扫描中" : "重新扫描市场"}
@@ -59,9 +57,9 @@ function Header({ onScan, scanning, scanDisabled, agentStatus }) {
   );
 }
 
-function AgentRail({ steps, activeStep }) {
+function AgentRail({ steps, activeStep, minimized, onExpand }) {
   return (
-    <div className="agent-rail" aria-label="智能分析流程">
+    <div className="agent-rail" aria-label="智能分析流程" aria-live="polite">
       <div className="agent-steps">
         {steps.map((step, index) => (
           <React.Fragment key={step}>
@@ -72,6 +70,7 @@ function AgentRail({ steps, activeStep }) {
           </React.Fragment>
         ))}
       </div>
+      {minimized && <button type="button" className="rail-progress-button" onClick={onExpand}>查看进度</button>}
     </div>
   );
 }
@@ -120,14 +119,6 @@ function RegionPanel({ region, countries, onSelectCountry, pinned }) {
         </div>
       </section>
 
-      <section className="panel-section opportunity-strip">
-        <div className="section-heading"><span>调研已确认主题</span><small>完成智能分析后形成结论</small></div>
-        <div className="opportunity-list">
-          {region.opportunities.map((item, index) => (
-            <div key={item}><i>{index + 1}</i><p>{item}</p></div>
-          ))}
-        </div>
-      </section>
     </div>
   );
 }
@@ -321,7 +312,7 @@ function BattleCard({ country, customer }) {
   );
 }
 
-function ManagementBrief({ country, onCopy, onDownload }) {
+function ManagementBrief({ country, onCopy }) {
   return (
     <div className="tab-body brief-page">
       <div className="brief-stamp">SOURCE DATA BRIEF · {country.en.toUpperCase()}</div>
@@ -335,7 +326,6 @@ function ManagementBrief({ country, onCopy, onDownload }) {
       </div>
       <div className="brief-actions">
         <button type="button" onClick={onCopy}><Icon name="copy" size={16}></Icon>复制简报</button>
-        <button type="button" className="primary" onClick={onDownload}><Icon name="download" size={16}></Icon>下载文本版</button>
       </div>
     </div>
   );
@@ -432,16 +422,8 @@ function CountryPanel({ country, region, onBack, onGenerate, generating, notify,
       await navigator.clipboard.writeText(briefText);
       notify("管理层简报已复制");
     } catch {
-      notify("复制失败，请下载简报，或允许浏览器访问剪贴板");
+      notify("复制失败，请允许浏览器访问剪贴板");
     }
-  };
-  const downloadBrief = () => {
-    const url = URL.createObjectURL(new Blob([briefText], { type: liveReport ? "text/markdown;charset=utf-8" : "text/plain;charset=utf-8" }));
-    const link = document.createElement("a");
-    link.href = url; link.download = `${country.en}-management-brief.${liveReport ? "md" : "txt"}`;
-    document.body.appendChild(link); link.click(); link.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-    notify(liveReport ? "Markdown 简报已下载" : "文本版简报已下载");
   };
 
   return (
@@ -464,12 +446,12 @@ function CountryPanel({ country, region, onBack, onGenerate, generating, notify,
         {selectedCustomer ? (["profile", "business", "digital", "dynamics", "evidence"].includes(tab)
           ? <CustomerResearchView tab={tab} country={country} customer={selectedCustomer} sourceProfile={sourceProfile} liveReport={liveReport}></CustomerResearchView>
           : liveReport
-            ? <ReportTab tab={tab} report={liveReport} country={country} generating={generating} onCopy={copyBrief} onDownload={downloadBrief}></ReportTab>
+            ? <ReportTab tab={tab} report={liveReport} country={country} generating={generating} onCopy={copyBrief}></ReportTab>
             : <>{tab === "sales" && <SalesAdvice country={country}></SalesAdvice>}{tab === "battle" && <BattleCard country={country} customer={selectedCustomer}></BattleCard>}</>)
-          : liveReport && tab !== "live" ? <ReportTab tab={tab} report={liveReport} country={country} generating={generating} onCopy={copyBrief} onDownload={downloadBrief} onSelectCustomer={enterCustomer}></ReportTab> : <>
+          : liveReport && tab !== "live" ? <ReportTab tab={tab} report={liveReport} country={country} generating={generating} onCopy={copyBrief} onSelectCustomer={enterCustomer}></ReportTab> : <>
           {tab === "overview" && <OpportunityOverview country={country}></OpportunityOverview>}
           {tab === "customers" && <CustomerRadar country={country} onSelectCustomer={enterCustomer}></CustomerRadar>}
-          {tab === "brief" && <ManagementBrief country={country} onCopy={copyBrief} onDownload={downloadBrief}></ManagementBrief>}
+          {tab === "brief" && <ManagementBrief country={country} onCopy={copyBrief}></ManagementBrief>}
           </>}
       </div>
       <div className="panel-footer-action">
@@ -485,12 +467,13 @@ function CountryPanel({ country, region, onBack, onGenerate, generating, notify,
   );
 }
 
-function AgentRunOverlay({ steps, active, mode, onClose, onViewPackage, statusMessage, error }) {
+function AgentRunOverlay({ steps, active, mode, onClose, onMinimize, onViewPackage, statusMessage, error }) {
   const done = active >= steps.length;
   return (
     <div className="agent-run-backdrop" role="dialog" aria-modal="true" aria-label="智能分析状态">
       <div className="agent-run-card">
         {done && <button type="button" className="overlay-close" onClick={onClose}><Icon name="close" size={18}></Icon></button>}
+        {!done && mode === "package" && <button type="button" className="overlay-minimize" onClick={onMinimize}>最小化</button>}
         <div className={`agent-orb ${done && !error ? "is-done" : ""} ${error ? "is-error" : ""}`}>{done && !error ? <Icon name="check" size={27}></Icon> : <Icon name={error ? "close" : "spark"} size={25}></Icon>}</div>
         <span className="run-eyebrow">全球商机智能分析</span>
         <h2>{error ? "智能分析未完成" : done ? (mode === "scan" ? "市场扫描已完成" : "客户作战材料已生成") : (mode === "scan" ? "正在分析市场与客户" : "正在运行完整商机分析链路")}</h2>
@@ -674,16 +657,6 @@ function BattlePackageDrawer({ country, region, onClose, notify, liveReport }) {
     navigator.clipboard?.writeText(current.text);
     notify(`「${current.title}」已复制`);
   };
-  const downloadAll = () => {
-    const full = artifacts.map((artifact) => artifact.text).join("\n\n────────────────────\n\n");
-    const url = URL.createObjectURL(new Blob([full], { type: "text/plain;charset=utf-8" }));
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${country.en}-bd-battle-package.txt`;
-    link.click();
-    URL.revokeObjectURL(url);
-    notify("完整作战包已下载");
-  };
 
   return (
     <div className="package-backdrop" role="dialog" aria-modal="true" aria-label={`${country.name} BD 作战包`} onClick={onClose}>
@@ -695,7 +668,6 @@ function BattlePackageDrawer({ country, region, onClose, notify, liveReport }) {
             <p>7 项材料 · 由 9 个智能分析步骤生成 · 目标客户 {liveReport?.customerProfile.name ?? country.customers[0].name}</p>
           </div>
           <div className="package-head-actions">
-            <button type="button" className="package-download" onClick={downloadAll}><Icon name="download" size={15}></Icon>下载全部</button>
             <button type="button" className="package-close" onClick={onClose} aria-label="关闭作战包"><Icon name="close" size={17}></Icon></button>
           </div>
         </header>
@@ -744,11 +716,13 @@ function App() {
   const [agentStatus, setAgentStatus] = useAppState(null);
   const [liveReports, setLiveReports] = useAppState({});
   const [customerFocus, setCustomerFocus] = useAppState(null);
+  const [panelCollapsed, setPanelCollapsed] = useAppState(true);
+  const [runMinimized, setRunMinimized] = useAppState(false);
 
-  const regionId = selectedRegion || hoverRegion || "north_america";
+  const regionId = selectedRegion || hoverRegion || "south_america";
   const region = regions[regionId];
   const country = selectedCountry ? countries[selectedCountry] : null;
-  const activeStep = run && !run.done ? run.step : -1;
+  const activeStep = run?.mode === "package" ? (run.done ? agentSteps.length : run.step) : -1;
 
   useAppEffect(() => {
     window.AgentApi.health().then(setAgentStatus).catch(() => setAgentStatus({ ok: false }));
@@ -773,17 +747,18 @@ function App() {
   }, [toast]);
 
   const selectRegion = (id) => {
-    setSelectedRegion(id); setSelectedCountry(null); setCustomerFocus(null); setHoverRegion(null);
+    setSelectedRegion(id); setSelectedCountry(null); setCustomerFocus(null); setHoverRegion(null); setPanelCollapsed(false);
   };
   const selectCountry = (id) => {
     const target = countries[id];
-    setSelectedRegion(target.region); setSelectedCountry(id); setCustomerFocus(null); setHoverRegion(null);
+    setSelectedRegion(target.region); setSelectedCountry(id); setCustomerFocus(null); setHoverRegion(null); setPanelCollapsed(false);
   };
   const backToGlobal = () => { setSelectedRegion(null); setSelectedCountry(null); setCustomerFocus(null); setHoverRegion(null); };
   const backToRegion = () => { setSelectedCountry(null); setCustomerFocus(null); };
   const notify = (message) => setToast(message);
 
   const startBackendRun = async ({ targetCountryId, regionId, customerId, countryName }) => {
+    setRunMinimized(false);
     setRun({ source: "backend", mode: "package", step: 0, done: false, targetCountryId, statusMessage: "正在启动智能分析…" });
     try {
       const output = await window.AgentApi.startRun({
@@ -807,6 +782,7 @@ function App() {
       setRun((current) => current?.source === "backend" ? { ...current, step: agentSteps.length, done: true, statusMessage: output.finalNarrative } : current);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
+      setRunMinimized(false);
       setRun((current) => current?.source === "backend" ? { ...current, step: agentSteps.length, done: true, error: message, statusMessage: "" } : current);
     }
   };
@@ -814,12 +790,14 @@ function App() {
   const startMarketScan = () => {
     if (marketScan || (run && !run.done) || pkgCountry) return;
     setRun(null);
+    setRunMinimized(false);
     setMarketScan({ step: 0, done: false, summary: buildMarketScanSummary(window.OPPORTUNITY_DATA) });
   };
   const viewMarketOverview = () => {
     if (!marketScan?.done) return;
     setMarketOverview({ ...marketScan.summary, completedAt: new Date().toISOString() });
     setMarketScan(null);
+    setPanelCollapsed(false);
     backToGlobal();
   };
   const startCountryPackage = () => {
@@ -838,14 +816,15 @@ function App() {
       if (event.key !== "Escape") return;
       if (pkgCountry) { setPkgCountry(null); return; }
       if (marketScan) { setMarketScan(null); return; }
-      if (run) { setRun(null); return; }
+      if (run && !run.done && !runMinimized) { setRunMinimized(true); return; }
+      if (run && run.done && !runMinimized) { setRun(null); return; }
       if (customerFocus) { setCustomerFocus(null); return; }
       if (selectedCountry) backToRegion();
       else if (selectedRegion) backToGlobal();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [pkgCountry, marketScan, run, customerFocus, selectedCountry, selectedRegion]);
+  }, [pkgCountry, marketScan, run, runMinimized, customerFocus, selectedCountry, selectedRegion]);
 
   const palette = t.palette;
   const themeStyle = {
@@ -855,7 +834,7 @@ function App() {
   return (
     <main className={`app density-${t.density}`} style={themeStyle} data-screen-label="海外商机洞察与决策智能体">
       <Header onScan={startMarketScan} scanning={Boolean(marketScan && !marketScan.done)} scanDisabled={Boolean(marketScan || (run && !run.done) || pkgCountry)} agentStatus={agentStatus}></Header>
-      <div className="app-stage">
+      <div className={`app-stage ${panelCollapsed ? "is-panel-collapsed" : ""}`}>
         <section className="map-stage">
           <div className="map-stage-copy">
             <span>GLOBAL OPPORTUNITY INTELLIGENCE</span>
@@ -875,10 +854,14 @@ function App() {
             onBack={backToGlobal}
             motion={t.motion}
           ></Globe>
-          <AgentRail steps={agentSteps} activeStep={activeStep}></AgentRail>
+          <AgentRail steps={agentSteps} activeStep={activeStep} minimized={Boolean(run && !run.done && runMinimized)} onExpand={() => setRunMinimized(false)}></AgentRail>
         </section>
 
-        <aside className="intelligence-panel" data-screen-label="商机情报面板">
+        <button type="button" className="panel-collapse-toggle" aria-expanded={!panelCollapsed} aria-controls="opportunity-intelligence-panel" onClick={() => setPanelCollapsed(value => !value)} title={panelCollapsed ? "展开商机信息面板" : "收起商机信息面板"}>
+          <Icon name="chevron" size={17}></Icon><span>{panelCollapsed ? "展开信息" : "收起"}</span>
+        </button>
+
+        <aside id="opportunity-intelligence-panel" className="intelligence-panel" data-screen-label="商机情报面板" aria-hidden={panelCollapsed}>
           {country ? (
             <CountryPanel country={country} region={regions[country.region]} onBack={backToRegion} onGenerate={startCountryPackage} generating={run?.mode === "package" && !run.done} notify={notify} packageReady={pkgReady.has(country.id)} onViewPackage={() => setPkgCountry(country.id)} liveReport={liveReports[country.id]} selectedCustomer={customerFocus?.countryId === country.id ? customerFocus : null} onSelectCustomer={setCustomerFocus}></CountryPanel>
           ) : marketOverview && !selectedRegion && !hoverRegion ? (
@@ -890,13 +873,14 @@ function App() {
       </div>
 
       {marketScan && <MarketScanOverlay scan={marketScan} onClose={() => setMarketScan(null)} onViewOverview={viewMarketOverview}></MarketScanOverlay>}
-      {run && (
+      {run && !runMinimized && (
         <AgentRunOverlay
           steps={agentSteps}
           active={run.done ? agentSteps.length : run.step}
           mode={run.mode}
-          onClose={() => setRun(null)}
-          onViewPackage={() => { setPkgCountry(run.targetCountryId || selectedCountry); setRun(null); }}
+          onClose={() => { setRun(null); setRunMinimized(false); }}
+          onMinimize={() => setRunMinimized(true)}
+          onViewPackage={() => { setPkgCountry(run.targetCountryId || selectedCountry); setRun(null); setRunMinimized(false); }}
           statusMessage={run.statusMessage}
           error={run.error}
         ></AgentRunOverlay>

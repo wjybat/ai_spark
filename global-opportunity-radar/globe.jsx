@@ -353,9 +353,8 @@ function Globe({
               <circle className="marker-dot" r={isSelected ? 6 : 5}></circle>
               {(isHover || isSelected) && (
                 <g className="marker-label" transform="translate(12 -17)">
-                  <rect x="0" y="0" width={country.name.length * 15 + 70} height="35" rx="10"></rect>
+                  <rect x="0" y="0" width={country.name.length * 15 + 24} height="35" rx="10"></rect>
                   <text x="12" y="22">{country.name}</text>
-                  <text className="marker-score" x={country.name.length * 15 + 36} y="22">{country.score ?? "实证"}</text>
                 </g>
               )}
             </g>
@@ -398,14 +397,8 @@ function Globe({
         ) : (
           <div className="globe-hint"><GlobeIcon name="rotate" size={16}></GlobeIcon>拖动旋转 · 悬停预览 · 点击锁定大洲</div>
         )}
-        <div className="data-status"><span></span>{loadState === "ready" ? "真实国家边界已就绪" : "轻量地图模式"}</div>
       </div>
 
-      {!selectedRegion && (
-        <div className="region-legend" aria-label="真实资料覆盖图例">
-          <span>真实资料覆盖</span><b>{Object.keys(countries).length} 国</b>
-        </div>
-      )}
     </div>
   );
 }
