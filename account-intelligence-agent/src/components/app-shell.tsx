@@ -83,7 +83,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <aside className={`sidebar ${menuOpen ? "open" : ""}`} aria-label="主导航">
       <nav>{nav.map(({ label, icon: Icon, tab, disabled }) => <button key={label} type="button" className={activeNav === label ? "active" : ""} disabled={disabled} aria-label={label} title={disabled ? "该功能尚未开放" : sidebarCollapsed ? label : undefined} onClick={() => openSection(label, tab)}><Icon size={18} /><span className="nav-label">{label}</span>{label !== "客户" && <ChevronRight className="nav-arrow" size={14} />}</button>)}</nav>
       <div className="ingestion-status"><div className="status-title"><FileText size={15} />数据接入</div><div><span>今日</span><b>{ingestion.today}</b></div><div><span>本周</span><b>{ingestion.week}</b></div><div><span>来源总数</span><b>{ingestion.total.toLocaleString()}</b></div><p><i />系统运行正常</p></div>
-      <div className="sidebar-foot"><button className="sidebar-toggle" type="button" onClick={toggleSidebar} aria-label={sidebarCollapsed ? "展开侧边栏" : "收起侧边栏"} aria-expanded={!sidebarCollapsed} title={sidebarCollapsed ? "展开侧边栏" : "收起侧边栏"}>{sidebarCollapsed ? <PanelLeftOpen size={15} /> : <PanelLeftClose size={15} />}</button><span>MVP · 本地运行</span></div>
+      <div className="sidebar-foot"><button className="sidebar-toggle" type="button" onClick={toggleSidebar} aria-label={sidebarCollapsed ? "展开侧边栏" : "收起侧边栏"} aria-expanded={!sidebarCollapsed} title={sidebarCollapsed ? "展开侧边栏" : "收起侧边栏"}>{sidebarCollapsed ? <PanelLeftOpen size={15} /> : <PanelLeftClose size={15} />}</button></div>
     </aside>
     {menuOpen && <button className="sidebar-scrim" aria-label="关闭菜单" onClick={() => setMenuOpen(false)} />}
     <main className="main-content">{children}</main>
