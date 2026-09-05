@@ -1,0 +1,28 @@
+{
+  "version": "1.2.0",
+  "countries": [
+    { "id": "cty_vn", "iso2": "VN", "iso3": "VNM", "name_en": "Vietnam", "name_local": "Việt Nam", "region_code": "sea", "currency_code": "VND", "timezone": "Asia/Ho_Chi_Minh", "research_languages": ["vi", "en"] },
+    { "id": "cty_id", "iso2": "ID", "iso3": "IDN", "name_en": "Indonesia", "name_local": "Indonesia", "region_code": "sea", "currency_code": "IDR", "timezone": "Asia/Jakarta", "research_languages": ["id", "en"] },
+    { "id": "cty_th", "iso2": "TH", "iso3": "THA", "name_en": "Thailand", "name_local": "ไทย", "region_code": "sea", "currency_code": "THB", "timezone": "Asia/Bangkok", "research_languages": ["th", "en"] },
+    { "id": "cty_my", "iso2": "MY", "iso3": "MYS", "name_en": "Malaysia", "name_local": "Malaysia", "region_code": "sea", "currency_code": "MYR", "timezone": "Asia/Kuala_Lumpur", "research_languages": ["ms", "en"] },
+    { "id": "cty_ph", "iso2": "PH", "iso3": "PHL", "name_en": "Philippines", "name_local": "Pilipinas", "region_code": "sea", "currency_code": "PHP", "timezone": "Asia/Manila", "research_languages": ["fil", "en"] },
+
+    { "id": "cty_sa", "iso2": "SA", "iso3": "SAU", "name_en": "Saudi Arabia", "name_local": "المملكة العربية السعودية", "region_code": "middle-east", "currency_code": "SAR", "timezone": "Asia/Riyadh", "research_languages": ["ar", "en"] },
+    { "id": "cty_ae", "iso2": "AE", "iso3": "ARE", "name_en": "United Arab Emirates", "name_local": "الإمارات العربية المتحدة", "region_code": "middle-east", "currency_code": "AED", "timezone": "Asia/Dubai", "research_languages": ["ar", "en"] },
+    { "id": "cty_qa", "iso2": "QA", "iso3": "QAT", "name_en": "Qatar", "name_local": "قطر", "region_code": "middle-east", "currency_code": "QAR", "timezone": "Asia/Qatar", "research_languages": ["ar", "en"] },
+    { "id": "cty_kw", "iso2": "KW", "iso3": "KWT", "name_en": "Kuwait", "name_local": "الكويت", "region_code": "middle-east", "currency_code": "KWD", "timezone": "Asia/Kuwait", "research_languages": ["ar", "en"] },
+    { "id": "cty_om", "iso2": "OM", "iso3": "OMN", "name_en": "Oman", "name_local": "عُمان", "region_code": "middle-east", "currency_code": "OMR", "timezone": "Asia/Muscat", "research_languages": ["ar", "en"] },
+
+    { "id": "cty_mx", "iso2": "MX", "iso3": "MEX", "name_en": "Mexico", "name_local": "México", "region_code": "latam", "currency_code": "MXN", "timezone": "America/Mexico_City", "research_languages": ["es", "en"] },
+    { "id": "cty_br", "iso2": "BR", "iso3": "BRA", "name_en": "Brazil", "name_local": "Brasil", "region_code": "latam", "currency_code": "BRL", "timezone": "America/Sao_Paulo", "research_languages": ["pt", "en"] },
+    { "id": "cty_co", "iso2": "CO", "iso3": "COL", "name_en": "Colombia", "name_local": "Colombia", "region_code": "latam", "currency_code": "COP", "timezone": "America/Bogota", "research_languages": ["es", "en"] },
+    { "id": "cty_cl", "iso2": "CL", "iso3": "CHL", "name_en": "Chile", "name_local": "Chile", "region_code": "latam", "currency_code": "CLP", "timezone": "America/Santiago", "research_languages": ["es", "en"] },
+    { "id": "cty_pe", "iso2": "PE", "iso3": "PER", "name_en": "Peru", "name_local": "Perú", "region_code": "latam", "currency_code": "PEN", "timezone": "America/Lima", "research_languages": ["es", "en"] },
+
+    { "id": "cty_eg", "iso2": "EG", "iso3": "EGY", "name_en": "Egypt", "name_local": "مصر", "region_code": "north-africa", "currency_code": "EGP", "timezone": "Africa/Cairo", "research_languages": ["ar", "en"] },
+    { "id": "cty_ma", "iso2": "MA", "iso3": "MAR", "name_en": "Morocco", "name_local": "المغرب", "region_code": "north-africa", "currency_code": "MAD", "timezone": "Africa/Casablanca", "research_languages": ["ar", "fr", "en"] },
+    { "id": "cty_dz", "iso2": "DZ", "iso3": "DZA", "name_en": "Algeria", "name_local": "الجزائر", "region_code": "north-africa", "currency_code": "DZD", "timezone": "Africa/Algiers", "research_languages": ["ar", "fr", "en"] },
+    { "id": "cty_tn", "iso2": "TN", "iso3": "TUN", "name_en": "Tunisia", "name_local": "تونس", "region_code": "north-africa", "currency_code": "TND", "timezone": "Africa/Tunis", "research_languages": ["ar", "fr", "en"] },
+    { "id": "cty_ly", "iso2": "LY", "iso3": "LBY", "name_en": "Libya", "name_local": "ليبيا", "region_code": "north-africa", "currency_code": "LYD", "timezone": "Africa/Tripoli", "research_languages": ["ar", "en"] }
+  ]
+}

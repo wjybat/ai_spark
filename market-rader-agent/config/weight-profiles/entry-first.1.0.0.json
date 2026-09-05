@@ -1,0 +1,7 @@
+{
+  "code": "entry_first_v1",
+  "version": "1.0.0",
+  "name": "Entry First",
+  "dimension_weights": { "market_size": 1500, "growth": 1500, "expansion": 1000, "digital": 1500, "customer_value": 1500, "entry_ease": 3000 },
+  "status": "draft"
+}

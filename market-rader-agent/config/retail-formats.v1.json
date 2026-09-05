@@ -1,0 +1,7 @@
+{
+  "version": "1.0.0",
+  "formats": [
+    { "code": "convenience_store", "name_en": "Convenience Store", "taxonomy_version": "1.0.0" },
+    { "code": "mini_mart", "name_en": "Mini Mart", "taxonomy_version": "1.0.0" }
+  ]
+}

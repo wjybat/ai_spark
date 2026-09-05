@@ -1,0 +1,183 @@
+{
+  "code": "southeast_asia_retail",
+  "version": "1.0.0",
+  "status": "draft",
+  "metrics": [
+    {
+      "metric_code": "qualified_store_base", "dimension_code": "market_size", "name": "Qualified Store Base",
+      "value_type": "integer", "raw_unit": "store", "direction": "higher_better", "indicator_weight_bps": 5000,
+      "aggregation_method": "qualified_store_base_from_retailers", "aggregation_config": { "input_predicates": ["qualified_store_base_actual", "retailer_store_count_actual"], "derivation_version": "retailer-foundations-v1", "minimum_store_count": 500, "minimum_retailers": 3 },
+      "normalization_method": "piecewise_linear",
+      "normalization_config": { "anchors": [ { "raw": "2000", "score_bps": 0 }, { "raw": "10000", "score_bps": 3000 }, { "raw": "30000", "score_bps": 6000 }, { "raw": "60000", "score_bps": 8500 }, { "raw": "120000", "score_bps": 10000 } ] },
+      "freshness_window_days": 1095, "input_predicates": ["qualified_store_base_actual", "retailer_store_count_actual"]
+    },
+    {
+      "metric_code": "qualified_retailer_count", "dimension_code": "market_size", "name": "Qualified Retailer Count",
+      "value_type": "integer", "raw_unit": "retailer", "direction": "higher_better", "indicator_weight_bps": 3000,
+      "aggregation_method": "qualified_retailer_count_from_observed_retailers", "aggregation_config": { "input_predicates": ["qualified_retailer_count_actual", "retailer_store_count_actual"], "derivation_version": "retailer-foundations-v1", "minimum_store_count": 500, "minimum_retailers": 3 },
+      "normalization_method": "piecewise_linear",
+      "normalization_config": { "anchors": [ { "raw": "5", "score_bps": 0 }, { "raw": "15", "score_bps": 3000 }, { "raw": "30", "score_bps": 6000 }, { "raw": "50", "score_bps": 8500 }, { "raw": "100", "score_bps": 10000 } ] },
+      "freshness_window_days": 1095, "input_predicates": ["qualified_retailer_count_actual", "retailer_store_count_actual"]
+    },
+    {
+      "metric_code": "modern_retail_scale", "dimension_code": "market_size", "name": "Modern Retail Scale",
+      "value_type": "percent", "raw_unit": "percent", "direction": "higher_better", "indicator_weight_bps": 2000,
+      "aggregation_method": "latest_value", "aggregation_config": { "predicate": "modern_retail_share_percent" },
+      "normalization_method": "piecewise_linear",
+      "normalization_config": { "anchors": [ { "raw": "10", "score_bps": 0 }, { "raw": "30", "score_bps": 3000 }, { "raw": "50", "score_bps": 6000 }, { "raw": "70", "score_bps": 8500 }, { "raw": "90", "score_bps": 10000 } ] },
+      "freshness_window_days": 1095, "input_predicates": ["modern_retail_share_percent"]
+    },
+    {
+      "metric_code": "format_store_cagr_3y", "dimension_code": "growth", "name": "Format Store CAGR 3Y",
+      "value_type": "percent", "raw_unit": "percent", "direction": "higher_better", "indicator_weight_bps": 4500,
+      "aggregation_method": "portfolio_cagr_from_retailer_observations", "aggregation_config": { "input_predicates": ["format_store_count_actual", "retailer_store_count_actual"], "derivation_version": "retailer-foundations-v1", "minimum_store_count": 500, "minimum_retailers": 3, "minimum_years": 2.5, "maximum_years": 3.5 },
+      "normalization_method": "piecewise_linear",
+      "normalization_config": { "anchors": [ { "raw": "-5", "score_bps": 0 }, { "raw": "0", "score_bps": 2000 }, { "raw": "5", "score_bps": 5000 }, { "raw": "10", "score_bps": 7500 }, { "raw": "20", "score_bps": 10000 } ] },
+      "freshness_window_days": 1095, "minimum_verified_claims": 2, "input_predicates": ["format_store_count_actual", "retailer_store_count_actual"]
+    },
+    {
+      "metric_code": "modern_retail_sales_cagr_3y", "dimension_code": "growth", "name": "Modern Retail Sales CAGR 3Y",
+      "value_type": "percent", "raw_unit": "percent", "direction": "higher_better", "indicator_weight_bps": 3500,
+      "aggregation_method": "latest_value", "aggregation_config": { "predicate": "modern_retail_sales_cagr_percent" },
+      "normalization_method": "piecewise_linear",
+      "normalization_config": { "anchors": [ { "raw": "0", "score_bps": 0 }, { "raw": "5", "score_bps": 3000 }, { "raw": "10", "score_bps": 6500 }, { "raw": "15", "score_bps": 10000 } ] },
+      "freshness_window_days": 730, "input_predicates": ["modern_retail_sales_cagr_percent"]
+    },
+    {
+      "metric_code": "qualified_retailer_store_growth", "dimension_code": "growth", "name": "Qualified Retailer Store Growth",
+      "value_type": "percent", "raw_unit": "percent", "direction": "higher_better", "indicator_weight_bps": 2000,
+      "aggregation_method": "retailer_growth_from_store_counts", "aggregation_config": { "input_predicates": ["retailer_store_growth_percent", "retailer_store_count_actual"], "derivation_version": "retailer-foundations-v1", "minimum_store_count": 500, "minimum_retailers": 3, "minimum_years": 0.75, "maximum_years": 1.5 },
+      "normalization_method": "piecewise_linear",
+      "normalization_config": { "anchors": [ { "raw": "0", "score_bps": 0 }, { "raw": "3", "score_bps": 2500 }, { "raw": "6", "score_bps": 5000 }, { "raw": "10", "score_bps": 8000 }, { "raw": "15", "score_bps": 10000 } ] },
+      "freshness_window_days": 730, "input_predicates": ["retailer_store_growth_percent", "retailer_store_count_actual"]
+    },
+    {
+      "metric_code": "announced_openings_ratio", "dimension_code": "expansion", "name": "Announced Openings Ratio",
+      "value_type": "percent", "raw_unit": "percent", "direction": "higher_better", "indicator_weight_bps": 4500,
+      "aggregation_method": "ratio_from_observations", "aggregation_config": { "numerator_predicate": "announced_store_openings_actual", "denominator_predicate": "format_store_count_actual", "annualized": true },
+      "normalization_method": "piecewise_linear",
+      "normalization_config": { "anchors": [ { "raw": "0", "score_bps": 0 }, { "raw": "2", "score_bps": 3000 }, { "raw": "5", "score_bps": 6000 }, { "raw": "8", "score_bps": 8500 }, { "raw": "12", "score_bps": 10000 } ] },
+      "freshness_window_days": 548, "input_predicates": ["announced_store_openings_actual", "format_store_count_actual"]
+    },
+    {
+      "metric_code": "expanding_retailer_share", "dimension_code": "expansion", "name": "Expanding Retailer Share",
+      "value_type": "percent", "raw_unit": "percent", "direction": "higher_better", "indicator_weight_bps": 3000,
+      "aggregation_method": "expanding_share_from_origins", "aggregation_config": { "input_predicates": ["expanding_retailer_share_percent", "announced_store_openings_actual", "qualified_retailer_count_actual"], "derivation_version": "derived-retail-v1", "method": "distinct_positive_opening_origins_divided_by_qualified_retailers" },
+      "normalization_method": "piecewise_linear",
+      "normalization_config": { "anchors": [ { "raw": "0", "score_bps": 0 }, { "raw": "20", "score_bps": 3000 }, { "raw": "40", "score_bps": 6000 }, { "raw": "60", "score_bps": 8500 }, { "raw": "80", "score_bps": 10000 } ] },
+      "freshness_window_days": 548, "input_predicates": ["expanding_retailer_share_percent", "announced_store_openings_actual", "qualified_retailer_count_actual"]
+    },
+    {
+      "metric_code": "new_entrant_activity", "dimension_code": "expansion", "name": "New Entrant Activity",
+      "value_type": "ordinal", "raw_unit": "level", "direction": "higher_better", "indicator_weight_bps": 2500,
+      "aggregation_method": "ordinal_from_evidence", "aggregation_config": { "predicate": "new_entrant_activity_level" },
+      "normalization_method": "ordinal_rubric",
+      "normalization_config": { "levels": ["none", "low", "moderate", "high"], "scores_bps": [0, 3500, 7000, 10000] },
+      "freshness_window_days": 548, "input_predicates": ["new_entrant_activity_level"]
+    },
+    {
+      "metric_code": "store_system_readiness", "dimension_code": "digital", "name": "Store System Readiness",
+      "value_type": "ordinal", "raw_unit": "level", "direction": "higher_better", "indicator_weight_bps": 2500,
+      "aggregation_method": "ordinal_from_evidence", "aggregation_config": { "predicate": "store_system_readiness_level" },
+      "normalization_method": "ordinal_rubric",
+      "normalization_config": { "levels": ["low", "medium", "high"], "scores_bps": [2000, 6000, 10000] },
+      "freshness_window_days": 1095, "input_predicates": ["store_system_readiness_level"]
+    },
+    {
+      "metric_code": "video_infrastructure_readiness", "dimension_code": "digital", "name": "Video Infrastructure Readiness",
+      "value_type": "ordinal", "raw_unit": "level", "direction": "higher_better", "indicator_weight_bps": 2500,
+      "aggregation_method": "ordinal_from_evidence", "aggregation_config": { "predicate": "video_infrastructure_readiness_level" },
+      "normalization_method": "ordinal_rubric",
+      "normalization_config": { "levels": ["low", "medium", "high"], "scores_bps": [2000, 6000, 10000] },
+      "freshness_window_days": 1095, "input_predicates": ["video_infrastructure_readiness_level"]
+    },
+    {
+      "metric_code": "cloud_connectivity_readiness", "dimension_code": "digital", "name": "Cloud Connectivity Readiness",
+      "value_type": "ordinal", "raw_unit": "level", "direction": "higher_better", "indicator_weight_bps": 2500,
+      "aggregation_method": "ordinal_from_evidence", "aggregation_config": { "predicate": "cloud_connectivity_readiness_level" },
+      "normalization_method": "ordinal_rubric",
+      "normalization_config": { "levels": ["low", "medium", "high"], "scores_bps": [2000, 6000, 10000] },
+      "freshness_window_days": 1095, "input_predicates": ["cloud_connectivity_readiness_level"]
+    },
+    {
+      "metric_code": "retailer_digital_investment_signals", "dimension_code": "digital", "name": "Retailer Digital Investment Signals",
+      "value_type": "ordinal", "raw_unit": "level", "direction": "higher_better", "indicator_weight_bps": 2500,
+      "aggregation_method": "ordinal_from_evidence", "aggregation_config": { "predicate": "digital_investment_signals_level" },
+      "normalization_method": "ordinal_rubric",
+      "normalization_config": { "levels": ["low", "medium", "high"], "scores_bps": [2000, 6000, 10000] },
+      "freshness_window_days": 1095, "input_predicates": ["digital_investment_signals_level"]
+    },
+    {
+      "metric_code": "addressable_store_base", "dimension_code": "customer_value", "name": "Addressable Store Base",
+      "value_type": "integer", "raw_unit": "store", "direction": "higher_better", "indicator_weight_bps": 3500,
+      "aggregation_method": "addressable_store_fallback", "aggregation_config": { "input_predicates": ["addressable_store_base_actual", "qualified_store_base_actual", "retailer_store_count_actual"], "derivation_version": "retailer-foundations-v1", "fallback": "qualified_store_base_actual_or_observed_retailer_sum", "minimum_store_count": 500, "minimum_retailers": 3 },
+      "normalization_method": "piecewise_linear",
+      "normalization_config": { "anchors": [ { "raw": "1000", "score_bps": 0 }, { "raw": "5000", "score_bps": 3000 }, { "raw": "15000", "score_bps": 6000 }, { "raw": "30000", "score_bps": 8500 }, { "raw": "60000", "score_bps": 10000 } ] },
+      "freshness_window_days": 1095, "input_predicates": ["addressable_store_base_actual", "qualified_store_base_actual", "retailer_store_count_actual"]
+    },
+    {
+      "metric_code": "top_customer_concentration", "dimension_code": "customer_value", "name": "Top Customer Concentration",
+      "value_type": "percent", "raw_unit": "percent", "direction": "higher_better", "indicator_weight_bps": 2000,
+      "aggregation_method": "latest_value", "aggregation_config": { "predicate": "top_customer_concentration_percent" },
+      "normalization_method": "piecewise_linear",
+      "normalization_config": { "anchors": [ { "raw": "10", "score_bps": 0 }, { "raw": "30", "score_bps": 3000 }, { "raw": "50", "score_bps": 6000 }, { "raw": "70", "score_bps": 8500 }, { "raw": "90", "score_bps": 10000 } ] },
+      "freshness_window_days": 1095, "input_predicates": ["top_customer_concentration_percent"]
+    },
+    {
+      "metric_code": "estimated_acv_potential", "dimension_code": "customer_value", "name": "Estimated ACV Potential",
+      "value_type": "money_usd_millions", "raw_unit": "usd_millions", "direction": "higher_better", "indicator_weight_bps": 2000,
+      "aggregation_method": "estimated_acv_from_customer_base", "aggregation_config": { "input_predicates": ["estimated_acv_potential_usd_millions", "qualified_retailer_count_actual", "addressable_store_base_actual", "qualified_store_base_actual", "retailer_store_count_actual"], "derivation_version": "retailer-foundations-v1", "acv_midpoint_usd_millions": 0.15, "ideal_customer_store_count": 500, "minimum_store_count": 500, "minimum_retailers": 3 },
+      "normalization_method": "piecewise_linear",
+      "normalization_config": { "anchors": [ { "raw": "5", "score_bps": 0 }, { "raw": "20", "score_bps": 3000 }, { "raw": "50", "score_bps": 6000 }, { "raw": "100", "score_bps": 8500 }, { "raw": "200", "score_bps": 10000 } ] },
+      "freshness_window_days": 1095, "input_predicates": ["estimated_acv_potential_usd_millions", "qualified_retailer_count_actual", "addressable_store_base_actual", "qualified_store_base_actual", "retailer_store_count_actual"]
+    },
+    {
+      "metric_code": "use_case_need_fit", "dimension_code": "customer_value", "name": "Use Case Need Fit",
+      "value_type": "ordinal", "raw_unit": "level", "direction": "higher_better", "indicator_weight_bps": 2500,
+      "aggregation_method": "ordinal_from_evidence", "aggregation_config": { "predicate": "use_case_need_fit_level" },
+      "normalization_method": "ordinal_rubric",
+      "normalization_config": { "levels": ["low", "medium", "high"], "scores_bps": [2000, 6000, 10000] },
+      "freshness_window_days": 1095, "input_predicates": ["use_case_need_fit_level"]
+    },
+    {
+      "metric_code": "privacy_video_regulation_fit", "dimension_code": "entry_ease", "name": "Privacy / Video Regulation Fit",
+      "value_type": "ordinal", "raw_unit": "level", "direction": "higher_better", "indicator_weight_bps": 2500,
+      "aggregation_method": "ordinal_from_evidence", "aggregation_config": { "predicate": "privacy_video_regulation_fit_level" },
+      "normalization_method": "ordinal_rubric",
+      "normalization_config": { "levels": ["restrictive", "moderate", "supportive"], "scores_bps": [0, 5000, 10000] },
+      "freshness_window_days": 1095, "critical": true, "input_predicates": ["privacy_video_regulation_fit_level"]
+    },
+    {
+      "metric_code": "deployment_data_residency_fit", "dimension_code": "entry_ease", "name": "Deployment Data Residency Fit",
+      "value_type": "ordinal", "raw_unit": "level", "direction": "higher_better", "indicator_weight_bps": 2000,
+      "aggregation_method": "ordinal_from_evidence", "aggregation_config": { "predicate": "data_residency_fit_level" },
+      "normalization_method": "ordinal_rubric",
+      "normalization_config": { "levels": ["incompatible", "partial", "compatible"], "scores_bps": [0, 5000, 10000] },
+      "freshness_window_days": 1095, "critical": true, "input_predicates": ["data_residency_fit_level"]
+    },
+    {
+      "metric_code": "partner_channel_availability", "dimension_code": "entry_ease", "name": "Partner Channel Availability",
+      "value_type": "ordinal", "raw_unit": "level", "direction": "higher_better", "indicator_weight_bps": 2000,
+      "aggregation_method": "ordinal_from_evidence", "aggregation_config": { "predicate": "partner_channel_availability_level" },
+      "normalization_method": "ordinal_rubric",
+      "normalization_config": { "levels": ["none", "limited", "strong"], "scores_bps": [1000, 5000, 10000] },
+      "freshness_window_days": 1095, "input_predicates": ["partner_channel_availability_level"]
+    },
+    {
+      "metric_code": "competition_intensity", "dimension_code": "entry_ease", "name": "Competition Intensity",
+      "value_type": "decimal", "raw_unit": "index", "direction": "lower_better", "indicator_weight_bps": 1500,
+      "aggregation_method": "competition_from_market_structure", "aggregation_config": { "input_predicates": ["competition_intensity_index", "qualified_retailer_count_actual", "top_customer_concentration_percent"], "derivation_version": "derived-retail-v1" },
+      "normalization_method": "piecewise_linear",
+      "normalization_config": { "anchors": [ { "raw": "1", "score_bps": 10000 }, { "raw": "3", "score_bps": 7500 }, { "raw": "5", "score_bps": 5000 }, { "raw": "7", "score_bps": 2500 }, { "raw": "10", "score_bps": 0 } ] },
+      "freshness_window_days": 1095, "input_predicates": ["competition_intensity_index", "qualified_retailer_count_actual", "top_customer_concentration_percent"]
+    },
+    {
+      "metric_code": "localization_sales_friction", "dimension_code": "entry_ease", "name": "Localization / Sales Friction",
+      "value_type": "decimal", "raw_unit": "index", "direction": "lower_better", "indicator_weight_bps": 2000,
+      "aggregation_method": "localization_friction_from_partner", "aggregation_config": { "input_predicates": ["localization_sales_friction_index", "partner_channel_availability_level"], "derivation_version": "derived-retail-v1", "partner_level_to_index": { "none": 5, "limited": 3, "strong": 1 } },
+      "normalization_method": "piecewise_linear",
+      "normalization_config": { "anchors": [ { "raw": "1", "score_bps": 10000 }, { "raw": "2", "score_bps": 7500 }, { "raw": "3", "score_bps": 5000 }, { "raw": "4", "score_bps": 2500 }, { "raw": "5", "score_bps": 0 } ] },
+      "freshness_window_days": 1095, "input_predicates": ["localization_sales_friction_index"]
+    }
+  ]
+}

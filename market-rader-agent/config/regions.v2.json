@@ -1,0 +1,58 @@
+{
+  "version": "2.0.0",
+  "default_region_code": "sea",
+  "regions": [
+    {
+      "code": "sea",
+      "name_en": "Southeast Asia",
+      "name_zh": "东南亚",
+      "country_scope": ["VN", "ID", "TH", "MY", "PH"],
+      "metric_definition_set_code": "southeast_asia_retail",
+      "metric_definition_set_version": "1.0.0",
+      "reference_set_code": "southeast_asia_retail",
+      "reference_set_version": "1.0.0",
+      "scoring_model_code": "market_opportunity",
+      "scoring_model_version": "1.2.0",
+      "benchmark_status": "regional"
+    },
+    {
+      "code": "middle-east",
+      "name_en": "Middle East",
+      "name_zh": "中东",
+      "country_scope": ["SA", "AE", "QA", "KW", "OM"],
+      "metric_definition_set_code": "middle_east_retail",
+      "metric_definition_set_version": "1.0.0",
+      "reference_set_code": "middle_east_retail",
+      "reference_set_version": "1.0.0",
+      "scoring_model_code": "market_opportunity_middle_east",
+      "scoring_model_version": "1.2.0",
+      "benchmark_status": "shared_baseline"
+    },
+    {
+      "code": "latam",
+      "name_en": "Latin America",
+      "name_zh": "拉美",
+      "country_scope": ["MX", "BR", "CO", "CL", "PE"],
+      "metric_definition_set_code": "latin_america_retail",
+      "metric_definition_set_version": "1.0.0",
+      "reference_set_code": "latin_america_retail",
+      "reference_set_version": "1.0.0",
+      "scoring_model_code": "market_opportunity_latin_america",
+      "scoring_model_version": "1.2.0",
+      "benchmark_status": "shared_baseline"
+    },
+    {
+      "code": "north-africa",
+      "name_en": "North Africa",
+      "name_zh": "北非",
+      "country_scope": ["EG", "MA", "DZ", "TN", "LY"],
+      "metric_definition_set_code": "north_africa_retail",
+      "metric_definition_set_version": "1.0.0",
+      "reference_set_code": "north_africa_retail",
+      "reference_set_version": "1.0.0",
+      "scoring_model_code": "market_opportunity_north_africa",
+      "scoring_model_version": "1.2.0",
+      "benchmark_status": "shared_baseline"
+    }
+  ]
+}

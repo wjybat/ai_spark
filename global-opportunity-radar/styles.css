@@ -85,6 +85,7 @@ button:focus-visible,
 .header-actions,
 .brand-line,
 .scan-button,
+.market-radar-header-link,
 .source-pill,
 .live-pill {
   display: flex;
@@ -167,6 +168,26 @@ button:focus-visible,
   border-radius: 50%;
   background: #5b9b6c;
   box-shadow: 0 0 0 4px rgba(91, 155, 108, 0.12);
+}
+
+.market-radar-header-link {
+  height: 38px;
+  gap: 7px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: color-mix(in srgb, white 55%, transparent);
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 650;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 160ms ease, transform 160ms ease;
+}
+
+.market-radar-header-link:hover {
+  background: color-mix(in srgb, var(--mint) 44%, transparent);
+  transform: translateY(-1px);
 }
 
 .scan-button {

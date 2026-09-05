@@ -1,0 +1,1 @@
+ALTER TABLE `scan_runs` ADD `trace_id` text;

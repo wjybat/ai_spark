@@ -1,0 +1,27 @@
+{
+  "name": "@market-radar/web",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "NODE_USE_ENV_PROXY=1 next dev",
+    "build": "next build",
+    "start": "NODE_USE_ENV_PROXY=1 next start",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@market-radar/agent": "workspace:*",
+    "@market-radar/domain": "workspace:*",
+    "@market-radar/infrastructure": "workspace:*",
+    "next": "^16.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.9.0"
+  }
+}

@@ -47,6 +47,12 @@ OPENAI_API_KEY=<仅保存在本地 .env>
 
 该 provider 使用 Chat Completions 流式接口与 Qwen 的 `enable_thinking` 参数，支持标准工具调用。配置变更后重启后端。模型密钥不进入页面、研究资料或 API 返回结果。
 
+## 市场雷达入口
+
+主页面顶部固定显示“市场雷达”入口，并在新标签页打开市场扫描工作台。默认地址为 `http://localhost:3000`，因此本地联调时需要同时在仓库的 `market-rader-agent` 目录运行 `pnpm dev`。部署环境可在加载 `app.jsx` 前设置 `window.MARKET_RADAR_URL` 覆盖目标地址。
+
+当前入口只负责页面跳转，不同步市场、国家或客户上下文；后续再通过正式移交接口打通数据。
+
 ## 公司 AI Router Live 模式
 
 项目内置 Dmall AI Router provider，使用 OpenAI Responses 协议：

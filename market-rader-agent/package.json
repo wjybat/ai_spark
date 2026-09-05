@@ -1,0 +1,44 @@
+{
+  "name": "market-radar-agent",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@11.17.0",
+  "engines": {
+    "node": ">=24 <25",
+    "pnpm": ">=11 <12"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter @market-radar/web --filter @market-radar/worker dev",
+    "dev:web": "pnpm --filter @market-radar/web dev",
+    "dev:worker": "pnpm --filter @market-radar/worker dev",
+    "lint": "eslint . --max-warnings=0",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "pnpm test:boundaries && pnpm test:config && pnpm -r --if-present test",
+    "test:boundaries": "node scripts/check-import-boundaries.mjs",
+    "test:config": "pnpm --filter @market-radar/contracts build && pnpm --filter @market-radar/infrastructure build && node scripts/check-config.mjs",
+    "test:unit": "vitest run",
+    "test:integration": "pnpm -r --if-present test:integration",
+    "test:e2e": "pnpm -r --if-present test:e2e",
+    "test:evals": "pnpm -r --if-present test:evals",
+    "db:generate": "pnpm --filter @market-radar/infrastructure db:generate",
+    "db:migrate": "pnpm --filter @market-radar/infrastructure db:migrate",
+    "db:seed": "pnpm --filter @market-radar/infrastructure db:seed",
+    "data:clear-fixture": "pnpm --filter @market-radar/infrastructure fixture:clear",
+    "data:revalidate-evidence": "pnpm --filter @market-radar/infrastructure evidence:revalidate",
+    "db:reset:test": "pnpm --filter @market-radar/infrastructure db:reset:test",
+    "backup": "pnpm --filter @market-radar/infrastructure backup",
+    "restore:check": "pnpm --filter @market-radar/infrastructure restore:check",
+    "replay:fixture": "pnpm --filter @market-radar/evals replay:fixture",
+    "build": "pnpm -r --if-present build",
+    "verify": "pnpm lint && pnpm test:boundaries && pnpm test:config && pnpm typecheck && pnpm test:unit && pnpm test:integration && pnpm build"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "drizzle-kit": "^0.31.10",
+    "eslint": "^10.9.1",
+    "globals": "^16.5.0",
+    "typescript": "^5.9.0",
+    "typescript-eslint": "^8.68.0",
+    "vitest": "^3.2.7"
+  }
+}

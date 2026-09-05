@@ -1,0 +1,86 @@
+{
+  "fixture": true,
+  "synthetic": true,
+  "not_for_business_use": true,
+  "version": "1.1.0",
+  "documents": [
+    {
+      "country": "MY", "topic": "retailer_expansion", "source_type": "industry_association_transparent_research",
+      "publisher": "Malaysia Retailers Research (synthetic)", "url": "https://fixture.example/research/my-expansion",
+      "published_at": "2026-07-05", "language": "en",
+      "text": "Malaysia convenience expansion remains steady. [announced_store_openings_actual|600|store|2026-05-01]. A majority of mid-size chains signaled modest growth. [expanding_retailer_share_percent|35|percent|2026-05-01]. New international entrants are testing the market. [new_entrant_activity_level|moderate|level|2026-05-01]."
+    },
+    {
+      "country": "MY", "topic": "digital_readiness", "source_type": "industry_association_transparent_research",
+      "publisher": "Malaysia Retailers Research (synthetic)", "url": "https://fixture.example/research/my-digital",
+      "published_at": "2026-07-05", "language": "en",
+      "text": "Malaysian chains are upgrading store systems. [store_system_readiness_level|medium|level|2026-03-20]. Bandwidth in stores supports cloud workloads. [cloud_connectivity_readiness_level|medium|level|2026-03-20]. Retailers are increasing digital budgets. [digital_investment_signals_level|medium|level|2026-04-20]."
+    },
+    {
+      "country": "MY", "topic": "video_infrastructure", "source_type": "industry_association_transparent_research",
+      "publisher": "Malaysia Retailers Research (synthetic)", "url": "https://fixture.example/research/my-video",
+      "published_at": "2026-07-05", "language": "en",
+      "text": "Camera coverage is improving in Malaysian modern formats. [video_infrastructure_readiness_level|medium|level|2026-03-20]."
+    },
+    {
+      "country": "MY", "topic": "market_size", "source_type": "mainstream_business_media",
+      "publisher": "Kuala Lumpur Trade Post (synthetic)", "url": "https://fixture.example/research/my-market-size",
+      "published_at": "2026-07-20", "language": "en",
+      "text": "The addressable base for analytics deployment is concentrated in urban Malaysian chains. [addressable_store_base_actual|6000|store|2026-06-10]."
+    },
+    {
+      "country": "MY", "topic": "retailer_landscape", "source_type": "mainstream_business_media",
+      "publisher": "Kuala Lumpur Trade Post (synthetic)", "url": "https://fixture.example/research/my-landscape",
+      "published_at": "2026-07-20", "language": "en",
+      "text": "Top chains hold most of the Malaysian modern trade. [top_customer_concentration_percent|55|percent|2026-06-10]. Deal sizes remain mid-market. [estimated_acv_potential_usd_millions|25|usd_millions|2026-06-10]."
+    },
+    {
+      "country": "MY", "topic": "loss_prevention_need", "source_type": "mainstream_business_media",
+      "publisher": "Kuala Lumpur Trade Post (synthetic)", "url": "https://fixture.example/research/my-lp-need",
+      "published_at": "2026-07-22", "language": "en",
+      "text": "Shrinkage concerns are rising among Malaysian convenience operators. [use_case_need_fit_level|medium|level|2026-06-10]."
+    },
+    {
+      "country": "MY", "topic": "partner_ecosystem", "source_type": "mainstream_business_media",
+      "publisher": "Kuala Lumpur Trade Post (synthetic)", "url": "https://fixture.example/research/my-partners",
+      "published_at": "2026-07-22", "language": "en",
+      "text": "Regional integrators are active in Malaysia. [partner_channel_availability_level|limited|level|2026-06-15]. Local sales support is available in English and Bahasa. [localization_sales_friction_index|2|index|2026-06-15]."
+    },
+    {
+      "country": "ID", "topic": "digital_readiness", "source_type": "industry_association_transparent_research",
+      "publisher": "Indonesian Retailers Association (synthetic)", "url": "https://fixture.example/research/id-digital",
+      "published_at": "2026-07-08", "language": "en",
+      "text": "Cloud adoption is growing in Java-based Indonesian networks. [cloud_connectivity_readiness_level|medium|level|2026-03-25]. Digital investment signals are strong among top grocers. [digital_investment_signals_level|medium|level|2026-04-25]."
+    },
+    {
+      "country": "ID", "topic": "video_infrastructure", "source_type": "industry_association_transparent_research",
+      "publisher": "Indonesian Retailers Association (synthetic)", "url": "https://fixture.example/research/id-video",
+      "published_at": "2026-07-08", "language": "en",
+      "text": "Indonesian chains report mixed camera coverage. [video_infrastructure_readiness_level|low|level|2026-03-25]."
+    },
+    {
+      "country": "ID", "topic": "retailer_landscape", "source_type": "mainstream_business_media",
+      "publisher": "Jakarta Commerce Daily (synthetic)", "url": "https://fixture.example/research/id-landscape",
+      "published_at": "2026-07-18", "language": "en",
+      "text": "Estimated deal potential is rising with Indonesian chain consolidation. [estimated_acv_potential_usd_millions|45|usd_millions|2026-06-05]."
+    },
+    {
+      "country": "ID", "topic": "loss_prevention_need", "source_type": "mainstream_business_media",
+      "publisher": "Jakarta Commerce Daily (synthetic)", "url": "https://fixture.example/research/id-lp-need",
+      "published_at": "2026-07-18", "language": "en",
+      "text": "Indonesian retailers are piloting video analytics in flagship stores. [use_case_need_fit_level|medium|level|2026-06-05]."
+    },
+    {
+      "country": "VN", "topic": "market_size", "source_type": "mainstream_business_media",
+      "publisher": "SEA Retail Weekly (synthetic)", "url": "https://fixture.example/research/vn-market-size",
+      "published_at": "2026-08-10", "language": "en",
+      "text": "Vietnam's qualified store base keeps expanding ahead of plan. [qualified_store_base_actual|46500|store|2026-07-01]. Urban chains form the main addressable pool for new deployments. [addressable_store_base_actual|21500|store|2026-07-01]."
+    },
+    {
+      "country": "TH", "topic": "retailer_expansion", "source_type": "industry_association_transparent_research",
+      "publisher": "Thai Retailers Association (synthetic)", "url": "https://fixture.example/research/th-expansion",
+      "published_at": "2026-08-01", "language": "en",
+      "text": "Thai chains continue opening stores outside Bangkok. [announced_store_openings_actual|1500|store|2026-06-20]. Expansion appetite improved slightly this year. [expanding_retailer_share_percent|45|percent|2026-06-20]."
+    }
+  ]
+}

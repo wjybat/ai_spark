@@ -1,0 +1,20 @@
+{
+  "code": "ai_video_loss_prevention",
+  "version": "1.0.0",
+  "status": "draft",
+  "name": "AI Video Analytics / Loss Prevention v1",
+  "use_case": "loss_prevention",
+  "ideal_customer_store_count": 500,
+  "supported_deployment_modes": ["edge", "hybrid"],
+  "camera_compatibility": ["rtsp", "onvif"],
+  "edge_hardware_requirement": "supported",
+  "cloud_requirement": "optional",
+  "data_residency_capability": "country_local_or_edge",
+  "supported_languages": ["en"],
+  "integration_requirements": ["camera_stream", "store_network"],
+  "sales_model": "enterprise_direct_or_partner",
+  "target_acv_band": { "currency": "USD", "min_minor_units": 5000000, "max_minor_units": 25000000 },
+  "required_digital_readiness": "medium",
+  "weight_profile_default": "overall_v1",
+  "hard_blocker_rules": ["video_processing_prohibited_for_use_case", "data_residency_incompatible", "no_qualified_customer"]
+}

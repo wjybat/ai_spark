@@ -1,0 +1,10 @@
+{
+  "code": "southeast_asia_retail",
+  "version": "1.0.0",
+  "scope": { "countries": ["VN", "ID", "TH", "MY", "PH", "SG", "BN", "KH", "LA", "MM", "TL"] },
+  "effective_at": "2026-09-01",
+  "config": {
+    "note": "Reference percentile baseline reserved for future metrics; no MVP indicator uses reference_percentile."
+  },
+  "status": "draft"
+}

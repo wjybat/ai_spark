@@ -76,6 +76,14 @@ async function tick() { await act(async () => vi.advanceTimersByTimeAsync(1100))
 async function finishScan() { for (let i = 0; i < 4; i += 1) await tick(); }
 
 describe("local market scan demo", { timeout: 20_000 }, () => {
+  it("keeps the market radar entrance in the global header", () => {
+    const link = container.querySelector<HTMLAnchorElement>(".app-header [data-market-radar-link]");
+    expect(link?.textContent).toContain("市场雷达");
+    expect(link?.href).toBe("http://localhost:3000/");
+    expect(link?.target).toBe("_blank");
+    expect(container.querySelectorAll("[data-market-radar-link]")).toHaveLength(1);
+  });
+
   it("starts with the intelligence panel collapsed and opens on South America", async () => {
     expect(container.querySelector(".app-stage")?.classList.contains("is-panel-collapsed")).toBe(true);
     expect(container.querySelector("#opportunity-intelligence-panel")?.getAttribute("aria-hidden")).toBe("true");

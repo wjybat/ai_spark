@@ -1,0 +1,39 @@
+{
+  "name": "@market-radar/infrastructure",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "pnpm build && node --env-file-if-exists=../../.env dist/db/migrate-cli.js",
+    "db:seed": "pnpm build && node --env-file-if-exists=../../.env dist/db/seed-cli.js",
+    "fixture:clear": "pnpm build && node --env-file-if-exists=../../.env dist/fixture/clear-cli.js",
+    "evidence:revalidate": "pnpm build && node --env-file-if-exists=../../.env dist/research/revalidate-cli.js",
+    "db:reset:test": "node --env-file-if-exists=../../.env -e \"require('node:fs').rmSync(process.env.MARKET_DB_PATH ?? './data/test.db', {force:true})\""
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^24.13.3",
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.7"
+  },
+  "dependencies": {
+    "@market-radar/application": "workspace:*",
+    "@market-radar/contracts": "workspace:*",
+    "@market-radar/domain": "workspace:*",
+    "better-sqlite3": "^12.11.1",
+    "drizzle-orm": "^0.44.7",
+    "zod": "^4.5.4"
+  }
+}
