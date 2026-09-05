@@ -94,6 +94,8 @@ export function CustomerWorkspace({ initialCustomerId }: { initialCustomerId?: s
     };
     const changeTab = (event: Event) => activateTab((event as CustomEvent<string>).detail || "总览");
     const analysisCompleted = () => { reload(); setDetailVersion((value) => value + 1); };
+    const requestedTab = new URLSearchParams(window.location.search).get("tab");
+    if (requestedTab && tabs.includes(requestedTab)) activateTab(requestedTab);
     window.addEventListener("customer-ingested", reload);
     window.addEventListener("customer-created", created);
     window.addEventListener("global-customer-search", globalSearch);

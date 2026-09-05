@@ -2,20 +2,23 @@
 
 import { Bell, BrainCircuit, ChevronRight, Database, FileText, Lightbulb, Menu, PanelLeftClose, PanelLeftOpen, Plus, Search, Settings, Sparkles, UserPlus, Users, X } from "lucide-react";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { IngestModal } from "./ingest-modal";
 import { JobTracker } from "./job-tracker";
 import { NewCustomerModal } from "./new-customer-modal";
 
 const nav = [
-  { label: "客户", icon: Users, tab: "总览" },
+  { label: "客户", icon: Users, href: "/customers" },
   { label: "洞察", icon: Lightbulb, tab: "关键洞察" },
-  { label: "经验库", icon: BrainCircuit, tab: "经验" },
+  { label: "经验库", icon: BrainCircuit, href: "/experiences" },
   { label: "数据来源", icon: Database, tab: "来源" },
   { label: "设置", icon: Settings, disabled: true },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const router = useRouter();
   const [ingestOpen, setIngestOpen] = useState(false);
   const [newCustomerOpen, setNewCustomerOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -28,6 +31,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setSidebarCollapsed(window.localStorage.getItem("customer-sidebar-collapsed") === "true");
+    if (pathname.startsWith("/experiences")) setActiveNav("经验库");
+    else if (pathname.startsWith("/customers")) setActiveNav("客户");
     const load = () => fetch("/api/v1/dashboard").then((response) => response.json()).then((data) => setIngestion(data.ingestion)).catch(() => undefined);
     const focusSearch = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
@@ -37,7 +42,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     };
     const syncNav = (event: Event) => {
       const tab = (event as CustomEvent<string>).detail;
-      setActiveNav(tab === "关键洞察" ? "洞察" : tab === "经验" ? "经验库" : tab === "来源" ? "数据来源" : "客户");
+      setActiveNav(tab === "关键洞察" ? "洞察" : tab === "来源" ? "数据来源" : "客户");
     };
     load();
     window.addEventListener("keydown", focusSearch);
@@ -48,7 +53,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       window.removeEventListener("customer-ingested", load);
       window.removeEventListener("customer-tab-active", syncNav);
     };
-  }, []);
+  }, [pathname]);
 
   function search(event: FormEvent) {
     event.preventDefault();
@@ -63,10 +68,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     });
   }
 
-  function openSection(label: string, tab?: string) {
-    if (!tab) return;
+  function openSection(label: string, tab?: string, href?: string) {
     setActiveNav(label);
     setMenuOpen(false);
+    if (href) { router.push(href); return; }
+    if (!tab) return;
+    if (pathname.startsWith("/experiences")) { router.push(`/customers?tab=${encodeURIComponent(tab)}`); return; }
     window.dispatchEvent(new CustomEvent("customer-tab-change", { detail: tab }));
   }
 
@@ -81,7 +88,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <span className="avatar" role="img" aria-label="当前用户 JS">JS</span>
     </header>
     <aside className={`sidebar ${menuOpen ? "open" : ""}`} aria-label="主导航">
-      <nav>{nav.map(({ label, icon: Icon, tab, disabled }) => <button key={label} type="button" className={activeNav === label ? "active" : ""} disabled={disabled} aria-label={label} title={disabled ? "该功能尚未开放" : sidebarCollapsed ? label : undefined} onClick={() => openSection(label, tab)}><Icon size={18} /><span className="nav-label">{label}</span>{label !== "客户" && <ChevronRight className="nav-arrow" size={14} />}</button>)}</nav>
+      <nav>{nav.map(({ label, icon: Icon, tab, href, disabled }) => <button key={label} type="button" className={activeNav === label ? "active" : ""} disabled={disabled} aria-label={label} title={disabled ? "该功能尚未开放" : sidebarCollapsed ? label : undefined} onClick={() => openSection(label, tab, href)}><Icon size={18} /><span className="nav-label">{label}</span>{label !== "客户" && <ChevronRight className="nav-arrow" size={14} />}</button>)}</nav>
       <div className="ingestion-status"><div className="status-title"><FileText size={15} />数据接入</div><div><span>今日</span><b>{ingestion.today}</b></div><div><span>本周</span><b>{ingestion.week}</b></div><div><span>来源总数</span><b>{ingestion.total.toLocaleString()}</b></div><p><i />系统运行正常</p></div>
       <div className="sidebar-foot"><button className="sidebar-toggle" type="button" onClick={toggleSidebar} aria-label={sidebarCollapsed ? "展开侧边栏" : "收起侧边栏"} aria-expanded={!sidebarCollapsed} title={sidebarCollapsed ? "展开侧边栏" : "收起侧边栏"}>{sidebarCollapsed ? <PanelLeftOpen size={15} /> : <PanelLeftClose size={15} />}</button></div>
     </aside>
