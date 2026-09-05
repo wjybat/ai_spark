@@ -72,10 +72,8 @@ export default async function CountryDetailPage({
         <span className={PRIORITY_CLASS[detail.priority] ?? "badge badge-p3"}>{priorityLabel(detail.priority)}</span>
       </div>
       <p className="page-sub">
-        Rank {detail.rank ?? "—"} · 稳定性 {detail.rank_stability} · 数据截至 {detail.data_as_of ?? "—"} ·
-        <span className="muted">
-          {context.resultProvider === "pi-agent" ? " 正式研究数据" : " 合成数据"}
-        </span>
+        Rank {detail.rank ?? "—"} · 稳定性 {detail.rank_stability} · 数据截至 {detail.data_as_of ?? "—"}
+        {context.resultProvider !== "pi-agent" && <span className="muted"> · 合成数据</span>}
       </p>
 
       {detail.blockers.length > 0 && (

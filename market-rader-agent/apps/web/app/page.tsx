@@ -189,7 +189,7 @@ export default async function OverviewPage(): Promise<React.JSX.Element> {
       id: "confidence",
       label: "数据可信度",
       value: `${avgEqi}%`,
-      delta: `五国平均 EQI（${context.resultProvider === "pi-agent" ? "正式研究数据" : "合成数据"}）`,
+      delta: context.resultProvider === "pi-agent" ? "五国平均 EQI" : "五国平均 EQI（合成数据）",
       icon: "shield",
       iconBg: "#f0ebfe",
       iconColor: "#8b5cf6",
@@ -341,7 +341,7 @@ export default async function OverviewPage(): Promise<React.JSX.Element> {
           </div>
           <div className="card-note">
             * 指数范围 0-100，分数越高代表机会越大；Blocked / Insufficient 国家不参与正式排名 · 数据截至{" "}
-            {context.dataAsOf ?? "—"}（{context.resultProvider === "pi-agent" ? "正式研究数据" : "合成数据"}）
+            {context.dataAsOf ?? "—"}{context.resultProvider === "pi-agent" ? "" : "（合成数据）"}
           </div>
         </section>
 

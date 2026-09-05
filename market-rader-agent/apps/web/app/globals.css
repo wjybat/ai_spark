@@ -945,12 +945,6 @@ details.why summary { cursor: pointer; color: var(--primary); font-size: 11.5px;
   .review-empty { align-items: flex-start; justify-content: flex-start; }
 }
 
-/* 合成数据横幅 */
-.synthetic-banner {
-  background: repeating-linear-gradient(45deg, #fdf6e3, #fdf6e3 12px, #faf0d7 12px, #faf0d7 24px);
-  color: #9a6b00; text-align: center; padding: 5px 12px; font-size: 12px; font-weight: 600;
-}
-
 .quality-gate-notice {
   display: flex;
   gap: 8px;

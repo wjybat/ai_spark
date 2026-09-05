@@ -62,23 +62,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
                 <span>收起菜单</span>
               </div>
             </aside>
-            <main className="main">
-              <div className="synthetic-banner" role="note">
-                {context.resultProvider === "pi-agent"
-                  ? "Live Research — 当前结果仅使用 Pi 搜索证据"
-                  : context.resultProvider === "fixture"
-                    ? "Synthetic Data — 当前展示为合成数据（fixture），不用于业务决策"
-                    : "No Result — 当前区域尚无扫描结果"}{" "}
-                · 区域 {context.scenarioName ?? context.regionCode}
-                {context.benchmarkStatus === "shared_baseline"
-                  ? " · 区域评分使用共享基准"
-                  : context.benchmarkStatus === "provisional_shared_baseline"
-                    ? " · 历史区域基准策略，评分仅为 provisional"
-                    : ""}
-                {" "}· 准入策略 高召回/低精度 · 最新任务 {context.scanStatus ?? "未运行"} · 当前结果 {context.resultProvider ?? "无"} · 数据截至 {context.dataAsOf ?? "—"}
-              </div>
-              {children}
-            </main>
+            <main className="main">{children}</main>
           </div>
         </div>
         <AgentDrawer />

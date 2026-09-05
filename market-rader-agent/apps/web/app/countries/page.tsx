@@ -38,8 +38,8 @@ export default async function CountriesPage(): Promise<React.JSX.Element> {
     <>
       <h1 className="page-title">Countries</h1>
       <p className="page-sub">
-        当前区域五国机会概览 · {context.scenarioName ?? context.regionCode}（数据截至 {context.dataAsOf ?? "—"}，
-        {context.resultProvider === "pi-agent" ? "正式研究数据" : "合成数据"}）
+        当前区域五国机会概览 · {context.scenarioName ?? context.regionCode}（数据截至 {context.dataAsOf ?? "—"}
+        {context.resultProvider === "pi-agent" ? "" : "，合成数据"}）
       </p>
       <table className="data-table">
         <thead>
