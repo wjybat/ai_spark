@@ -22,10 +22,32 @@ const DIMENSION_LABEL: Record<string, string> = {
 };
 
 interface CountryRow extends RankingItem {
-  readonly growth: number | null;
-  readonly digital: number | null;
-  readonly customerValue: number | null;
   readonly dimensionScores: Record<string, number | null>;
+  readonly dimensionCoverage: Record<string, number>;
+}
+
+function DimensionScoreLink({
+  row,
+  code,
+  label,
+}: {
+  row: CountryRow;
+  code: string;
+  label: string;
+}): React.JSX.Element {
+  const value = row.dimensionScores[code] ?? null;
+  if (value === null) return <>—</>;
+  const coverage = row.dimensionCoverage[code] ?? 0;
+  return (
+    <a
+      className="score-link"
+      href={`/countries/${row.country.id}#score-breakdown`}
+      title={`${label} ${value}/100，证据覆盖率 ${coverage}%。点击查看指标、权重与证据明细`}
+      aria-label={`${row.country.name}${label} ${value} 分，查看计算明细`}
+    >
+      {value}
+    </a>
+  );
 }
 
 function priorityBadge(priority: string): string {
@@ -78,20 +100,29 @@ export default async function OverviewPage(): Promise<React.JSX.Element> {
   const rows: CountryRow[] = ranking.items.map((item, index) => {
     const detail = details[index];
     const dimensionScores: Record<string, number | null> = {};
+    const dimensionCoverage: Record<string, number> = {};
     for (const dimension of detail?.dimensions ?? []) {
       dimensionScores[dimension.dimension_code] = dimension.score;
+      dimensionCoverage[dimension.dimension_code] = dimension.coverage;
     }
     return {
       ...item,
-      growth: dimensionScores["growth"] ?? null,
-      digital: dimensionScores["digital"] ?? null,
-      customerValue: dimensionScores["customer_value"] ?? null,
       dimensionScores,
+      dimensionCoverage,
     };
   });
 
   const ranked = rows.filter((row) => row.rank !== null);
   const top = ranked[0];
+  const topDetail = top === undefined
+    ? null
+    : details.find((detail) => detail?.country.id === top.country.id) ?? null;
+  const topFormula = topDetail?.dimensions
+    .filter((dimension) => dimension.score !== null && dimension.contribution !== null)
+    .map((dimension) =>
+      `${DIMENSION_LABEL[dimension.dimension_code] ?? dimension.dimension_code} ${dimension.score}×${dimension.weight}%`,
+    )
+    .join(" + ") ?? null;
 
   const bubbles: BubbleCountry[] = rows.map((row) => ({
     code: row.country.iso2,
@@ -142,9 +173,9 @@ export default async function OverviewPage(): Promise<React.JSX.Element> {
     },
     {
       id: "opportunity",
-      label: "综合机会指数",
-      value: top !== undefined ? String(top.opportunity_score ?? "—") : "—",
-      delta: `五国平均 ${avgOpp ?? "—"}`,
+      label: "平均机会指数",
+      value: String(avgOpp ?? "—"),
+      delta: `Top 1 ${top !== undefined ? COUNTRY_META[top.country.id]?.name ?? top.country.name : "—"} ${top?.opportunity_score ?? "—"}`,
       icon: "radar",
       iconBg: "#e7f8f0",
       iconColor: "#10b981",
@@ -243,12 +274,15 @@ export default async function OverviewPage(): Promise<React.JSX.Element> {
           <div className="bubble-wrap">
             <BubbleChart countries={bubbles} />
           </div>
-          <div className="card-note center">气泡大小代表机会指数 · 虚线半透明 = 非正式结果</div>
+          <div className="card-note center">圆点为真实坐标，密集气泡通过引线避让 · 气泡大小代表机会指数</div>
         </section>
 
         {/* 排行表 */}
         <section className="card ranking-card">
-          <div className="card-title">国家机会排行</div>
+          <div className="card-title">
+            国家机会排行
+            <span className="score-hint">点击维度分数查看计算明细</span>
+          </div>
           <table className="rank-table">
             <thead>
               <tr>
@@ -276,9 +310,15 @@ export default async function OverviewPage(): Promise<React.JSX.Element> {
                       </div>
                     </td>
                     <td className="num num-opp">{row.opportunity_score ?? "—"}</td>
-                    <td className="num num-growth">{row.growth ?? "—"}</td>
-                    <td className="num num-digital">{row.digital ?? "—"}</td>
-                    <td className="num num-customer">{row.customerValue ?? "—"}</td>
+                    <td className="num num-growth">
+                      <DimensionScoreLink row={row} code="growth" label="增长" />
+                    </td>
+                    <td className="num num-digital">
+                      <DimensionScoreLink row={row} code="digital" label="数字化" />
+                    </td>
+                    <td className="num num-customer">
+                      <DimensionScoreLink row={row} code="customer_value" label="客户价值" />
+                    </td>
                     <td className="num num-diff">{row.entry_difficulty ?? "—"}</td>
                     <td>
                       <span className={priorityBadge(row.priority)}>{priorityLabel(row.priority)}</span>
@@ -287,6 +327,18 @@ export default async function OverviewPage(): Promise<React.JSX.Element> {
                 ))}
             </tbody>
           </table>
+          <div className="score-method">
+            <strong>分数如何计算？</strong>
+            <span>
+              维度分先将原始指标归一化到 0–100，再按指标权重加权；100 分表示当前可用指标达到归一化上限，并不表示原始数据等于 100。
+              综合机会分是六个维度（含“进入容易度”）的加权和，缺失值不会按 0 计算。
+            </span>
+            {top !== undefined && topFormula !== null && (
+              <span className="score-example">
+                {COUNTRY_META[top.country.id]?.name ?? top.country.name}：{topFormula} = {top.opportunity_score ?? "—"}
+              </span>
+            )}
+          </div>
           <div className="card-note">
             * 指数范围 0-100，分数越高代表机会越大；Blocked / Insufficient 国家不参与正式排名 · 数据截至{" "}
             {context.dataAsOf ?? "—"}（{context.resultProvider === "pi-agent" ? "正式研究数据" : "合成数据"}）

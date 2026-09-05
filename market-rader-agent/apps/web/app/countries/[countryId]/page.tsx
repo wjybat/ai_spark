@@ -109,8 +109,8 @@ export default async function CountryDetailPage({
         ))}
       </div>
 
-      <div className="card" style={{ marginBottom: 14 }}>
-        <div className="card-title">六维度拆解</div>
+      <div className="card" id="score-breakdown" style={{ marginBottom: 14 }}>
+        <div className="card-title">六维度评分拆解</div>
         <div style={{ marginTop: 10 }}>
           <DetailBars
             bars={detail.dimensions.map((dimension) => {
@@ -124,12 +124,34 @@ export default async function CountryDetailPage({
             })}
           />
         </div>
+        <table className="score-breakdown-table">
+          <thead>
+            <tr>
+              <th>维度</th>
+              <th>维度分</th>
+              <th>综合权重</th>
+              <th>分数贡献</th>
+              <th>证据覆盖率</th>
+            </tr>
+          </thead>
+          <tbody>
+            {detail.dimensions.map((dimension) => (
+              <tr key={dimension.dimension_code}>
+                <td>{DIMENSION_LABEL[dimension.dimension_code] ?? dimension.dimension_code}</td>
+                <td>{dimension.score ?? "—"}</td>
+                <td>{dimension.weight}%</td>
+                <td>{dimension.contribution ?? "—"}</td>
+                <td>{dimension.coverage}%</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
         <div className="card-note">
-          各维度得分为可用指标加权重归一化结果；权重来自 overall_v1 策略，覆盖率不足 20% 的维度不计算得分。
+          综合机会分 = 各维度“分数贡献”之和。维度分来自可用原始指标归一化后的加权结果；100 分表示达到归一化上限，不代表原始值为 100。
         </div>
       </div>
 
-      <div className="card">
+      <div className="card" id="raw-indicators">
         <div className="card-title">Raw Indicators（{detail.metrics.length}）</div>
         <table className="data-table">
           <thead>

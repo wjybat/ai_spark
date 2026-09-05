@@ -322,7 +322,7 @@ button { font-family: inherit; }
 /* 主区域三栏 */
 .grid-main {
   display: grid;
-  grid-template-columns: 300px minmax(0, 1fr) 336px;
+  grid-template-columns: clamp(360px, 22vw, 420px) minmax(0, 1fr) 336px;
   gap: 14px;
   align-items: stretch;
 }
@@ -341,10 +341,13 @@ button { font-family: inherit; }
 .card-note.center { text-align: center; }
 
 /* 气泡图 */
-.bubble-wrap { flex: 1; display: flex; align-items: center; margin-top: 6px; }
-.bubble-chart { display: block; }
+.bubble-wrap { flex: 1; display: flex; align-items: center; margin-top: 6px; min-height: 360px; }
+.bubble-chart { display: block; overflow: visible; }
 .bubble { cursor: pointer; transition: opacity 0.15s; }
 .bubble:hover { opacity: 0.82; }
+.bubble circle { stroke: rgba(255, 255, 255, 0.85); stroke-width: 1.5; }
+.bubble-leader { stroke: #a8b4c6; stroke-width: 1; stroke-dasharray: 3 3; }
+.bubble-anchor { fill: #6f7f96; stroke: #fff; stroke-width: 1; }
 
 /* 排行表 */
 .rank-table { width: 100%; border-collapse: collapse; margin-top: 6px; }
@@ -369,6 +372,52 @@ button { font-family: inherit; }
 .num-digital { color: #3b82f6; }
 .num-customer { color: #1e40af; }
 .num-diff { color: #e6950a; }
+.score-link {
+  color: inherit;
+  text-decoration: underline dotted currentColor;
+  text-underline-offset: 3px;
+  cursor: help;
+}
+.score-link:hover { text-decoration-style: solid; }
+.score-hint {
+  margin-left: auto;
+  color: var(--text-3);
+  font-size: 10.5px;
+  font-weight: 400;
+}
+.score-method {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 5px 10px;
+  margin-top: auto;
+  padding: 10px 12px;
+  color: #42526b;
+  background: #f6f9ff;
+  border: 1px solid #e2eaff;
+  border-radius: 8px;
+  font-size: 10.5px;
+  line-height: 1.55;
+}
+.score-method strong { color: #244b8f; white-space: nowrap; }
+.score-example {
+  grid-column: 2;
+  color: #65758c;
+}
+.score-breakdown-table {
+  width: 100%;
+  margin-top: 14px;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.score-breakdown-table th,
+.score-breakdown-table td {
+  padding: 8px 10px;
+  text-align: right;
+  border-top: 1px solid var(--border-soft);
+}
+.score-breakdown-table th { color: var(--text-3); font-weight: 500; }
+.score-breakdown-table th:first-child,
+.score-breakdown-table td:first-child { text-align: left; }
 
 .badge {
   display: inline-block;

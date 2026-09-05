@@ -98,36 +98,49 @@ export interface BubbleCountry {
   readonly href: string;
 }
 
-/** 市场吸引力 × 进入难度 气泡图 */
+/** 市场吸引力 × 进入难度气泡图。密集数据点会轻微避让，并用引线保留真实坐标。 */
 export function BubbleChart({ countries }: { countries: readonly BubbleCountry[] }): React.JSX.Element {
-  const W = 300;
-  const H = 262;
-  const px = { l: 34, r: 10, t: 16, b: 38 };
+  const W = 420;
+  const H = 340;
+  const px = { l: 42, r: 16, t: 20, b: 42 };
   const x0 = px.l;
   const y0 = px.t;
   const x1 = W - px.r;
   const y1 = H - px.b;
   const midX = (x0 + x1) / 2;
   const midY = (y0 + y1) / 2;
-  const cx = (v: number) => x0 + (v / 100) * (x1 - x0);
-  const cy = (v: number) => y1 - (v / 100) * (y1 - y0);
+  const cx = (value: number) => x0 + (value / 100) * (x1 - x0);
+  const cy = (value: number) => y1 - (value / 100) * (y1 - y0);
 
-  const bubbles = countries
-    .map((c) => {
-      const r = 10 + (c.opportunity ?? 40) * 0.21;
-      const bx = cx(c.x);
-      const by = cy(c.y);
-      const fontSize = c.name.length > 2 ? 9.5 : 11;
-      return (
-        `<a href="${c.href}"><g class="bubble" data-code="${c.code}">` +
-        `<circle cx="${fmt(bx)}" cy="${fmt(by)}" r="${fmt(r)}" fill="${c.color}" fill-opacity="${c.provisional ? 0.45 : 0.88}"` +
-        (c.provisional ? ' stroke-dasharray="4 3"' : "") +
-        `/>` +
-        `<text x="${fmt(bx)}" y="${fmt(by + 3.5)}" text-anchor="middle" font-size="${fontSize}" font-weight="600" fill="#fff">${c.name}</text>` +
-        `</g></a>`
-      );
-    })
-    .join("");
+  const positioned: Array<{
+    country: BubbleCountry;
+    anchorX: number;
+    anchorY: number;
+    x: number;
+    y: number;
+    radius: number;
+  }> = [];
+  const offsets = [
+    [0, 0], [0, -38], [38, 0], [0, 38], [-38, 0],
+    [38, -38], [38, 38], [-38, 38], [-38, -38],
+    [0, -76], [76, 0], [0, 76], [-76, 0],
+  ] as const;
+
+  for (const country of countries) {
+    const anchorX = cx(country.x);
+    const anchorY = cy(country.y);
+    const radius = 13 + (country.opportunity ?? 40) * 0.06;
+    const candidates = offsets.map(([dx, dy]) => ({
+      x: Math.min(x1 - radius, Math.max(x0 + radius, anchorX + dx)),
+      y: Math.min(y1 - radius, Math.max(y0 + radius, anchorY + dy)),
+    }));
+    const position = candidates.find((candidate) =>
+      positioned.every((other) =>
+        Math.hypot(candidate.x - other.x, candidate.y - other.y) >= radius + other.radius + 5,
+      ),
+    ) ?? candidates[0]!;
+    positioned.push({ country, anchorX, anchorY, ...position, radius });
+  }
 
   return (
     <svg
@@ -136,23 +149,50 @@ export function BubbleChart({ countries }: { countries: readonly BubbleCountry[]
       width="100%"
       role="img"
       aria-label="市场吸引力与进入难度气泡图"
-      dangerouslySetInnerHTML={{
-        __html:
-          `<line x1="${midX}" y1="${y0}" x2="${midX}" y2="${y1}" stroke="#dfe5ee" stroke-dasharray="4 4"/>` +
-          `<line x1="${x0}" y1="${midY}" x2="${x1}" y2="${midY}" stroke="#dfe5ee" stroke-dasharray="4 4"/>` +
-          `<line x1="${x0}" y1="${y1}" x2="${x0}" y2="${y0 - 4}" stroke="#c4cddb" stroke-width="1.2"/>` +
-          `<path d="M ${x0 - 3} ${y0 + 1} L ${x0} ${y0 - 6} L ${x0 + 3} ${y0 + 1}" fill="none" stroke="#c4cddb" stroke-width="1.2"/>` +
-          `<line x1="${x0}" y1="${y1}" x2="${x1 + 4}" y2="${y1}" stroke="#c4cddb" stroke-width="1.2"/>` +
-          `<path d="M ${x1 - 1} ${y1 - 3} L ${x1 + 6} ${y1} L ${x1 - 1} ${y1 + 3}" fill="none" stroke="#c4cddb" stroke-width="1.2"/>` +
-          `<text x="${x0 - 8}" y="${y0 + 3}" text-anchor="end" font-size="10" fill="#8a94a6">高</text>` +
-          `<text x="${x0 - 8}" y="${y1 + 3}" text-anchor="end" font-size="10" fill="#8a94a6">低</text>` +
-          `<text x="${x0}" y="${y1 + 14}" text-anchor="middle" font-size="10" fill="#8a94a6">容易</text>` +
-          `<text x="${x1}" y="${y1 + 14}" text-anchor="middle" font-size="10" fill="#8a94a6">困难</text>` +
-          `<text x="${(x0 + x1) / 2}" y="${H - 6}" text-anchor="middle" font-size="11" fill="#5b6b84">进入难度</text>` +
-          `<text transform="translate(10 ${(y0 + y1) / 2}) rotate(-90)" text-anchor="middle" font-size="11" fill="#5b6b84">市场吸引力</text>` +
-          bubbles,
-      }}
-    />
+    >
+      <line x1={midX} y1={y0} x2={midX} y2={y1} stroke="#dfe5ee" strokeDasharray="4 4" />
+      <line x1={x0} y1={midY} x2={x1} y2={midY} stroke="#dfe5ee" strokeDasharray="4 4" />
+      <line x1={x0} y1={y1} x2={x0} y2={y0 - 4} stroke="#c4cddb" strokeWidth={1.2} />
+      <path d={`M ${x0 - 3} ${y0 + 1} L ${x0} ${y0 - 6} L ${x0 + 3} ${y0 + 1}`} fill="none" stroke="#c4cddb" strokeWidth={1.2} />
+      <line x1={x0} y1={y1} x2={x1 + 4} y2={y1} stroke="#c4cddb" strokeWidth={1.2} />
+      <path d={`M ${x1 - 1} ${y1 - 3} L ${x1 + 6} ${y1} L ${x1 - 1} ${y1 + 3}`} fill="none" stroke="#c4cddb" strokeWidth={1.2} />
+      <text x={x0 - 9} y={y0 + 3} textAnchor="end" fontSize={10} fill="#8a94a6">高</text>
+      <text x={x0 - 9} y={y1 + 3} textAnchor="end" fontSize={10} fill="#8a94a6">低</text>
+      <text x={x0} y={y1 + 15} textAnchor="middle" fontSize={10} fill="#8a94a6">容易</text>
+      <text x={x1} y={y1 + 15} textAnchor="middle" fontSize={10} fill="#8a94a6">困难</text>
+      <text x={(x0 + x1) / 2} y={H - 7} textAnchor="middle" fontSize={11} fill="#5b6b84">进入难度</text>
+      <text transform={`translate(11 ${(y0 + y1) / 2}) rotate(-90)`} textAnchor="middle" fontSize={11} fill="#5b6b84">市场吸引力</text>
+
+      {positioned.map(({ country, anchorX, anchorY, x, y, radius }) => {
+        const displaced = Math.hypot(x - anchorX, y - anchorY) > 2;
+        return (
+          <g key={country.code}>
+            {displaced && (
+              <>
+                <line className="bubble-leader" x1={anchorX} y1={anchorY} x2={x} y2={y} />
+                <circle className="bubble-anchor" cx={anchorX} cy={anchorY} r={2.5} />
+              </>
+            )}
+            <a href={country.href}>
+              <g className="bubble" data-code={country.code}>
+                <title>{`${country.name}：市场吸引力 ${country.y}，进入难度 ${country.x}，机会指数 ${country.opportunity ?? "—"}`}</title>
+                <circle
+                  cx={x}
+                  cy={y}
+                  r={radius}
+                  fill={country.color}
+                  fillOpacity={country.provisional ? 0.45 : 0.88}
+                  strokeDasharray={country.provisional ? "4 3" : undefined}
+                />
+                <text x={x} y={y + 3.5} textAnchor="middle" fontSize={country.name.length > 2 ? 9.5 : 11} fontWeight={600} fill="#fff">
+                  {country.name}
+                </text>
+              </g>
+            </a>
+          </g>
+        );
+      })}
+    </svg>
   );
 }
 
