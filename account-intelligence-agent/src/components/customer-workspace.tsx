@@ -2,6 +2,7 @@
 
 import { AlertTriangle, ArrowLeft, ArrowRight, Bot, BriefcaseBusiness, Building2, CalendarDays, Check, ChevronDown, CircleAlert, Clock3, Download, FileText, Filter, Lightbulb, Loader2, MapPin, RefreshCw, Search, Share2, ShieldCheck, Sparkles, Target, TrendingDown, TrendingUp, UserRound, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { CustomerChatDrawer } from "./customer-chat-drawer";
 
 interface Customer { id: string; name: string; country: string | null; industry: string | null; owner: string | null; category: string; stage: string; status: string; last_activity_at: string | null; profile_json: string; card_summary?: string | null }
 interface EventItem { id: string; source_item_id: string; event_type: string; occurred_at: string; summary: string; importance: number; source_title: string; source_type: string; payload?: { evidence_text?: string } }
@@ -60,12 +61,14 @@ export function CustomerWorkspace({ initialCustomerId }: { initialCustomerId?: s
   const [filterOpen, setFilterOpen] = useState(false);
   const [loading, setLoading] = useState(Boolean(initialCustomerId));
   const [refreshing, setRefreshing] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [evidenceSelection, setEvidenceSelection] = useState<EvidenceSelection | null>(null);
   const [listVersion, setListVersion] = useState(0);
   const [detailVersion, setDetailVersion] = useState(0);
   const closeEvidence = useCallback(() => setEvidenceSelection(null), []);
+  const closeChat = useCallback(() => setChatOpen(false), []);
 
   const activateTab = useCallback((nextTab: string) => {
     setTab(nextTab);
@@ -133,7 +136,7 @@ export function CustomerWorkspace({ initialCustomerId }: { initialCustomerId?: s
     return () => { cancelled = true; clearTimeout(timer); };
   }, [query, category, stage, status, listVersion]);
 
-  useEffect(() => { setEvidenceSelection(null); }, [selectedId]);
+  useEffect(() => { setEvidenceSelection(null); setChatOpen(false); }, [selectedId]);
   const loadDetail = useCallback(async () => {
     if (!selectedId) { setDetail(null); setLoading(false); return; }
     setLoading(true);
@@ -213,7 +216,7 @@ export function CustomerWorkspace({ initialCustomerId }: { initialCustomerId?: s
     <section className="detail-panel" aria-label="客户详情">
       {detail ? <>
         <header className="customer-header"><button className="mobile-back" onClick={closeMobileDetail}><ArrowLeft size={18} />客户列表</button><CompanyLogo name={detail.name} large /><div className="identity"><h1>{detail.name}<ShieldCheck size={18} aria-label="已验证客户" /></h1><p>{detail.country || "地区未知"}<i>·</i>{detail.industry || "行业未知"}</p><div className="hero-pills"><span className={`pill category-${detail.category}`}>{categoryLabel[detail.category]}</span><span>{stageLabel[detail.stage]}</span><span className={`status-${detail.status}`}>{statusLabel[detail.status]}</span></div></div>
-          <div className="header-actions"><div className="utility-actions"><button className="secondary-button" title="分享客户链接" onClick={share}><Share2 size={14} />分享</button><button className="secondary-button" title="导出客户情报 JSON" onClick={exportDetail}><Download size={14} />导出</button></div><div className="owner-meta"><span><small>负责人</small><b><i className="tiny-avatar">{initials(detail.owner || "未")}</i>{detail.owner || "未分配"}</b></span><span><small>最后更新</small><b><Clock3 size={14} />{timeAgo(detail.last_activity_at)}</b></span><span><small>数据来源</small><b><FileText size={14} />{detail.source_count} 项</b></span></div><button className="primary-button" onClick={refresh} disabled={refreshing}>{refreshing ? <Loader2 className="spin" size={15} /> : <RefreshCw size={15} />}刷新分析</button></div>
+          <div className="header-actions"><div className="utility-actions"><button className="secondary-button" title="分享客户链接" onClick={share}><Share2 size={14} />分享</button><button className="secondary-button" title="导出客户情报 JSON" onClick={exportDetail}><Download size={14} />导出</button></div><div className="owner-meta"><span><small>负责人</small><b><i className="tiny-avatar">{initials(detail.owner || "未")}</i>{detail.owner || "未分配"}</b></span><span><small>最后更新</small><b><Clock3 size={14} />{timeAgo(detail.last_activity_at)}</b></span><span><small>数据来源</small><b><FileText size={14} />{detail.source_count} 项</b></span></div><button className="secondary-button agent-chat-trigger" onClick={() => setChatOpen(true)}><Bot size={15} />问 Agent</button><button className="primary-button" onClick={refresh} disabled={refreshing}>{refreshing ? <Loader2 className="spin" size={15} /> : <RefreshCw size={15} />}刷新分析</button></div>
         </header>
         <nav className="detail-tabs" role="tablist" aria-label="客户详情栏目">{tabs.map((item) => <button key={item} role="tab" aria-selected={tab === item} onClick={() => activateTab(item)} className={tab === item ? "active" : ""}>{item}</button>)}</nav>
         <div className="detail-content">
@@ -228,6 +231,7 @@ export function CustomerWorkspace({ initialCustomerId }: { initialCustomerId?: s
       </> : <div className="center-loading">{loading ? <><Loader2 className="spin" />正在加载客户情报…</> : error ? <><CircleAlert size={34} />{error}<button className="secondary-button" onClick={() => setListVersion((value) => value + 1)}>重新加载</button></> : <><Building2 size={34} />选择一个客户查看情报</>}</div>}
     </section>
     {notice && <div className="toast" role="status">{notice}<button aria-label="关闭提示" onClick={() => setNotice("")}><X size={14} /></button></div>}
+    {detail && <CustomerChatDrawer customerId={detail.id} customerName={detail.name} open={chatOpen} onClose={closeChat} onOpenSource={(source) => { setChatOpen(false); setEvidenceSelection({ sourceId: source.id, conclusion: `Agent 参考材料：${source.title}` }); }} />}
     {detail && evidenceSelection && <EvidenceDrawer customerId={detail.id} selection={evidenceSelection} onClose={closeEvidence} />}
   </div>;
 }

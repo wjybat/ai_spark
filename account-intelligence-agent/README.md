@@ -31,6 +31,8 @@ pnpm worker           # 异步处理材料
 
 页面将“新建客户”和“更新材料”分开；人工更新材料必须选择已有客户，可粘贴文本或上传 PDF、DOCX、Markdown、TXT。提交后右下角任务中心会持续显示等待、Pi Agent 分析中、完成或失败状态，完成后自动刷新客户情报；失败任务可直接重新分析。任务记录保存在浏览器中，刷新页面后仍可继续跟踪。外部接口只有显式传入 `auto_create_customer: true` 时才会自动创建未知客户。
 
+客户详情页提供“问 Agent”入口。对话 Agent 只读取当前客户的画像、有效事实、时间线和来源材料，回答中会返回可打开的参考材料；对话历史按客户保存在浏览器本地，不写入数据库。
+
 接入一条材料：
 
 ```bash
@@ -70,6 +72,7 @@ pnpm build         # 生产构建
 - `GET /api/v1/customers/:id/timeline`
 - `GET /api/v1/customers/:id/sources`
 - `POST /api/v1/customers/:id/refresh`
+- `POST /api/v1/customers/:id/chat`
 - `POST /api/v1/ingest`
 - `POST /api/v1/ingest/file`
 - `POST /api/v1/events`
@@ -97,6 +100,8 @@ pi
 - `submit_customer_analysis`：提交经过 Zod 校验的 Event、Fact 和 Next Action
 
 `submit_customer_analysis` 是终止工具，Agent 无权直接修改数据库。LLM 调用期间不会持有 SQLite 事务。Pi 不可用时，根据 `PI_AGENT_FALLBACK` 回退到 OpenAI-compatible 抽取器或确定性本地规则。
+
+客户对话使用独立的临时内存会话，并且仅启用 `get_customer_context`、`list_customer_facts`、`list_customer_timeline`、`list_customer_sources` 和 `read_customer_source` 五个只读客户域工具。来源读取会校验客户归属；不启用 Shell、文件或数据库写入工具。可通过 `PI_AGENT_CHAT_THINKING` 和 `PI_AGENT_CHAT_TIMEOUT_MS` 单独调整对话推理级别与超时。
 
 ## 端到端测试案例
 
