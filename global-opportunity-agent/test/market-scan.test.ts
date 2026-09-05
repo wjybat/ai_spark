@@ -76,6 +76,14 @@ async function tick() { await act(async () => vi.advanceTimersByTimeAsync(1100))
 async function finishScan() { for (let i = 0; i < 4; i += 1) await tick(); }
 
 describe("local market scan demo", { timeout: 20_000 }, () => {
+  it("keeps the customer intelligence entrance in the global header", () => {
+    const link = container.querySelector<HTMLAnchorElement>(".app-header [data-customer-intelligence-link]");
+    expect(link?.textContent).toContain("客户情报中心");
+    expect(link?.href).toBe("http://localhost:3001/customers");
+    expect(link?.target).toBe("_blank");
+    expect(container.querySelectorAll("[data-customer-intelligence-link]")).toHaveLength(1);
+  });
+
   it("starts with the intelligence panel collapsed and opens on South America", async () => {
     expect(container.querySelector(".app-stage")?.classList.contains("is-panel-collapsed")).toBe(true);
     expect(container.querySelector("#opportunity-intelligence-panel")?.getAttribute("aria-hidden")).toBe("true");

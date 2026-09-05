@@ -1,4 +1,5 @@
 const { useEffect: useAppEffect, useMemo: useAppMemo, useState: useAppState } = React;
+const CUSTOMER_INTELLIGENCE_URL = window.CUSTOMER_INTELLIGENCE_URL || "http://localhost:3001/customers";
 
 function Icon({ name, size = 18 }) {
   const shapes = {
@@ -49,6 +50,7 @@ function Header({ onScan, scanning, scanDisabled, agentStatus }) {
       </div>
       <div className="header-actions">
         <div className={`live-pill ${agentStatus?.ok ? "is-connected" : "is-offline"}`}><i></i>{agentStatus?.ok ? "智能分析服务 · 已就绪" : "智能分析服务连接中"}</div>
+        <a className="customer-intelligence-header-link" data-customer-intelligence-link href={CUSTOMER_INTELLIGENCE_URL} target="_blank" rel="noopener noreferrer"><Icon name="users" size={16}></Icon>客户情报中心</a>
         <button type="button" className="scan-button" onClick={onScan} disabled={scanning || scanDisabled} title="整理现有市场与客户资料">
           <Icon name="scan" size={17}></Icon>{scanning ? "扫描中" : "重新扫描市场"}
         </button>

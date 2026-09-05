@@ -47,6 +47,12 @@ OPENAI_API_KEY=<仅保存在本地 .env>
 
 该 provider 使用 Chat Completions 流式接口与 Qwen 的 `enable_thinking` 参数，支持标准工具调用。配置变更后重启后端。模型密钥不进入页面、研究资料或 API 返回结果。
 
+## 客户情报中心入口
+
+主页面顶部固定显示“客户情报中心”入口，并在新标签页打开持续经营工作台。默认地址为 `http://localhost:3001/customers`，因此本地联调时需要同时启动 `account-intelligence-agent`。部署环境可在加载 `app.jsx` 前设置 `window.CUSTOMER_INTELLIGENCE_URL` 覆盖目标地址。
+
+当前入口只负责页面跳转，不同步客户身份和材料；后续再通过正式移交接口打通数据。
+
 ## 公司 AI Router Live 模式
 
 项目内置 Dmall AI Router provider，使用 OpenAI Responses 协议：
