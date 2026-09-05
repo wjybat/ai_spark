@@ -1,9 +1,11 @@
 import { getDb } from "@/lib/db";
+import { buildRecentTimeline } from "@/lib/timeline";
 import type { CustomerRow } from "@/lib/types";
 import { safeJson } from "@/lib/utils";
 
 export const runtime = "nodejs";
 interface SummaryRow { current_state: string; key_requirements_json: string; key_blockers_json: string; success_factors_json: string; failure_reasons_json: string; reusable_playbook_json: string; next_actions_json: string; evidence_json: string; generated_at: string }
+interface EventRow extends Record<string, unknown> { source_item_id: string; occurred_at: string; summary: string; importance: number; confidence: number; created_at: string; payload_json: string }
 
 export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -12,7 +14,7 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
   if (!customer) return Response.json({ error: "客户不存在" }, { status: 404 });
   const summary = db.prepare("SELECT * FROM customer_summaries WHERE customer_id=?").get(id) as SummaryRow | undefined;
   const recentEvents = db.prepare(`SELECT e.*,s.title source_title,s.source_type FROM customer_events e JOIN source_items s ON s.id=e.source_item_id
-    WHERE e.customer_id=? ORDER BY e.occurred_at DESC,e.importance DESC,e.confidence DESC,e.created_at DESC LIMIT 20`).all(id) as unknown as Array<Record<string, unknown> & { payload_json: string }>;
+    WHERE e.customer_id=? ORDER BY e.occurred_at DESC,e.importance DESC,e.confidence DESC,e.created_at DESC LIMIT 100`).all(id) as unknown as EventRow[];
   const experienceRows = db.prepare("SELECT * FROM customer_experiences WHERE customer_id=? ORDER BY created_at DESC").all(id) as unknown as Array<Record<string, unknown> & { source_item_ids_json: string }>;
   const experiences = experienceRows.map(({ source_item_ids_json, ...experience }) => ({ ...experience, source_item_ids: safeJson(source_item_ids_json, []) }));
   const facts = db.prepare(`SELECT f.*,s.title source_title,s.source_type FROM customer_facts f
@@ -30,7 +32,7 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
     next_actions: safeJson(summary?.next_actions_json, []),
     evidence: safeJson(summary?.evidence_json, []),
     generated_at: summary?.generated_at || null,
-    recent_events: recentEvents.map(({ payload_json, ...event }) => ({ ...event, payload: safeJson(payload_json, {}) })),
+    recent_events: buildRecentTimeline(recentEvents.map(({ payload_json, ...event }) => ({ ...event, payload: safeJson(payload_json, {}) })), 20),
     experiences, facts, source_count: sourceCount,
   });
 }

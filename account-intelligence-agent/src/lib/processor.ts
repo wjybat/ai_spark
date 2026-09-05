@@ -4,6 +4,7 @@ import { analyzeWithPiAgent } from "./pi-agent";
 import { getDb, transaction } from "./db";
 import { recomputeState } from "./state-engine";
 import { refreshSummary } from "./summary";
+import { resolveEventOccurredAt } from "./timeline";
 import type { CustomerRow, Extraction, SourceRow } from "./types";
 import { makeId, nowIso } from "./utils";
 
@@ -92,7 +93,11 @@ export async function processJob(job: JobRow, db: DatabaseSync = getDb(), overri
       db.prepare("DELETE FROM customer_events WHERE source_item_id=?").run(source.id);
       db.prepare("DELETE FROM customer_facts WHERE source_item_id=?").run(source.id);
       const addEvent = db.prepare("INSERT INTO customer_events (id,customer_id,source_item_id,event_type,occurred_at,summary,importance,confidence,payload_json,created_at) VALUES (?,?,?,?,?,?,?,?,?,?)");
-      for (const event of result.events) addEvent.run(makeId("evt"), source.customer_id, source.id, event.event_type, event.occurred_at || source.occurred_at || source.received_at, event.summary, event.importance, event.confidence, JSON.stringify({ evidence_text: findVerbatimEvidence(source.content, event.summary, event.evidence_text) }), nowIso());
+      for (const event of result.events) {
+        const evidenceText = findVerbatimEvidence(source.content, event.summary, event.evidence_text);
+        const fallbackDate = event.occurred_at || source.occurred_at || source.received_at;
+        addEvent.run(makeId("evt"), source.customer_id, source.id, event.event_type, resolveEventOccurredAt(evidenceText || event.summary, fallbackDate), event.summary, event.importance, event.confidence, JSON.stringify({ evidence_text: evidenceText }), nowIso());
+      }
       for (const fact of result.facts) mergeFact(db, source.customer_id!, source.id, { ...fact, evidence_text: findVerbatimEvidence(source.content, fact.fact_value, fact.evidence_text) });
       result.next_actions.forEach((next, index) => mergeFact(db, source.customer_id!, source.id, { fact_type: "NEXT_ACTION", fact_key: `action_${index + 1}`, fact_value: next.action, confidence: 0.8, evidence_text: findVerbatimEvidence(source.content, next.action, next.reason) }));
       recomputeState(db, source.customer_id!);
