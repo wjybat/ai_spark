@@ -1,0 +1,7 @@
+{
+  "code": "overall_v1",
+  "version": "1.0.0",
+  "name": "Overall",
+  "dimension_weights": { "market_size": 2000, "growth": 2000, "expansion": 1500, "digital": 1500, "customer_value": 2000, "entry_ease": 1000 },
+  "status": "draft"
+}

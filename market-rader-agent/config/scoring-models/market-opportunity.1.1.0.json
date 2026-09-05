@@ -1,0 +1,22 @@
+{
+  "code": "market_opportunity",
+  "version": "1.1.0",
+  "metric_definition_set_code": "southeast_asia_retail",
+  "opportunity_formula": {
+    "dimensions": ["market_size", "growth", "expansion", "digital", "customer_value", "entry_ease"],
+    "market_attractiveness_dimensions": ["market_size", "growth", "expansion", "digital", "customer_value"]
+  },
+  "priority_rules": {
+    "p1": { "opportunity_min_bps": 8000, "entry_difficulty_max_bps": 6500, "coverage_min_bps": 8000, "eqi_min_bps": 7000 },
+    "p2_opportunity_min_bps": 6500,
+    "p2_entry_difficulty_max_bps": 7500,
+    "p3_opportunity_min_bps": 5000
+  },
+  "hard_blocker_rules": ["video_processing_prohibited_for_use_case", "data_residency_incompatible", "no_qualified_customer"],
+  "minimum_coverage": {
+    "overall_bps": 7500,
+    "dimension_score_bps": 2000,
+    "dimension_bps": { "market_size": 6000, "customer_value": 6000, "entry_ease": 6000 }
+  },
+  "status": "draft"
+}

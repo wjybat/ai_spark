@@ -1,0 +1,14 @@
+{
+  "code": "default",
+  "version": "1.0.0",
+  "tiers": {
+    "government_regulator_official_statistics": 9500,
+    "audited_annual_report_exchange_filing": 9200,
+    "company_investor_material_official_announcement": 8800,
+    "industry_association_transparent_research": 8200,
+    "mainstream_business_media": 7500,
+    "company_news_product_page": 7000,
+    "other_verifiable_public_web": 5000
+  },
+  "status": "draft"
+}

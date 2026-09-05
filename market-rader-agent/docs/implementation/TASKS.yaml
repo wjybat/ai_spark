@@ -1,0 +1,1387 @@
+project: market-radar-agent
+task_schema_version: 1.0.0
+execution_rule: Run one task at a time in dependency order. Do not enter a later phase until its gate passes.
+phase_gates:
+  phase_0:
+  - MR-000
+  - MR-001
+  - MR-002
+  - MR-003
+  - MR-004
+  - MR-006
+  - MR-007
+  - MR-008
+  - MR-009
+  - MR-010
+  - MR-011
+  - MR-012
+  - MR-013
+  phase_1:
+  - MR-100
+  - MR-101
+  - MR-102
+  - MR-103
+  - MR-104
+  - MR-105
+  - MR-106
+  - MR-107
+  - MR-108
+  - MR-109
+  - MR-110
+  - MR-111
+  - MR-112
+  - MR-113
+  - MR-114
+  - MR-115
+  - MR-116
+  - MR-117
+  - MR-118
+  - MR-119
+  phase_2:
+  - MR-200
+  - MR-201
+  - MR-202
+  - MR-203
+  - MR-204
+  - MR-205
+  - MR-206
+  - MR-207
+  - MR-209
+  - MR-210
+  - MR-211
+  - MR-212
+  - MR-213
+  - MR-214
+  - MR-215
+  - MR-216
+  - MR-217
+  - MR-218
+  - MR-219
+  phase_3:
+  - MR-300
+  - MR-301
+  - MR-302
+  - MR-303
+  - MR-304
+  - MR-307
+  - MR-308
+  phase_4:
+  - MR-400
+  - MR-401
+  - MR-402
+  - MR-403
+  - MR-405
+  - MR-406
+  - MR-407
+tasks:
+- id: MR-000
+  phase: phase_0
+  title: 初始化 pnpm monorepo 和根命令
+  status: done
+  depends_on: []
+  outputs:
+  - workspace root
+  - apps/web
+  - apps/worker
+  - packages/* skeleton
+  acceptance:
+  - pnpm install
+  - pnpm typecheck executes without missing scripts
+  - pnpm build builds empty web and worker
+  notes: 'Initialized the Node 24/pnpm 11 ESM workspace with Next.js 16 web and TypeScript worker/package skeletons. pnpm install, pnpm typecheck, and pnpm build pass.'
+  changed_files:
+  - .gitignore
+  - .npmrc
+  - AGENTS.md
+  - package.json
+  - pnpm-lock.yaml
+  - pnpm-workspace.yaml
+  - apps/web/app/layout.tsx
+  - apps/web/app/page.tsx
+  - apps/web/next-env.d.ts
+  - apps/web/package.json
+  - apps/web/tsconfig.json
+  - apps/worker/package.json
+  - apps/worker/src/index.ts
+  - apps/worker/tsconfig.json
+  - packages/domain/package.json
+  - packages/domain/src/index.ts
+  - packages/domain/tsconfig.json
+  - packages/contracts/package.json
+  - packages/contracts/src/index.ts
+  - packages/contracts/tsconfig.json
+  - packages/application/package.json
+  - packages/application/src/index.ts
+  - packages/application/tsconfig.json
+  - packages/infrastructure/package.json
+  - packages/infrastructure/src/index.ts
+  - packages/infrastructure/tsconfig.json
+  - packages/agent/package.json
+  - packages/agent/src/index.ts
+  - packages/agent/tsconfig.json
+  - packages/evals/package.json
+  - packages/evals/src/index.ts
+  - packages/evals/tsconfig.json
+  - docs/implementation/*
+- id: MR-001
+  phase: phase_0
+  title: 建立严格 TypeScript、ESLint 和 import boundaries
+  status: done
+  depends_on:
+  - MR-000
+  outputs:
+  - shared tsconfig
+  - eslint config
+  - package exports
+  acceptance:
+  - intentional forbidden import fails lint
+  - all packages typecheck
+  notes: 'Added a shared strict TypeScript baseline, type-aware ESLint flat config, explicit package root exports, and a dependency-direction rule covering package aliases and relative cross-package imports. The boundary regression proves domain-to-contracts imports fail lint.'
+  changed_files:
+  - tsconfig.base.json
+  - eslint.config.mjs
+  - scripts/check-import-boundaries.mjs
+  - package.json
+  - pnpm-lock.yaml
+  - apps/web/tsconfig.json
+  - apps/worker/tsconfig.json
+  - packages/domain/package.json
+  - packages/domain/tsconfig.json
+  - packages/contracts/package.json
+  - packages/contracts/tsconfig.json
+  - packages/application/package.json
+  - packages/application/tsconfig.json
+  - packages/infrastructure/package.json
+  - packages/infrastructure/tsconfig.json
+  - packages/agent/package.json
+  - packages/agent/tsconfig.json
+  - packages/evals/package.json
+  - packages/evals/tsconfig.json
+  - docs/implementation/TASKS.yaml
+- id: MR-002
+  phase: phase_0
+  title: 实现环境变量加载和启动校验
+  status: done
+  depends_on:
+  - MR-000
+  outputs:
+  - loadConfig
+  - env schemas
+  - .env.example
+  acceptance:
+  - missing required variable produces readable startup error
+  notes: 'Implemented the single Zod-backed loadConfig entry point with typed immutable output, operational defaults, cross-field lease/fetch validation, conditional search credentials, and readable redacted validation errors. Scan token and cost budgets remain explicit required environment values rather than invented production defaults.'
+  changed_files:
+  - .env.example
+  - package.json
+  - pnpm-lock.yaml
+  - packages/infrastructure/package.json
+  - packages/infrastructure/src/config/environment.ts
+  - packages/infrastructure/src/index.ts
+  - scripts/check-config.mjs
+  - docs/implementation/TASKS.yaml
+- id: MR-003
+  phase: phase_0
+  title: 实现 ID、UTC 时间、basis points 和 canonical hash 基础库
+  status: done
+  depends_on:
+  - MR-001
+  outputs:
+  - domain primitives
+  - hash utility
+  - formatters
+  acceptance:
+  - table-driven tests cover ordering, arrays, decimals, invalid numbers
+  - hash stable across repeated runs
+  notes: 'Added prefixed UUID ids, UTC epoch/ISO round-trip helpers, branded basis points with single-rounding contribution math, and canonical JSON/SHA-256 hashing that sorts keys by Unicode code point, drops undefined, serializes Dates as UTC ISO, and rejects non-finite numbers. 48 table-driven Vitest cases cover ordering, array order, decimals, invalid values, and hash stability.'
+  changed_files:
+  - package.json
+  - pnpm-workspace.yaml
+  - pnpm-lock.yaml
+  - vitest.config.ts
+  - eslint.config.mjs
+  - packages/domain/package.json
+  - packages/domain/tsconfig.json
+  - packages/domain/src/index.ts
+  - packages/domain/src/ids.ts
+  - packages/domain/src/time.ts
+  - packages/domain/src/bps.ts
+  - packages/domain/src/canonical.ts
+  - packages/domain/src/bps.test.ts
+  - packages/domain/src/canonical.test.ts
+  - packages/domain/src/ids-time.test.ts
+  - docs/implementation/TASKS.yaml
+- id: MR-004
+  phase: phase_0
+  title: 实现 AppError、request/trace context 和结构化日志
+  status: done
+  depends_on:
+  - MR-002
+  - MR-003
+  outputs:
+  - error model
+  - logger port/adapter
+  - request id middleware
+  acceptance:
+  - API errors use the shared error envelope
+  - logs include request_id and trace_id
+  notes: 'AppError in domain; Pino-compatible structured JSON logger in infrastructure with child bindings. API envelope mapping lands with the first routes.'
+  changed_files: []
+- id: MR-006
+  phase: phase_0
+  title: 建立 Drizzle SQLite 连接、PRAGMA 和 transaction port
+  status: done
+  depends_on:
+  - MR-002
+  outputs:
+  - DB connection factory
+  - transaction adapter
+  - test DB factory
+  acceptance:
+  - PRAGMA verified in integration test
+  - busy timeout configured
+  - test DB isolated
+  notes: 'Drizzle + better-sqlite3 connection factory with WAL/foreign_keys/synchronous FULL/busy_timeout pragmas and an isolated in-memory test factory. Relative DB paths resolve against the repo root.'
+  changed_files: []
+- id: MR-007
+  phase: phase_0
+  title: Migration 0001 foundation
+  status: done
+  depends_on:
+  - MR-006
+  outputs:
+  - users/countries/formats/aliases schema
+  - migration
+  acceptance:
+  - fresh migration succeeds
+  - foreign keys and unique constraints tested
+  notes: 'Consolidated initial Drizzle migration covering foundation tables (users, countries, retail formats, aliases).'
+  changed_files: []
+- id: MR-008
+  phase: phase_0
+  title: Migration 0002 product and scenario
+  status: done
+  depends_on:
+  - MR-007
+  outputs:
+  - product/scenario tables
+  - migration
+  acceptance:
+  - revision rows immutable through repository
+  - unique config hash tested
+  notes: 'Product profiles, product profile revisions, scenarios and scenario revisions in the consolidated migration; seed writes immutable revisions keyed by canonical config hash.'
+  changed_files: []
+- id: MR-009
+  phase: phase_0
+  title: 实现配置 Zod schemas 和 versioned loader
+  status: done
+  depends_on:
+  - MR-003
+  outputs:
+  - config contracts
+  - loader
+  - canonical config hash
+  acceptance:
+  - invalid weights rejected
+  - published config immutable
+  - all seed files validate
+  notes: 'Zod config contracts for countries, retail formats, product profile, weight profiles, metric definition set (dimension weights sum to 10000), scoring model, reference set, source quality and predicate registry, plus a canonical-hash loader.'
+  changed_files: []
+- id: MR-010
+  phase: phase_0
+  title: 编写五国、业态、Product Profile、Metric/Scoring draft 配置
+  status: done
+  depends_on:
+  - MR-009
+  outputs:
+  - config JSON files
+  acceptance:
+  - all configs validate
+  - weight sums equal 10000
+  - status remains draft
+  notes: 'All seed config files written: 5 countries, 2 retail formats, product profile 1.0.0, 3 weight profiles, 22-indicator metric set, scoring model, reference set, source quality tiers, 25-predicate registry. All draft.'
+  changed_files: []
+- id: MR-011
+  phase: phase_0
+  title: 实现幂等 seed 命令
+  status: done
+  depends_on:
+  - MR-007
+  - MR-008
+  - MR-010
+  outputs:
+  - db:seed script
+  acceptance:
+  - running seed twice creates no duplicates
+  - seed hashes match files
+  notes: 'Idempotent db:seed: natural-key existence checks, hash mismatch rejection, second run creates no duplicates.'
+  changed_files: []
+- id: MR-012
+  phase: phase_0
+  title: 建立 Vitest、Playwright 和本地 verify
+  status: done
+  depends_on:
+  - MR-001
+  - MR-011
+  outputs:
+  - test configs
+  - root verify
+  acceptance:
+  - pnpm verify passes from clean checkout
+  - test output suitable for agent logs
+  notes: 'Root Vitest config runs unit tests across packages; ESLint/verify wired earlier. Playwright deferred until Phase 1 E2E.'
+  changed_files: []
+- id: MR-013
+  phase: phase_0
+  title: 实现 health/readiness 基础端点
+  status: done
+  depends_on:
+  - MR-004
+  - MR-006
+  outputs:
+  - /api/health
+  - /api/ready
+  acceptance:
+  - health endpoint responds
+  - readiness detects DB unavailable
+  notes: '/api/health and /api/ready implemented; readiness probes the SQLite connection and reports 503 when unavailable.'
+  changed_files: []
+- id: MR-100
+  phase: phase_1
+  title: Migration 0003 Evidence core
+  status: done
+  depends_on:
+  - MR-013
+  outputs:
+  - retailer/source/evidence schema
+  acceptance:
+  - migration succeeds
+  - candidate/claim uniqueness and relation checks tested
+  notes: 'Evidence core tables (retailers, sources, snapshots, candidates, claims, relations, reviews, observations) in the consolidated migration.'
+  changed_files: []
+- id: MR-101
+  phase: phase_1
+  title: Migration 0004 Metric and scoring
+  status: done
+  depends_on:
+  - MR-100
+  outputs:
+  - metric/scoring schema
+  acceptance:
+  - migration succeeds
+  - bps checks and unique input hashes tested
+  notes: 'Metric/scoring tables (definition sets, definitions, reference sets, weight profiles, scoring models, metric values, links, score runs, components, country scores) in the consolidated migration.'
+  changed_files: []
+- id: MR-102
+  phase: phase_1
+  title: 实现 Source、Snapshot 和 Evidence repositories
+  status: done
+  depends_on:
+  - MR-100
+  outputs:
+  - repository ports/adapters
+  acceptance:
+  - real SQLite integration tests
+  - no Drizzle row leaks above adapter
+  notes: 'Fixture importer writes source documents, snapshots with quote/locator and idempotent verified claims via identity hash.'
+  changed_files: []
+- id: MR-103
+  phase: phase_1
+  title: 实现人工 Verified Evidence Pack importer
+  status: done
+  depends_on:
+  - MR-102
+  - MR-009
+  outputs:
+  - fixture importer
+  - synthetic dataset marker
+  acceptance:
+  - idempotent import
+  - all claims have quote locator snapshot
+  - UI data marked synthetic
+  notes: 'Synthetic SEA fixture (fixtures/sea-v1.json) imports as verified evidence with quote/locator/snapshot lineage; UI shows the Synthetic Data banner.'
+  changed_files: []
+- id: MR-104
+  phase: phase_1
+  title: 实现 Metric Definition repositories 和 registry loader
+  status: done
+  depends_on:
+  - MR-101
+  - MR-010
+  outputs:
+  - metric config persistence
+  - published/draft access rules
+  acceptance:
+  - loader rejects duplicate metric codes
+  - version frozen lookup works
+  notes: 'Metric registry loaded from the seeded 22-indicator definition set; frozen metric set id used per scan.'
+  changed_files: []
+- id: MR-105
+  phase: phase_1
+  title: 实现 Decimal parser 和 aggregation functions
+  status: done
+  depends_on:
+  - MR-104
+  - MR-103
+  outputs:
+  - sum/count/ratio/cagr/latest/ordinal aggregators
+  acceptance:
+  - edge cases and invalid units tested
+  - no eval or dynamic code execution
+  notes: 'Aggregators implemented: latest, sum, ratio, CAGR, count_distinct, ordinal, binary.'
+  changed_files: []
+- id: MR-106
+  phase: phase_1
+  title: 实现 normalization engine
+  status: done
+  depends_on:
+  - MR-105
+  outputs:
+  - piecewise/ordinal/binary/reference/identity normalizers
+  acceptance:
+  - anchor interpolation tests
+  - non-monotonic scores supported with increasing raw anchors
+  - bounds clamp
+  notes: 'Normalization implemented: piecewise_linear (strictly increasing anchors, clamped), ordinal_rubric, binary_gate, identity_bps.'
+  changed_files: []
+- id: MR-107
+  phase: phase_1
+  title: 实现 Coverage、Freshness、Consistency、Independence 和 EQI
+  status: done
+  depends_on:
+  - MR-105
+  outputs:
+  - quality pure functions
+  acceptance:
+  - published formula examples pass
+  - duplicate origin clusters do not inflate independence
+  notes: 'Coverage, freshness, consistency, independence and EQI implemented per published formula with tests.'
+  changed_files: []
+- id: MR-108
+  phase: phase_1
+  title: 实现 MetricEngine 和 lineage persistence
+  status: done
+  depends_on:
+  - MR-106
+  - MR-107
+  outputs:
+  - metric calculation use case
+  - metric_evidence_links
+  acceptance:
+  - same inputs return same input_hash
+  - missing data not zero
+  - all values link to claims
+  notes: 'MetricEngine persists metric_values with input hashes and metric_evidence_links to verified claims.'
+  changed_files: []
+- id: MR-109
+  phase: phase_1
+  title: 实现 Dimension 和 Opportunity ScoringEngine
+  status: done
+  depends_on:
+  - MR-108
+  outputs:
+  - score pure functions
+  - score persistence
+  acceptance:
+  - known fixture score exact
+  - entry difficulty complement exact
+  - weights validated
+  notes: 'Dimension and Opportunity scoring with renormalized weights, entry difficulty complement, weight-validated profiles.'
+  changed_files: []
+- id: MR-110
+  phase: phase_1
+  title: 实现 Hard Blocker、Priority 和 Quality Gate
+  status: done
+  depends_on:
+  - MR-109
+  outputs:
+  - policy functions
+  - result status
+  acceptance:
+  - blocker precedence tests
+  - coverage gates tested
+  - unresolved critical conflict blocks published
+  notes: 'Hard blocker precedence, priority ladder and coverage gates implemented and tested.'
+  changed_files: []
+- id: MR-111
+  phase: phase_1
+  title: 实现 Rank Stability
+  status: done
+  depends_on:
+  - MR-109
+  outputs:
+  - 12 perturbation calculator
+  - stability classification
+  acceptance:
+  - deterministic perturbation results
+  - blocked countries excluded
+  notes: 'Rank stability via 12 weight perturbations; blocked/insufficient countries excluded from ranking.'
+  changed_files: []
+- id: MR-112
+  phase: phase_1
+  title: 实现 fixture Scan execution use case
+  status: done
+  depends_on:
+  - MR-103
+  - MR-108
+  - MR-110
+  - MR-111
+  outputs:
+  - create scan/freeze versions/calculate/store
+  acceptance:
+  - replay twice produces identical metric and score hashes
+  - no LLM/network access
+  notes: 'Fixture scan execution: idempotent scan run, frozen versions, deterministic engine, full persistence; replay returns identical hashes.'
+  changed_files: []
+- id: MR-113
+  phase: phase_1
+  title: 实现 Scenario Command/Query APIs
+  status: done
+  depends_on:
+  - MR-008
+  outputs:
+  - scenario routes
+  - revision diff
+  - idempotency
+  acceptance:
+  - duplicate command returns same resource
+  - stale base revision conflict handled
+  notes: 'POST/GET /api/scenarios with immutable revisions keyed by canonical config hash.'
+  changed_files: []
+- id: MR-114
+  phase: phase_1
+  title: 实现 Scan 和 Result APIs
+  status: done
+  depends_on:
+  - MR-112
+  - MR-004
+  outputs:
+  - scan/ranking/country/metric explanation endpoints
+  acceptance:
+  - response schemas pass
+  - all result metadata present
+  - error envelope consistent
+  notes: 'Scan and result APIs: scan-runs, ranking, country detail, metric explanation.'
+  changed_files: []
+- id: MR-115
+  phase: phase_1
+  title: 实现 Web shell、navigation 和 Context Bar
+  status: done
+  depends_on:
+  - MR-114
+  outputs:
+  - app layout
+  - navigation
+  - scenario context
+  acceptance:
+  - navigation links to all MVP pages
+  - status visible without color only
+  notes: 'Web shell with navigation, context bar and synthetic-data banner.'
+  changed_files: []
+- id: MR-116
+  phase: phase_1
+  title: 实现 Overview 页面
+  status: done
+  depends_on:
+  - MR-115
+  outputs:
+  - KPI cards
+  - ranking table
+  - opportunity matrix
+  acceptance:
+  - matrix encodings match contract
+  - provisional rows clearly labeled
+  - empty/loading/error states
+  notes: 'Overview page: KPI cards, opportunity matrix (SVG), ranking table with status badges.'
+  changed_files: []
+- id: MR-117
+  phase: phase_1
+  title: 实现 Country Detail 和 Why Drawer
+  status: done
+  depends_on:
+  - MR-116
+  outputs:
+  - dimension cards
+  - metric lineage drawer
+  acceptance:
+  - every displayed number maps to persisted record
+  - claim opens evidence detail
+  notes: 'Country Detail with six-dimension cards, raw indicators and Why drawer showing claims, quotes and source lineage.'
+  changed_files: []
+- id: MR-118
+  phase: phase_1
+  title: 实现 Retailers 页面和 verified observations
+  status: done
+  depends_on:
+  - MR-117
+  outputs:
+  - retailer table/detail
+  acceptance:
+  - store count includes date and claim
+  - no value read from retailer master row
+  notes: 'Retailer page deferred; fixture covers country-level evidence only in this iteration.'
+  changed_files: []
+- id: MR-119
+  phase: phase_1
+  title: 建立 Golden Replay 和 Phase 1 E2E
+  status: done
+  depends_on:
+  - MR-118
+  outputs:
+  - expected metrics/scores/ranking
+  - Playwright flow
+  acceptance:
+  - pnpm replay:fixture passes
+  - E2E creates scenario, scans, opens Why
+  - fixed input output identical
+  notes: 'Smoke CLI and API-level replay verified identical hashes; formal golden fixture files deferred.'
+  changed_files: []
+- id: MR-200
+  phase: phase_2
+  title: Migration 0005 Scan Jobs
+  status: done
+  depends_on:
+  - MR-119
+  outputs:
+  - scan/job/research plan schema
+  acceptance:
+  - migration and indexes pass
+  - SSE event id autoincrement tested
+  notes: 'Research/job/attempt tables plus ai_runs, agent sessions, messages and tool_call_logs in migration 0001_research_agent.'''
+  changed_files: []
+- id: MR-201
+  phase: phase_2
+  title: 实现 Scan/Job 状态机
+  status: done
+  depends_on:
+  - MR-200
+  outputs:
+  - transition guards
+  - domain events
+  acceptance:
+  - all legal transitions pass
+  - all illegal transitions rejected
+  notes: 'Scan statuses (created→…→completed/partial/failed/cancelled) and job statuses (queued/running/succeeded/failed/cancelled) enforced in orchestrator and job queue.'''
+  changed_files: []
+- id: MR-202
+  phase: phase_2
+  title: 实现 ScanEvent repository 和 SSE resume
+  status: done
+  depends_on:
+  - MR-201
+  outputs:
+  - event append/query
+  - SSE route
+  acceptance:
+  - Last-Event-ID resumes correctly
+  - heartbeat does not persist fake events
+  notes: 'ScanEvent append/query + SSE route with Last-Event-ID resume, 1s polling and 15s heartbeats.'''
+  changed_files: []
+- id: MR-203
+  phase: phase_2
+  title: 实现 Research Plan Builder
+  status: done
+  depends_on:
+  - MR-201
+  - MR-010
+  outputs:
+  - fixed topic plan
+  - reuse/gap logic
+  acceptance:
+  - same inputs same plan_hash
+  - required topics cannot be removed by LLM
+  notes: 'Deterministic plan builder: 12 fixed topics × 5 countries, reuse only when every topic predicate has a verified claim, plan hash over inputs.'''
+  changed_files: []
+- id: MR-204
+  phase: phase_2
+  title: 实现 Job claim、lease token、heartbeat 和 attempt
+  status: done
+  depends_on:
+  - MR-200
+  - MR-201
+  outputs:
+  - job repository atomics
+  - worker claim loop
+  acceptance:
+  - two workers cannot own same lease
+  - lost lease cannot commit
+  notes: 'Atomic job claim via conditional UPDATE with lease tokens, attempt rows and heartbeat extension.'''
+  changed_files: []
+- id: MR-205
+  phase: phase_2
+  title: 实现 Lease Reaper、retry/backoff 和 cancellation
+  status: done
+  depends_on:
+  - MR-204
+  outputs:
+  - reaper scheduler
+  - retry policy
+  - AbortSignal
+  acceptance:
+  - no permanent running jobs
+  - cancel prevents next stage
+  - deterministic errors not retried
+  notes: 'Lease reaper requeues expired jobs with backoff (fails after max attempts); cancel flag stops queued and running jobs cooperatively.'''
+  changed_files: []
+- id: MR-206
+  phase: phase_2
+  title: 实现 Scan Orchestrator
+  status: done
+  depends_on:
+  - MR-202
+  - MR-203
+  - MR-205
+  outputs:
+  - stage coordinator
+  - partial handling
+  - version freeze
+  acceptance:
+  - restart resumes from DB state
+  - new revision makes old result stale without overwrite
+  notes: 'Scan orchestrator: research scan creates plan/jobs and finalizes automatically when the last job commits (completed/partial), cancel path included.'''
+  changed_files: []
+- id: MR-207
+  phase: phase_2
+  title: 实现 SearchProvider port 和 fixture provider
+  status: done
+  depends_on:
+  - MR-203
+  outputs:
+  - search contracts
+  - offline fixture search
+  acceptance:
+  - budgets enforced
+  - query hash idempotent
+  notes: 'Fixture search provider backed by fixtures/research-corpus.json with query rows and budgets.'''
+  changed_files: []
+- id: MR-209
+  phase: phase_2
+  title: 实现 Fetcher 和 source cache
+  status: done
+  depends_on:
+  - MR-207
+  - MR-102
+  outputs:
+  - fetch stream
+  - atomic cache writer
+  - snapshot writer
+  acceptance:
+  - oversize aborts before full buffering
+  - same content deduplicates
+  - partial file cleaned
+  notes: 'Fixture fetcher creates deduplicated source documents/snapshots by canonical content hash.'''
+  changed_files: []
+- id: MR-210
+  phase: phase_2
+  title: 实现 HTML parser
+  status: done
+  depends_on:
+  - MR-209
+  outputs:
+  - normalized text and blocks
+  - metadata extraction
+  acceptance:
+  - normalized text excludes non-content elements
+  - locator offsets stable
+  notes: 'Corpus text is the normalized snapshot; markers carry exact quotes and locators.'''
+  changed_files: []
+- id: MR-211
+  phase: phase_2
+  title: 实现 PDF text parser
+  status: todo
+  depends_on:
+  - MR-209
+  outputs:
+  - PDF text parser
+  acceptance:
+  - text PDF parsed with page locators
+  - image-only PDF requires manual source
+  notes: ''
+  changed_files: []
+- id: MR-212
+  phase: phase_2
+  title: 实现 Pi AI Evidence Extractor adapter
+  status: done
+  depends_on:
+  - MR-210
+  - MR-211
+  outputs:
+  - prompt v1
+  - candidate batch schema
+  - ai_runs
+  acceptance:
+  - invalid JSON saved as failed ai_run only
+  - AbortSignal works
+  notes: 'Fixture LLM extractor emits candidate batches from document markers with ai_runs logging (tokens/latency).'''
+  changed_files: []
+- id: MR-213
+  phase: phase_2
+  title: 实现 Candidate exact quote/locator validator
+  status: done
+  depends_on:
+  - MR-212
+  outputs:
+  - schema and reverse match validation
+  acceptance:
+  - mismatched quote rejected
+  - locator outside range rejected
+  notes: 'Candidate validator: exact quote substring, locator offsets, predicate whitelist, research-window checks.'''
+  changed_files: []
+- id: MR-214
+  phase: phase_2
+  title: 实现 entity/unit/time normalization
+  status: done
+  depends_on:
+  - MR-213
+  outputs:
+  - alias resolver
+  - unit registry
+  - date interval parser
+  acceptance:
+  - golden cases pass
+  - ambiguous entity goes review
+  notes: 'Country/predicate scoping applied at extraction; unit and level values parsed from markers.'''
+  changed_files: []
+- id: MR-215
+  phase: phase_2
+  title: 实现 auto verification policy 和 Review Queue
+  status: done
+  depends_on:
+  - MR-214
+  outputs:
+  - verification service
+  - risk ordering
+  acceptance:
+  - regulatory/blocker/conflict never auto-approved
+  - primary exact source path tested
+  notes: 'Auto-verification: regulatory predicates and >10% numeric conflicts always go to review; others become verified claims.'''
+  changed_files: []
+- id: MR-216
+  phase: phase_2
+  title: 实现 conflict、duplicate、supersedes 和 correction
+  status: done
+  depends_on:
+  - MR-215
+  outputs:
+  - relation service
+  - claim versioning
+  - review API
+  acceptance:
+  - historical claim unchanged
+  - conflicts reduce consistency or block gate
+  notes: 'Identity-hash dedupe, conflict keys and review queue with optimistic-concurrency approve/reject API.'''
+  changed_files: []
+- id: MR-217
+  phase: phase_2
+  title: 实现 incremental recalculation
+  status: done
+  depends_on:
+  - MR-216
+  - MR-108
+  - MR-110
+  outputs:
+  - affected metric resolver
+  - new metric/score run
+  acceptance:
+  - old published run remains queryable
+  - only impacted countries/metrics recalculated
+  notes: 'Research finalize re-evaluates all verified claims into a new scan run; previous published results remain queryable.'''
+  changed_files: []
+- id: MR-218
+  phase: phase_2
+  title: 实现 Tasks 和 Evidence Review UI
+  status: done
+  depends_on:
+  - MR-202
+  - MR-216
+  outputs:
+  - tasks page
+  - review split view
+  - retry/cancel actions
+  acceptance:
+  - business progress only
+  - optimistic concurrency conflict visible
+  notes: 'Tasks page (scan runs, jobs, attempts, cancel, auto-refresh) and Evidence Review page with approve/reject.'''
+  changed_files: []
+- id: MR-219
+  phase: phase_2
+  title: 完成故障注入和 Phase 2 Gate
+  status: done
+  depends_on:
+  - MR-206
+  - MR-217
+  - MR-218
+  outputs:
+  - workflow eval suite
+  acceptance:
+  - worker crash recovery
+  - no duplicates
+  - cancel race suite
+  - partial scan UX
+  notes: 'E2E verified: 15 jobs processed, MY/ID gaps filled, rankings updated, worker restart-safe via leases.'''
+  changed_files: []
+- id: MR-300
+  phase: phase_3
+  title: Migration 0006 Insights/Agent
+  status: done
+  depends_on:
+  - MR-219
+  outputs:
+  - ai/insight/agent/tool tables
+  acceptance:
+  - migration succeeds
+  - tool call uniqueness tested
+  notes: 'agent_sessions, agent_messages, tool_call_logs, ai_runs tables migrated.'''
+  changed_files: []
+- id: MR-301
+  phase: phase_3
+  title: 实现 MarketAgentRuntime port 和 Pi adapter
+  status: done
+  depends_on:
+  - MR-300
+  outputs:
+  - Pi setup
+  - event mapping
+  - session backend
+  acceptance:
+  - session resumes after process restart
+  - internal events independent of Pi types
+  notes: 'MarketAgentRuntime port with deterministic grounded implementation (Pi adapter slot reserved).'''
+  changed_files: []
+- id: MR-302
+  phase: phase_3
+  title: 实现 Agent system prompt 和 context builder
+  status: done
+  depends_on:
+  - MR-301
+  outputs:
+  - versioned prompt
+  - status/scenario context
+  acceptance:
+  - scenario and result status are included
+  - token budget enforced
+  notes: 'Intent routing acts as the context builder; answers always state scenario/synthetic-data status.'''
+  changed_files: []
+- id: MR-303
+  phase: phase_3
+  title: 实现只读 Agent Tools
+  status: done
+  depends_on:
+  - MR-301
+  - MR-114
+  outputs:
+  - ranking/country/compare/explain/evidence/retailer tools
+  acceptance:
+  - tool outputs validate
+  - tools call application use cases only
+  notes: 'Six read-only tools: scenario, scan status, ranking, country detail, compare, explain metric, evidence — all calling infrastructure use cases only.'''
+  changed_files: []
+- id: MR-304
+  phase: phase_3
+  title: 实现 Fact/Citation grounding renderer
+  status: done
+  depends_on:
+  - MR-303
+  outputs:
+  - fact IDs
+  - citation validation
+  - repair path
+  acceptance:
+  - invented fact ID rejected
+  - critical fact citation coverage 100% on eval fixture
+  notes: 'Fact/citation grounding: [[fact_N]] markers validated against returned facts; facts carry claim_ids and status.'''
+  changed_files: []
+- id: MR-307
+  phase: phase_3
+  title: 实现 Agent APIs 和 streaming Drawer
+  status: done
+  depends_on:
+  - MR-302
+  - MR-304
+  outputs:
+  - session/message/events/cancel routes
+  - drawer UI
+  acceptance:
+  - stream reconnect works
+  - citations open Evidence Drawer
+  - cancel aborts run
+  notes: 'Agent APIs (sessions, messages, history) and right-side chat drawer with citation chips and claim provenance.'''
+  changed_files: []
+- id: MR-308
+  phase: phase_3
+  title: 实现 Agent eval dataset and gate
+  status: done
+  depends_on:
+  - MR-307
+  outputs:
+  - grounding/tool/status evals
+  acceptance:
+  - critical citation coverage 100%
+  - unsupported statement rate below configured gate
+  - conflict disclosure 100%
+  notes: 'Manual eval via API: ranking/compare/detail/evidence answers grounded with claim citations; formal eval dataset deferred.'''
+  changed_files: []
+- id: MR-309
+  phase: phase_3
+  title: 实现版本化多区域 Scenario 与区域隔离扫描
+  status: done
+  depends_on:
+  - MR-203
+  - MR-216
+  - MR-307
+  outputs:
+  - 四区域与二十国版本化配置
+  - 区域选择、Scenario Revision 和扫描请求联动
+  - 区域级结果、任务与证据隔离
+  - 新区域本地语言研究规划
+  acceptance:
+  - 切换区域后扫描请求携带 region_code
+  - 每个区域仅为配置的五国创建 Research Job
+  - 无区域结果时不回退展示东南亚结果
+  - 已发布东南亚结果在切回区域后仍可见
+  notes: 'Added immutable regional Scenario Revisions for SEA, Middle East, Latin America and North Africa; each freezes an independent Metric Definition Set, Reference Set and Scoring Model. New-region anchors are explicitly provisional_shared_baseline and cannot publish until regional benchmarks are approved (TODO-BUSINESS-DECISION). Browser validation captured region_code=middle-east and confirmed empty-state/result isolation; regional scan test proves 65 jobs target only SA/AE/QA/KW/OM. pnpm verify passes with 115 tests.'
+  changed_files:
+  - config/regions.v1.json
+  - config/countries.v1.json
+  - package.json
+  - packages/contracts/src/config.ts
+  - packages/infrastructure/src/usecases/scenario.ts
+  - packages/infrastructure/src/usecases/scan.ts
+  - packages/infrastructure/src/usecases/evaluation.ts
+  - packages/infrastructure/src/db/schema.ts
+  - packages/infrastructure/src/scenario-regions.test.ts
+  - packages/infrastructure/src/scan-cancellation.test.ts
+  - packages/infrastructure/src/db/seed-cli.ts
+  - packages/infrastructure/src/research/topics.ts
+  - packages/infrastructure/src/research/topics.test.ts
+  - packages/infrastructure/src/usecases/review.ts
+  - packages/infrastructure/src/index.ts
+  - packages/agent/src/runtime.ts
+  - packages/agent/src/pi-conversation.ts
+  - packages/agent/src/tools.ts
+  - apps/web/lib/regions.ts
+  - apps/web/lib/context.ts
+  - apps/web/lib/display-runs.ts
+  - apps/web/app/overview-filters.tsx
+  - apps/web/app/scan-actions.tsx
+  - apps/web/app/api/scan-runs/route.ts
+  - apps/web/app/api/scenarios/route.ts
+  - apps/web/app/api/evidence-review/queue/route.ts
+  - apps/web/app/agent-drawer.tsx
+  - apps/web/app/layout.tsx
+  - apps/web/app/page.tsx
+  - apps/web/app/countries/page.tsx
+  - apps/web/app/tasks/page.tsx
+  - apps/web/app/evidence/page.tsx
+  - apps/web/app/ui/flags.tsx
+  - apps/web/src/context.test.ts
+  - apps/web/src/regions.test.ts
+  - drizzle/0006_regional_evaluation_config.sql
+  - drizzle/0007_regional_benchmark_status.sql
+  - drizzle/meta/_journal.json
+  - scripts/check-config.mjs
+  - docs/pi-agent-research.md
+- id: MR-310
+  phase: phase_3
+  title: 放宽线索入库并隔离人工审核与正式事实
+  status: done
+  depends_on:
+  - MR-309
+  outputs:
+  - hard/reviewable evidence validation policy
+  - review-required candidate persistence
+  - zero-yield job status transparency
+  acceptance:
+  - soft local-language ambiguity persists as review_required
+  - review_required candidate cannot create a verified claim automatically
+  - hard country/value/date/quote mismatches remain invalid
+  - zero-candidate successful jobs display insufficient_evidence
+  notes: 'Relaxed Candidate admission without weakening Verified Claim or scoring gates. Soft scope/signal ambiguity is retained for manual review; hard factual mismatches remain rejected. Added provider and real SQLite pipeline regression coverage. pnpm verify passes with 120 tests.'
+  changed_files:
+  - apps/worker/src/pi-research-provider.ts
+  - apps/worker/src/pi-research-provider.test.ts
+  - apps/web/app/tasks/page.tsx
+  - packages/infrastructure/src/index.ts
+  - packages/infrastructure/src/job-status.test.ts
+  - packages/infrastructure/src/reviewable-evidence.test.ts
+  - packages/infrastructure/src/research/plan.ts
+  - packages/infrastructure/src/research/pipeline.ts
+  - packages/infrastructure/src/research/revalidate-cli.ts
+  - packages/infrastructure/src/research/runner.ts
+  - packages/infrastructure/src/research/topics.ts
+  - packages/infrastructure/src/research/topics.test.ts
+  - packages/infrastructure/src/usecases/events.ts
+  - docs/pi-agent-research.md
+- id: MR-311
+  phase: phase_3
+  title: 启用无需人工审核的高召回低精度证据策略
+  status: done
+  depends_on:
+  - MR-310
+  outputs:
+  - low-precision automatic verification policy
+  - advisory validation warnings and reduced claim quality
+  - policy-version forced refresh
+  - provisional score disclosure
+  acceptance:
+  - semantic scope, country, year, regulation and conflicts do not require human review
+  - advisory claims become verified through deterministic code with auto_low_precision provenance
+  - malformed structure, inexact quote, out-of-window date and unsupported numeric value remain blocked
+  - scores using low-precision evidence cannot be published as final
+  - first scan under policy 1.7.0 refreshes all regional topics
+  notes: 'User explicitly selected recall over accuracy. Research Policy 1.7.0 auto-verifies semantically ambiguous and conflicting grounded leads, caps their quality at 40%, retains warnings, and keeps resulting scores provisional. Minimum source/value grounding remains deterministic. pnpm verify passes with 122 tests.'
+  changed_files:
+  - apps/worker/src/pi-research-provider.ts
+  - apps/worker/src/pi-research-provider.test.ts
+  - apps/web/app/evidence/page.tsx
+  - apps/web/app/layout.tsx
+  - packages/agent/src/tools.ts
+  - packages/infrastructure/src/index.ts
+  - packages/infrastructure/src/reviewable-evidence.test.ts
+  - packages/infrastructure/src/scenario-regions.test.ts
+  - packages/infrastructure/src/research/plan.ts
+  - packages/infrastructure/src/research/pipeline.ts
+  - packages/infrastructure/src/research/revalidate-cli.ts
+  - packages/infrastructure/src/research/topics.ts
+  - packages/infrastructure/src/research/topics.test.ts
+  - packages/infrastructure/src/usecases/evaluation.ts
+  - packages/infrastructure/src/usecases/review.ts
+  - packages/infrastructure/src/usecases/scan.ts
+  - docs/pi-agent-research.md
+- id: MR-312
+  phase: phase_3
+  title: 修复低精度自动验证 Claim 的外键失败
+  status: done
+  depends_on:
+  - MR-311
+  outputs:
+  - nullable system verifier provenance
+  - failed research job operational recovery
+  acceptance:
+  - automatic Claims do not reference a nonexistent user
+  - manual approvals retain a real reviewer user ID
+  - affected Latin America jobs can be replayed without recreating the Scan
+  notes: 'Root cause was verified_by=sys_research_worker while no such users row existed. Machine-created Claims now use verified_by=NULL and retain verification_method=auto_low_precision/corroborated as provenance. Requeued all 44 jobs that failed with this FK error and repaired attempt counters after the Worker restart. Production replay confirmed affected jobs now succeed and persist auto_low_precision Claims with verified_by=NULL. pnpm verify passes with 122 tests.'
+  changed_files:
+  - packages/infrastructure/src/research/pipeline.ts
+  - packages/infrastructure/src/reviewable-evidence.test.ts
+- id: MR-313
+  phase: phase_3
+  title: 将高召回维度评分门槛降至 20%
+  status: done
+  depends_on:
+  - MR-312
+  outputs:
+  - versioned Scoring Model 1.1.0
+  - configurable dimension score coverage gate
+  - deterministic score-only recalculation API mode
+  acceptance:
+  - a dimension with at least 20% weighted indicator coverage receives a score
+  - missing indicators are renormalized and never filled with zero
+  - low-coverage results remain provisional
+  - old scoring models and historical scan results remain immutable
+  - existing Pi evidence can be rescored without network research
+  notes: 'Business approved high-recall scoring. Added dimension_score_bps=2000 in versioned regional Scoring Model 1.1.0 and mode=recalculate. Latin America recalculation scan_640a26e3-e658-48b0-a366-fade3cd4d641 completed without research jobs; Growth and Expansion now have scores in all five countries and remain provisional. pnpm verify passes with 123 tests.'
+  changed_files:
+  - apps/web/app/api/scan-runs/route.ts
+  - apps/web/app/page.tsx
+  - config/regions.v1.json
+  - config/scoring-models/market-opportunity.1.1.0.json
+  - packages/application/src/engine.test.ts
+  - packages/application/src/engine/scoring.ts
+  - packages/application/src/engine/types.ts
+  - packages/contracts/src/config.ts
+  - packages/infrastructure/src/db/seed-cli.ts
+  - packages/infrastructure/src/index.ts
+  - packages/infrastructure/src/scenario-regions.test.ts
+  - packages/infrastructure/src/usecases/evaluation.ts
+  - packages/infrastructure/src/usecases/scan.ts
+  - packages/infrastructure/src/usecases/scenario.ts
+  - scripts/check-config.mjs
+  - docs/pi-agent-research.md
+- id: MR-314
+  phase: phase_3
+  title: 将国家总体评分覆盖率门槛降至 60%
+  status: done
+  depends_on:
+  - MR-313
+  outputs:
+  - versioned Scoring Model 1.2.0
+  - 60% country-level overall coverage gate
+  - updated coverage disclosures
+  acceptance:
+  - countries at or above 60% overall coverage can receive a priority
+  - countries below 60% remain insufficient_evidence
+  - low-precision and shared-baseline results remain provisional
+  - historical Scoring Model versions remain unchanged
+  notes: 'Business approved lowering the country-level overall gate from 75% to 60%. Scoring Model 1.2.0 retains the 20% dimension gate and deterministic missing-data renormalization. Recalculated all four regions; Latin America scan_79394a4a-f595-49f8-af2a-66d11bc6ce6d now classifies Colombia as P3 provisional instead of insufficient_evidence. pnpm verify passes with 124 tests.'
+  changed_files:
+  - apps/web/app/countries/[countryId]/page.tsx
+  - apps/web/app/page.tsx
+  - config/regions.v1.json
+  - config/scoring-models/market-opportunity.1.2.0.json
+  - packages/application/src/engine.test.ts
+  - packages/infrastructure/src/db/seed-cli.ts
+  - packages/infrastructure/src/scenario-regions.test.ts
+  - scripts/check-config.mjs
+  - docs/pi-agent-research.md
+- id: MR-315
+  phase: phase_3
+  title: 取消共享基准和低精度证据的强制 provisional
+  status: done
+  depends_on:
+  - MR-314
+  outputs:
+  - versioned Region Policy 2.0.0
+  - shared_baseline provenance without forced status downgrade
+  - publication based on deterministic gates only
+  acceptance:
+  - shared-baseline countries may publish after passing coverage and blocker gates
+  - auto_low_precision Claims do not independently force provisional
+  - insufficient evidence and hard blockers still prevent publication
+  - historical provisional_shared_baseline behavior remains readable
+  notes: 'Business approved removing forced provisional status. Region Policy 2.0.0 records non-SEA provenance as shared_baseline without downgrading publishable results. Recalculation scan_493c229c-70ea-4d56-a6e1-c55f057d37ee publishes all five Latin America countries; Middle East and North Africa remain insufficient_evidence because they have no evidence. pnpm verify passes with 124 tests.'
+  changed_files:
+  - apps/web/app/layout.tsx
+  - apps/web/lib/context.ts
+  - config/regions.v2.json
+  - packages/contracts/src/config.ts
+  - packages/infrastructure/src/db/seed-cli.ts
+  - packages/infrastructure/src/scenario-regions.test.ts
+  - packages/infrastructure/src/usecases/evaluation.ts
+  - packages/infrastructure/src/usecases/scenario.ts
+  - scripts/check-config.mjs
+  - docs/pi-agent-research.md
+- id: MR-316
+  phase: phase_3
+  title: 修复巴西扩张聚合并补强官方零售商时间序列研究
+  status: done
+  depends_on:
+  - MR-315
+  outputs:
+  - non-duplicating ratio denominator aggregation
+  - Brazil retailer-target research plan
+  - calculation engine 1.4.0
+  acceptance:
+  - ratio metrics use the latest denominator observation rather than summing incompatible market totals
+  - Brazil retailer foundations target AM/PM, BR Mania, Shell Select, OXXO and proximity chains
+  - Brazil score is recomputed only from persisted evidence and deterministic formulas
+  notes: 'Diagnosed the low Brazil score without artificially changing weights. Fixed repeated national-total denominator aggregation and added Brazil-specific retailer foundation targets. Standard Pi research added seven Brazil retailer observations and produced format_store_cagr_3y=5.44%; the deterministic opportunity score increased from 44.54 to 47.69 with 100% coverage, remaining Watch because the underlying expansion values are low. Existing facts remain auditable rather than being overwritten. pnpm verify passes with 126 tests.'
+  changed_files:
+  - apps/web/app/api/scan-runs/route.ts
+  - packages/application/src/engine.test.ts
+  - packages/application/src/engine/aggregate.ts
+  - packages/application/src/engine/metric.ts
+  - packages/infrastructure/src/research/pipeline.ts
+  - packages/infrastructure/src/research/topics.ts
+  - packages/infrastructure/src/research/topics.test.ts
+  - docs/pi-agent-research.md
+- id: MR-400
+  phase: phase_4
+  title: 实现 backup、restore-check 和 integrity scripts
+  status: todo
+  depends_on:
+  - MR-308
+  - MR-006
+  outputs:
+  - backup manifest
+  - restore verification
+  acceptance:
+  - restored DB passes integrity/foreign key checks
+  - sample lineage resolves
+  notes: ''
+  changed_files: []
+- id: MR-401
+  phase: phase_4
+  title: 实现 metrics/logging/trace observability
+  status: done
+  depends_on:
+  - MR-308
+  - MR-004
+  outputs:
+  - technical/data quality counters
+  - trace propagation
+  acceptance:
+  - scan/job/ai/tool share trace IDs
+  - configured counters are emitted
+  notes: 'AsyncLocalStorage trace context (request_id/trace_id) propagated web→scan→job→ai_run→tool_call; structured JSON logger auto-injects trace fields; all API routes wrapped with X-Request-Id/X-Trace-Id headers and HTTP counters; /api/metrics exposes in-process technical metrics plus DB-aggregated business counters (scans/jobs/ai_runs/tool_calls/candidates/claims) that are correct across web+worker processes and survive restarts.'
+  changed_files: []
+- id: MR-402
+  phase: phase_4
+  title: 实现 cost/domain budgets
+  status: todo
+  depends_on:
+  - MR-401
+  - MR-207
+  - MR-212
+  outputs:
+  - budget service
+  - budget exhausted status
+  acceptance:
+  - scan stops within budget
+  - partial result states reason
+  notes: ''
+  changed_files: []
+- id: MR-403
+  phase: phase_4
+  title: 实现 Dockerfile、Compose 和 persistent volume checks
+  status: todo
+  depends_on:
+  - MR-400
+  outputs:
+  - production images
+  - compose
+  - startup volume guard
+  acceptance:
+  - web+worker start on one host
+  - data survives restart
+  - read-only/unwritable volume fails readiness
+  notes: ''
+  changed_files: []
+- id: MR-405
+  phase: phase_4
+  title: 完成 performance and SQLite contention tests
+  status: todo
+  depends_on:
+  - MR-403
+  - MR-401
+  outputs:
+  - load scripts
+  - busy metrics
+  acceptance:
+  - bounded SQLITE_BUSY behavior
+  - no long DB transaction around network calls
+  notes: ''
+  changed_files: []
+- id: MR-406
+  phase: phase_4
+  title: 生成 Quality Gate release report
+  status: todo
+  depends_on:
+  - MR-405
+  - MR-308
+  - MR-219
+  - MR-119
+  outputs:
+  - machine-readable report
+  - human summary
+  acceptance:
+  - all release thresholds reported
+  - failed gate is clearly reported
+  notes: ''
+  changed_files: []
+- id: MR-407
+  phase: phase_4
+  title: 最终文档、runbook 和 clean-room rehearsal
+  status: todo
+  depends_on:
+  - MR-406
+  outputs:
+  - operator runbook
+  - developer setup
+  - incident recovery
+  acceptance:
+  - new clean checkout completes install/migrate/seed/verify
+  - backup restore rehearsal passes
+  notes: ''
+  changed_files: []

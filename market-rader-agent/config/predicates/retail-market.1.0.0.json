@@ -1,0 +1,31 @@
+{
+  "code": "retail_market",
+  "version": "1.0.0",
+  "predicates": [
+    { "code": "qualified_store_base_actual", "value_type": "integer", "allowed_units": ["store"], "entity_scope": "country" },
+    { "code": "qualified_retailer_count_actual", "value_type": "integer", "allowed_units": ["retailer"], "entity_scope": "country" },
+    { "code": "modern_retail_share_percent", "value_type": "percent", "allowed_units": ["percent"], "entity_scope": "country" },
+    { "code": "format_store_count_actual", "value_type": "integer", "allowed_units": ["store"], "entity_scope": "country" },
+    { "code": "modern_retail_sales_cagr_percent", "value_type": "percent", "allowed_units": ["percent"], "entity_scope": "country" },
+    { "code": "retailer_store_growth_percent", "value_type": "percent", "allowed_units": ["percent"], "entity_scope": "country" },
+    { "code": "announced_store_openings_actual", "value_type": "integer", "allowed_units": ["store"], "entity_scope": "country" },
+    { "code": "expanding_retailer_share_percent", "value_type": "percent", "allowed_units": ["percent"], "entity_scope": "country" },
+    { "code": "new_entrant_activity_level", "value_type": "ordinal", "allowed_units": ["level"], "entity_scope": "country" },
+    { "code": "store_system_readiness_level", "value_type": "ordinal", "allowed_units": ["level"], "entity_scope": "country" },
+    { "code": "video_infrastructure_readiness_level", "value_type": "ordinal", "allowed_units": ["level"], "entity_scope": "country" },
+    { "code": "cloud_connectivity_readiness_level", "value_type": "ordinal", "allowed_units": ["level"], "entity_scope": "country" },
+    { "code": "digital_investment_signals_level", "value_type": "ordinal", "allowed_units": ["level"], "entity_scope": "country" },
+    { "code": "addressable_store_base_actual", "value_type": "integer", "allowed_units": ["store"], "entity_scope": "country" },
+    { "code": "top_customer_concentration_percent", "value_type": "percent", "allowed_units": ["percent"], "entity_scope": "country" },
+    { "code": "estimated_acv_potential_usd_millions", "value_type": "money_usd_millions", "allowed_units": ["usd_millions"], "entity_scope": "country" },
+    { "code": "use_case_need_fit_level", "value_type": "ordinal", "allowed_units": ["level"], "entity_scope": "country" },
+    { "code": "privacy_video_regulation_fit_level", "value_type": "ordinal", "allowed_units": ["level"], "entity_scope": "country" },
+    { "code": "data_residency_fit_level", "value_type": "ordinal", "allowed_units": ["level"], "entity_scope": "country" },
+    { "code": "partner_channel_availability_level", "value_type": "ordinal", "allowed_units": ["level"], "entity_scope": "country" },
+    { "code": "competition_intensity_index", "value_type": "decimal", "allowed_units": ["index"], "entity_scope": "country" },
+    { "code": "localization_sales_friction_index", "value_type": "decimal", "allowed_units": ["index"], "entity_scope": "country" },
+    { "code": "retailer_store_count_actual", "value_type": "integer", "allowed_units": ["store"], "entity_scope": "retailer" },
+    { "code": "retailer_store_opening_plan_actual", "value_type": "integer", "allowed_units": ["store"], "entity_scope": "retailer" },
+    { "code": "video_processing_restriction_status", "value_type": "ordinal", "allowed_units": ["level"], "entity_scope": "country" }
+  ]
+}

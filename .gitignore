@@ -1,2 +1,28 @@
+# OS / editor artifacts
 .DS_Store
 
+# Dependencies and package-manager caches
+node_modules/
+.pnpm-store/
+
+# Build and test output
+.next/
+out/
+dist/
+coverage/
+playwright-report/
+test-results/
+.cache/
+*.tsbuildinfo
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+
+# Runtime files
+*.log
+*.pid
+*.db
+*.db-shm
+*.db-wal

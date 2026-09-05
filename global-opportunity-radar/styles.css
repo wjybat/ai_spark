@@ -86,6 +86,7 @@ button:focus-visible,
 .brand-line,
 .scan-button,
 .customer-intelligence-header-link,
+.market-radar-header-link,
 .source-pill,
 .live-pill {
   display: flex;
@@ -170,7 +171,8 @@ button:focus-visible,
   box-shadow: 0 0 0 4px rgba(91, 155, 108, 0.12);
 }
 
-.customer-intelligence-header-link {
+.customer-intelligence-header-link,
+.market-radar-header-link {
   height: 38px;
   gap: 7px;
   padding: 0 14px;
@@ -185,7 +187,8 @@ button:focus-visible,
   transition: background 160ms ease, transform 160ms ease;
 }
 
-.customer-intelligence-header-link:hover {
+.customer-intelligence-header-link:hover,
+.market-radar-header-link:hover {
   background: color-mix(in srgb, var(--mint) 44%, transparent);
   transform: translateY(-1px);
 }
