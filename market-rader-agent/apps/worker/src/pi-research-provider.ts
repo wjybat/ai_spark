@@ -21,6 +21,7 @@ import {
   validatePredicateEvidence,
   validatePredicateValue,
 } from "@market-radar/infrastructure";
+import { selectPiModel } from "@market-radar/agent";
 import type {
   CorpusDocument,
   ResearchDocumentProvider,
@@ -73,6 +74,7 @@ type PiSubmission = Static<typeof submissionSchema>;
 
 export interface PiResearchProviderOptions {
   readonly cwd: string;
+  readonly model: string;
   readonly timeoutMs: number;
   readonly thinkingLevel: "off" | "minimal" | "low" | "medium" | "high" | "xhigh" | "max";
   readonly onActivity?: (message: string, fields: Readonly<Record<string, unknown>>) => void;
@@ -350,9 +352,11 @@ export function createPiAgentResearchProvider(options: PiResearchProviderOptions
       );
       if (skillSections.length > 0) skillGuidance = skillSections.join("\n");
       const modelRuntime = await ModelRuntime.create();
+      const model = selectPiModel(modelRuntime, options.model);
       const { session, extensionsResult } = await createAgentSession({
         cwd: options.cwd,
         agentDir,
+        model,
         tools: [SEARCH_TOOL, FETCH_TOOL, SUBMIT_TOOL],
         customTools: [submitTool],
         resourceLoader,

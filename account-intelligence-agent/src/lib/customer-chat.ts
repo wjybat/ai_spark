@@ -175,7 +175,7 @@ export async function chatWithCustomerAgent(db: DatabaseSync, customerId: string
     cwd: process.cwd(),
     model,
     modelRuntime,
-    thinkingLevel: (process.env.PI_AGENT_CHAT_THINKING || "low") as "off" | "minimal" | "low" | "medium" | "high",
+    thinkingLevel: (process.env.PI_AGENT_CHAT_THINKING || "high") as "off" | "minimal" | "low" | "medium" | "high",
     customTools: tools,
     tools: tools.map((tool) => tool.name),
     noTools: "builtin",

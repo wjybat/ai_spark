@@ -78,6 +78,9 @@ importers:
       '@earendil-works/pi-coding-agent':
         specifier: 0.84.4
         version: 0.84.4(@modelcontextprotocol/sdk@1.30.0(supports-color@7.2.0)(zod@4.5.4))(supports-color@7.2.0)(ws@8.21.3)(zod@4.5.4)
+      '@market-radar/agent':
+        specifier: workspace:*
+        version: link:../../packages/agent
       '@market-radar/infrastructure':
         specifier: workspace:*
         version: link:../../packages/infrastructure

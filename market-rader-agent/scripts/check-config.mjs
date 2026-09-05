@@ -63,8 +63,10 @@ assert.ok(Object.isFrozen(config.database));
 
 const piConfig = loadConfig({ ...validEnvironment, SEARCH_PROVIDER: "pi-agent" });
 assert.equal(piConfig.search.provider, "pi-agent");
+assert.equal(piConfig.piAgent.model, "dmall-router/glm-5.3-zp");
 assert.equal(piConfig.piAgent.timeoutMs, 180_000);
-assert.equal(piConfig.piAgent.thinkingLevel, "low");
+assert.equal(piConfig.piAgent.thinkingLevel, "high");
+assert.equal(piConfig.agentChat.thinkingLevel, "high");
 
 assert.throws(
   () => loadConfig({}),

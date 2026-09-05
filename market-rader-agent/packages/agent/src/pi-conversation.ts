@@ -11,6 +11,7 @@ import { StringEnum } from "@earendil-works/pi-ai";
 import type { MarketDatabase } from "@market-radar/infrastructure";
 import { Type } from "typebox";
 
+import { selectPiModel } from "./pi-model.js";
 import { AGENT_TOOLS, type AgentFact } from "./tools.js";
 import type { AgentMessage } from "./runtime.js";
 
@@ -87,6 +88,7 @@ export async function runPiConversation(
     readonly message: string;
     readonly history: readonly AgentMessage[];
     readonly scanRunId?: string;
+    readonly model: string;
     readonly timeoutMs: number;
     readonly thinkingLevel: "off" | "minimal" | "low" | "medium" | "high" | "xhigh" | "max";
   },
@@ -185,9 +187,11 @@ export async function runPiConversation(
   });
   await resourceLoader.reload();
   const modelRuntime = await ModelRuntime.create();
+  const model = selectPiModel(modelRuntime, input.model);
   const { session } = await createAgentSession({
     cwd,
     agentDir,
+    model,
     tools: [QUERY_TOOL, SUBMIT_TOOL],
     customTools: [queryTool, submitTool],
     resourceLoader,

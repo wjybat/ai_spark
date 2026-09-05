@@ -27,6 +27,7 @@ function buildResearchProvider(): ResearchDocumentProvider | undefined {
   if (config.search.provider === "pi-agent") {
     return createPiAgentResearchProvider({
       cwd: resolveFromRoot("."),
+      model: config.piAgent.model,
       timeoutMs: config.piAgent.timeoutMs,
       thinkingLevel: config.piAgent.thinkingLevel,
       onActivity: (message, fields) => logger.info(message, fields),

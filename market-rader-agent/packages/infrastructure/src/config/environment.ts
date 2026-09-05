@@ -43,13 +43,14 @@ export const environmentSchema = z
     SQLITE_BUSY_TIMEOUT_MS: integerFromEnvironment(5_000, 0),
     SEARCH_PROVIDER: nonEmptyString.default("fixture"),
     SEARCH_API_KEY: optionalString,
+    PI_AGENT_MODEL: nonEmptyString.default("dmall-router/glm-5.3-zp"),
     PI_AGENT_TIMEOUT_MS: integerFromEnvironment(180_000, 1_000),
     PI_AGENT_THINKING_LEVEL: z
       .enum(["off", "minimal", "low", "medium", "high", "xhigh", "max"])
-      .default("low"),
+      .default("high"),
     AGENT_CHAT_THINKING_LEVEL: z
       .enum(["off", "minimal", "low", "medium", "high", "xhigh", "max"])
-      .default("minimal"),
+      .default("high"),
     LLM_PROVIDER: nonEmptyString.default("fixture"),
     LLM_MODEL_EXTRACTOR: nonEmptyString.default("fixture-extractor"),
     LLM_MODEL_AGENT: nonEmptyString.default("fixture-agent"),
@@ -132,6 +133,7 @@ export interface AppConfig {
     maxTokensPerScan: number;
   }>;
   readonly piAgent: Readonly<{
+    model: string;
     timeoutMs: number;
     thinkingLevel: Environment["PI_AGENT_THINKING_LEVEL"];
   }>;
@@ -209,6 +211,7 @@ export function loadConfig(input: EnvironmentInput = process.env): AppConfig {
       maxTokensPerScan: environment.LLM_MAX_TOKENS_PER_SCAN,
     }),
     piAgent: Object.freeze({
+      model: environment.PI_AGENT_MODEL,
       timeoutMs: environment.PI_AGENT_TIMEOUT_MS,
       thinkingLevel: environment.PI_AGENT_THINKING_LEVEL,
     }),

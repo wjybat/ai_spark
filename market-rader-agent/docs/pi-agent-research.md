@@ -9,11 +9,14 @@ The Research Worker can use the local Pi model authentication and the installed 
 
 ```dotenv
 SEARCH_PROVIDER=pi-agent
+PI_AGENT_MODEL=dmall-router/glm-5.3-zp
 PI_AGENT_TIMEOUT_MS=300000
-PI_AGENT_THINKING_LEVEL=low
-AGENT_CHAT_THINKING_LEVEL=minimal
+PI_AGENT_THINKING_LEVEL=high
+AGENT_CHAT_THINKING_LEVEL=high
 WORKER_CONCURRENCY=3
 ```
+
+`PI_AGENT_MODEL` selects the model only. The `dmall-router` Provider URL and Key are resolved from the local `~/.pi/agent/models.json`; they must not be copied into this repository.
 
 When the machine uses `HTTP_PROXY`, `HTTPS_PROXY`, or `ALL_PROXY`, start the Worker with `NODE_USE_ENV_PROXY=1`. The repository's Worker `dev` and `start` scripts enable this for Node 24 automatically.
 
@@ -59,7 +62,7 @@ pnpm data:revalidate-evidence
 
 ## Conversational Agent
 
-When `SEARCH_PROVIDER=pi-agent`, the Web Agent uses a separate bounded Pi session for natural multi-turn dialogue. Chat latency is controlled independently by `AGENT_CHAT_THINKING_LEVEL` (default `minimal`), while research keeps `PI_AGENT_THINKING_LEVEL`. It has only persisted ranking, country comparison/detail, metric explanation, evidence lookup, scan-status lookup, and a grounded-answer submission tool. It has no filesystem, shell, browser, web-search, mutation, forecasting, or scenario-simulation tools. Market facts must cite facts returned during the current turn; if Pi is unavailable, a deterministic read-only fallback remains available. Web development and production scripts enable `NODE_USE_ENV_PROXY=1` so local Pi authentication works through the configured proxy.
+When `SEARCH_PROVIDER=pi-agent`, the Web Agent uses a separate bounded Pi session for natural multi-turn dialogue. Both chat and research use `dmall-router/glm-5.3-zp` with `high` thinking by default; their thinking levels remain independently configurable through `AGENT_CHAT_THINKING_LEVEL` and `PI_AGENT_THINKING_LEVEL`. It has only persisted ranking, country comparison/detail, metric explanation, evidence lookup, scan-status lookup, and a grounded-answer submission tool. It has no filesystem, shell, browser, web-search, mutation, forecasting, or scenario-simulation tools. Market facts must cite facts returned during the current turn; if Pi is unavailable, a deterministic read-only fallback remains available. Web development and production scripts enable `NODE_USE_ENV_PROXY=1` so local Pi authentication works through the configured proxy.
 
 ## Deterministic derived metrics
 

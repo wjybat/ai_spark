@@ -150,7 +150,7 @@ export async function analyzeWithPiAgent(db: DatabaseSync, customer: CustomerRow
   });
   await loader.reload();
   const { session } = await createAgentSession({
-    cwd: process.cwd(), model, modelRuntime, thinkingLevel: (process.env.PI_AGENT_THINKING || "low") as "off" | "minimal" | "low" | "medium" | "high",
+    cwd: process.cwd(), model, modelRuntime, thinkingLevel: (process.env.PI_AGENT_THINKING || "high") as "off" | "minimal" | "low" | "medium" | "high",
     customTools: tools, tools: tools.map((tool) => tool.name), noTools: "builtin",
     resourceLoader: loader, settingsManager, sessionManager: SessionManager.inMemory(process.cwd()),
   });

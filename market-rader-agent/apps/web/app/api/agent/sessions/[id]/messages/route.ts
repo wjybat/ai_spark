@@ -38,6 +38,7 @@ export async function POST(
     const runtime = createAgentRuntime({
       piConversation: {
         enabled: config.search.provider === "pi-agent",
+        model: config.piAgent.model,
         timeoutMs: Math.min(config.piAgent.timeoutMs, 120_000),
         thinkingLevel: config.agentChat.thinkingLevel,
       },

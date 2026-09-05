@@ -84,14 +84,14 @@ pnpm build         # 生产构建
 
 ## Pi 基座 Agent
 
-Worker 使用 `@earendil-works/pi-coding-agent` SDK 创建隔离的内存会话，默认复用 `~/.pi/agent` 中的登录凭据和默认模型。首次使用前可运行：
+Worker 使用 `@earendil-works/pi-coding-agent` SDK 创建隔离的内存会话，默认选择本机 Pi 配置中的 `dmall-router/glm-5.3-zp`，并使用 `high` 推理等级。Provider URL 和 Key 继续从 `~/.pi/agent/models.json` 解析，不写入项目。首次使用前可运行：
 
 ```bash
 pi
 /login
 ```
 
-也可以在 `.env` 中通过 `PI_AGENT_MODEL=provider/model` 指定模型。Agent 不启用 Pi 的文件、Shell 或写入工具，只能使用以下业务工具：
+可以在 `.env` 中通过 `PI_AGENT_MODEL=provider/model` 覆盖模型。Agent 不启用 Pi 的文件、Shell 或写入工具，只能使用以下业务工具：
 
 - `get_customer_profile`：读取当前客户画像与旧总结
 - `read_source_material`：读取当前任务的完整材料

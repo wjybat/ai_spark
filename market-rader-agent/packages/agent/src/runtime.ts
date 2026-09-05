@@ -179,6 +179,7 @@ function renderAnswer(message: string, result: ToolResult): string {
 export interface AgentRuntimeOptions {
   readonly piConversation?: Readonly<{
     enabled: boolean;
+    model: string;
     timeoutMs: number;
     thinkingLevel: "off" | "minimal" | "low" | "medium" | "high" | "xhigh" | "max";
   }>;
@@ -260,6 +261,7 @@ async function runAgentMessage(
           message: input.message,
           history,
           ...(input.activeScanRunId === undefined ? {} : { scanRunId: input.activeScanRunId }),
+          model: options.piConversation.model,
           timeoutMs: options.piConversation.timeoutMs,
           thinkingLevel: options.piConversation.thinkingLevel,
         });
