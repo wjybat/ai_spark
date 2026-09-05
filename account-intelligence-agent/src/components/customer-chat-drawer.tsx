@@ -2,6 +2,7 @@
 
 import { Bot, Loader2, Send, Sparkles, Trash2, X } from "lucide-react";
 import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
+import { ChatMarkdown } from "./chat-markdown";
 
 interface ChatSource { id: string; title: string }
 interface ChatMessage { id: string; role: "user" | "assistant"; content: string; sources?: ChatSource[] }
@@ -18,10 +19,6 @@ function loadMessages(customerId: string): ChatMessage[] {
 
 function persistMessages(customerId: string, messages: ChatMessage[]) {
   window.localStorage.setItem(storageKey(customerId), JSON.stringify(messages.slice(-30)));
-}
-
-function ChatText({ content }: { content: string }) {
-  return <p>{content.split(/(\*\*[^*]+\*\*)/g).map((part, index) => part.startsWith("**") && part.endsWith("**") ? <strong key={index}>{part.slice(2, -2)}</strong> : part)}</p>;
 }
 
 export function CustomerChatDrawer({ customerId, customerName, open, onClose, onOpenSource }: {
@@ -106,7 +103,7 @@ export function CustomerChatDrawer({ customerId, customerName, open, onClose, on
       <div className="chat-context"><Sparkles size={14} /><span>正在基于 <b>{customerName}</b> 的客户材料回答</span><em>只读</em></div>
       <div className="chat-messages" aria-live="polite">
         {messages.length === 0 && <div className="chat-welcome"><span><Bot size={24} /></span><b>你好，我是客户情报 Agent</b><p>我可以查阅该客户的画像、事实、时间线和来源材料，帮助你总结进展、分析阻碍并规划下一步。</p><div>{suggestions.map((suggestion) => <button key={suggestion} type="button" onClick={() => { setInput(suggestion); inputRef.current?.focus(); }}>{suggestion}</button>)}</div></div>}
-        {messages.map((message) => <article key={message.id} className={`chat-message ${message.role}`}><div>{message.role === "assistant" ? <Bot size={15} /> : "你"}</div><section><ChatText content={message.content} />{message.sources && message.sources.length > 0 && <footer><span>参考材料</span>{message.sources.map((source) => <button key={source.id} type="button" onClick={() => onOpenSource(source)}>{source.title}</button>)}</footer>}</section></article>)}
+        {messages.map((message) => <article key={message.id} className={`chat-message ${message.role}`}><div>{message.role === "assistant" ? <Bot size={15} /> : "你"}</div><section><ChatMarkdown content={message.content} />{message.sources && message.sources.length > 0 && <footer><span>参考材料</span>{message.sources.map((source) => <button key={source.id} type="button" onClick={() => onOpenSource(source)}>{source.title}</button>)}</footer>}</section></article>)}
         {sending && <article className="chat-message assistant chat-typing"><div><Bot size={15} /></div><section><Loader2 className="spin" size={15} /><span>正在查阅客户材料…</span></section></article>}
         {error && <div className="chat-error" role="alert">{error}<button type="button" onClick={() => setError("")}>关闭</button></div>}
         <div ref={endRef} />
