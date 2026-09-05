@@ -36,16 +36,17 @@ function cardSummary(customer: Customer) {
   return parts?.at(-1) || `${stageLabel[customer.stage]}阶段客户推进记录`;
 }
 function CompanyLogo({ name, large = false }: { name: string; large?: boolean }) {
-  const key = name.toLowerCase();
-  const isWellcome = key.includes("wellcome") || name.includes("惠康");
-  let mark: React.ReactNode = initials(name);
-  if (isWellcome) mark = <img src="/logos/wellcome.svg" alt="" />;
-  else if (key.includes("tesco")) mark = <span className="tesco-mark">TESCO<i /></span>;
-  else if (key.includes("carrefour")) mark = <span className="carrefour-mark">◆</span>;
-  else if (key === "walmart") mark = <span className="walmart-mark">✳</span>;
-  else if (key === "lidl") mark = <span className="lidl-mark">LIDL</span>;
-  else if (key === "metro") mark = <span className="metro-mark">M</span>;
-  return <div className={`company-logo ${large ? "large" : ""} ${isWellcome ? "wellcome-logo" : `logo-${name.length % 4}`}`}>{mark}</div>;
+  const key = name.toLowerCase().replace(/[\s_-]/g, "");
+  const brand = name.includes("惠康") || key.includes("wellcome") ? ["wellcome", "/logos/wellcome.svg"]
+    : name.includes("麦德龙") || key === "metro" ? ["metro", "/logos/metro.svg"]
+      : key.includes("tesco") ? ["tesco", "/logos/tesco.svg"]
+        : key.includes("carrefour") ? ["carrefour", "/logos/carrefour.svg"]
+          : key.includes("walmart") ? ["walmart", "/logos/walmart.svg"]
+            : key.includes("lidl") ? ["lidl", "/logos/lidl.svg"]
+              : /^(?:7eleven|711)$/.test(key) ? ["seven-eleven", "/logos/7-eleven.svg"]
+                : null;
+  if (brand) return <div className={`company-logo brand-logo brand-${brand[0]} ${large ? "large" : ""}`}><img src={brand[1]} alt={`${name} 商标`} /></div>;
+  return <div className={`company-logo ${large ? "large" : ""} logo-${name.length % 4}`}>{initials(name)}</div>;
 }
 
 export function CustomerWorkspace({ initialCustomerId }: { initialCustomerId?: string }) {
