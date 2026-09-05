@@ -60,7 +60,9 @@ describe("客户情报核心链路", () => {
     expect(storeFact.fact_value).toBe("10");
     expect(storeFact.evidence_text).toBe("10 家门店");
     expect(db.prepare("SELECT current_state FROM customer_summaries").get()).toBeTruthy();
-    expect((db.prepare("SELECT COUNT(*) count FROM customer_experiences").get() as { count: number }).count).toBe(2);
+    const experiences = db.prepare("SELECT title FROM customer_experiences").all() as unknown as Array<{ title: string }>;
+    expect(experiences).toHaveLength(2);
+    expect(experiences.map((item) => item.title)).toEqual(expect.arrayContaining(["方案确认延期", "分模块确认、整体收口"]));
   });
 
   it("证据抽取优先保留原文，并为改写结论定位最相关段落", () => {
