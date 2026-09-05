@@ -1,6 +1,7 @@
 const { useEffect: useAppEffect, useMemo: useAppMemo, useState: useAppState } = React;
-const CUSTOMER_INTELLIGENCE_URL = window.CUSTOMER_INTELLIGENCE_URL || "http://localhost:3001/customers";
-const MARKET_RADAR_URL = window.MARKET_RADAR_URL || "http://localhost:3000";
+const SUB_AGENT_ORIGIN = `${window.location.protocol}//${window.location.hostname || "localhost"}`;
+const CUSTOMER_INTELLIGENCE_URL = window.CUSTOMER_INTELLIGENCE_URL || `${SUB_AGENT_ORIGIN}:3001/customers`;
+const MARKET_RADAR_URL = window.MARKET_RADAR_URL || `${SUB_AGENT_ORIGIN}:3000`;
 
 function Icon({ name, size = 18 }) {
   const shapes = {
