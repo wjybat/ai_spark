@@ -97,25 +97,53 @@ describe("country-to-customer report hierarchy", { timeout: 20_000 }, () => {
       expect(container.querySelector(".detail-tabs .is-active")?.textContent).toBe("国家概况");
       expect(body().querySelector(`[data-country-overview="${item.id}"]`)).not.toBeNull();
       expect(body().textContent).toContain(item.research.summary);
-      expect(body().textContent).toContain(item.research.sample.stores);
-      expect(container.querySelector(".country-quick-metrics")?.textContent).toContain("线下门店 · 估算");
+      expect(body().querySelector(".national-sample")).toBeNull();
+      expect(body().textContent).not.toContain("已收录客户样本");
+      expect(container.querySelector(".country-quick-metrics")?.textContent).not.toMatch(/估算|待核实/);
+      for (const count of item.research.counts) {
+        expect(container.querySelector(".country-quick-metrics")?.textContent).toContain(count.label);
+        expect(count.source.url).toMatch(/^https:\/\//);
+      }
+      expect(container.querySelectorAll(".country-quick-metrics .metric-cell")).toHaveLength(item.research.counts.length);
+      expect(container.querySelector(".country-quick-metrics")?.textContent).not.toContain("市场观察");
       expect(container.querySelector(".country-quick-metrics")?.textContent).not.toContain(item.storeCount);
       expect(body().querySelectorAll(".national-metrics article")).toHaveLength(3);
+      expect(body().querySelectorAll(".national-metric-label span")).toHaveLength(0);
+      expect(body().querySelector(".national-intro-foot")?.children).toHaveLength(1);
+      expect(body().textContent).not.toContain("逐项注明统计范围");
+      expect(body().textContent).not.toContain("理解客户所在的市场");
+      expect(body().textContent).not.toContain("演示评分 / 100");
       expect(body().querySelectorAll('[role="meter"]')).toHaveLength(4);
-      expect(body().querySelectorAll(".national-signals article")).toHaveLength(3);
-      expect(body().textContent).toContain("未收录具体招聘或招标事件");
+      expect(body().querySelectorAll(".national-signals article")).toHaveLength(2);
+      expect(body().textContent).not.toContain("本地零售网络与业态入口");
+      expect(body().querySelector(".national-watch")).toBeNull();
+      expect(body().textContent).not.toContain("招聘与公告观察");
+      const signalKeys = item.research.signals.map(signal => window.OPPORTUNITY_DATA.getCountrySignalPeriodKey(signal.period));
+      expect(signalKeys).toEqual([...signalKeys].sort().reverse());
+      let methodology = body().querySelector(".national-method")!;
+      expect(methodology.querySelectorAll("p")).toHaveLength(0);
+      expect(methodology.querySelector("summary")?.textContent).toBe("数据口径与来源");
+      expect(methodology.querySelectorAll("a")).toHaveLength(item.research.sources.length);
+      expect(methodology.textContent).not.toContain(item.research.countNote);
       for (const metric of item.research.metrics) {
-        if (metric.basis === "公开资料") expect(metric.source.url).toMatch(/^https:\/\//);
-        else expect(metric.basis).toBe("演示估算");
+        expect(metric.basis).toBe("公开资料");
+        expect(metric.source.url).toMatch(/^https:\/\//);
+        expect(body().textContent).toContain(metric.value);
+        if (metric.unit) expect(body().textContent).toContain(metric.unit);
       }
       await click("市场与商机");
       expect(body().querySelector(`[data-country-radar="${item.id}"]`)).not.toBeNull();
+      methodology = body().querySelector(".national-method")!;
+      expect(methodology.querySelectorAll("p")).toHaveLength(0);
+      expect(methodology.querySelectorAll("a")).toHaveLength(item.research.sources.length);
       for (const heading of ["为什么值得看","机会在哪里","风险与应对","适合切入的零售场景"]) expect(body().textContent).toContain(heading);
-      expect(body().textContent).toContain(item.research.nextStep);
+      expect(body().textContent).not.toContain("下一步怎么推进");
+      expect(body().querySelector(".national-next")).toBeNull();
       expect(body().querySelectorAll(".national-scenarios article")).toHaveLength(3);
-      await click("查看本国客户雷达 →");
+      await click("客户雷达");
       expect(container.querySelector(".detail-tabs .is-active")?.textContent).toBe("客户雷达");
     }
+    expect(country("brazil").research.structure).toBe("巴西大型集团与区域连锁并存，批发零售和折扣消费强化价格与效率竞争。");
   });
 
   it("retains national facts and country scores alongside a generated customer report", async () => {
@@ -129,7 +157,8 @@ describe("country-to-customer report hierarchy", { timeout: 20_000 }, () => {
     expect(body().querySelector(".national-live-supplement")).toBeNull();
     expect(body().textContent).not.toContain("MARKET_FIRST");
     await mount(undefined, { country: country("uae") });
-    expect(body().textContent).toContain("单国门店数未单独披露");
+    expect(body().textContent).toContain(country("uae").research.metrics[0].value);
+    expect(body().querySelector(".national-sample")).toBeNull();
     expect(body().textContent).not.toContain("MARKET_FIRST");
   });
 
@@ -181,21 +210,54 @@ describe("country-to-customer report hierarchy", { timeout: 20_000 }, () => {
     await enterCustomer();
     expect(container.querySelector('[data-view-level="customer"]')).not.toBeNull();
     expect(container.querySelector(".country-head-main h1")?.textContent).toBe("Cencosud");
-    expect([...container.querySelectorAll(".detail-tabs button")].map(item => item.textContent)).toEqual(["客户概览", "业务布局", "数字化与系统", "动态与组织", "资料来源", "销售建议", "作战卡"]);
+    expect([...container.querySelectorAll(".detail-tabs button")].map(item => item.textContent)).toEqual(["客户概览", "战略与业务布局", "数字化与系统", "动态与组织", "资料来源", "销售建议", "作战卡"]);
     expect(body().querySelector('[data-customer-research-tab="profile"]')).not.toBeNull();
     expect(body().textContent).toContain(window.OPPORTUNITY_DATA.companyProfiles.cencosud.headquarters);
-    await click("业务布局");
+    const facts = window.OPPORTUNITY_DATA.companyProfiles.cencosud.operatingFacts;
+    expect(facts).toHaveLength(11);
+    expect(body().querySelectorAll('[data-company-facts="cencosud"] tbody tr')).toHaveLength(facts.length);
+    expect([...body().querySelectorAll('[data-company-facts="cencosud"] thead th')].map(item => item.textContent)).toEqual(["数据项", "数值", "同比", "期间 / 口径"]);
+    for (const fact of facts) {
+      expect(body().textContent).toContain(fact.item);
+      expect(body().textContent).toContain(fact.value);
+      expect(body().textContent).toContain(fact.yoy);
+      expect(body().textContent).toContain(fact.period);
+    }
+    await click("战略与业务布局");
     expect(body().textContent).toContain(window.OPPORTUNITY_DATA.companyProfiles.cencosud.businessAreas[0]);
+    const strategy = window.OPPORTUNITY_DATA.companyProfiles.cencosud.regionalTechnologyStrategy;
+    expect(strategy).toHaveLength(5);
+    expect(body().querySelectorAll('[data-regional-strategy="cencosud"] article')).toHaveLength(strategy.length);
+    for (const item of strategy) {
+      expect(body().textContent).toContain(item.title);
+      expect(body().textContent).toContain(item.detail);
+    }
     await click("数字化与系统");
     expect(body().textContent).toContain(window.OPPORTUNITY_DATA.companyProfiles.cencosud.knownSystems[0]);
+    const erpTimeline = window.OPPORTUNITY_DATA.companyProfiles.cencosud.erpTimeline;
+    expect(erpTimeline).toHaveLength(7);
+    expect(body().querySelectorAll('[data-erp-timeline="cencosud"] li')).toHaveLength(erpTimeline.length);
+    for (const item of erpTimeline) {
+      expect(body().textContent).toContain(item.period);
+      expect(body().textContent).toContain(item.event);
+      expect(body().textContent).toContain(item.assessment);
+    }
     await click("动态与组织");
-    expect(body().textContent).toContain(window.OPPORTUNITY_DATA.companyProfiles.cencosud.decisionRoles[0]);
+    const storeNetwork = window.OPPORTUNITY_DATA.companyProfiles.cencosud.storeNetwork;
+    expect(body().querySelector('[data-store-network="cencosud"]')).not.toBeNull();
+    expect(body().querySelectorAll('[data-store-network="cencosud"] .customer-network-summary article')).toHaveLength(3);
+    expect(body().querySelectorAll('[data-store-network="cencosud"] tbody tr')).toHaveLength(storeNetwork.byFormat.length + storeNetwork.byCountry.length + storeNetwork.historicalMix.length);
+    expect(body().textContent).not.toContain("优先关注角色");
+    expect(body().textContent).not.toContain("仍需补充的信息");
+    expect(body().textContent).toContain(storeNetwork.insight);
     await click("资料来源");
     expect(body().textContent).toContain(window.OPPORTUNITY_DATA.companyProfiles.cencosud.sources[0].title);
     await click("销售建议");
     expect(body().textContent).toContain(country().recommendations[0]);
     await click("作战卡");
     expect(body().textContent).toContain("Cencosud");
+    expect(body().textContent).toContain("调研客户");
+    expect(body().textContent).not.toContain("真实调研客户");
     await returnToCountry();
     expect(container.querySelector('[data-view-level="country"]')).not.toBeNull();
     expect(container.querySelector(".detail-tabs .is-active")?.textContent).toBe("客户雷达");
@@ -228,7 +290,7 @@ describe("country-to-customer report hierarchy", { timeout: 20_000 }, () => {
     expect(container.querySelectorAll(".detail-tabs button")).toHaveLength(7);
     expect(body().querySelector("[data-customer-research-tab]")?.getAttribute("data-customer-research-tab")).toBe("profile");
     expect(body().querySelector("[data-report-run]")?.getAttribute("data-report-run")).toBe(report.runId);
-    await click("业务布局");
+    await click("战略与业务布局");
     expect(body().textContent).toContain(report.customerProfile.businessAreas[0]);
     await click("数字化与系统");
     expect(body().textContent).toContain("PROFILE_FIRST");
@@ -239,8 +301,17 @@ describe("country-to-customer report hierarchy", { timeout: 20_000 }, () => {
     expect(body().textContent).toContain(report.evidenceChain.records[0].title);
     await click("销售建议");
     expect(body().textContent).toContain("EMAIL_FIRST");
-    expect(body().textContent).toContain(report.researchBrief.firstMeetingQuestions[0]);
+    expect(body().textContent).not.toContain("优先联系角色");
+    expect(body().textContent).not.toContain("首次拜访问题");
+    expect(body().textContent).not.toContain(report.researchBrief.firstMeetingQuestions[0]);
     await click("作战卡");
+    expect(body().querySelector(".report-hero")).toBeNull();
+    expect(body().textContent).not.toContain("客户作战卡 · 集团口径");
+    expect(body().textContent).not.toContain("参考评分，需人工验证");
+    expect(body().textContent).not.toContain("禁止直接宣称");
+    expect(body().textContent).not.toContain("不可承诺事项");
+    expect(body().textContent).not.toContain(report.productMatch.matches[0].caution);
+    expect(body().textContent).not.toContain(report.productMatch.avoidClaims[0]);
     expect(body().textContent).toContain("MATCH_FIRST");
     expect(body().textContent).toContain("MITIGATION_FIRST");
     await returnToCountry();
@@ -391,7 +462,7 @@ describe("country-to-customer report hierarchy", { timeout: 20_000 }, () => {
     expect(container.querySelectorAll(".detail-tabs button")).toHaveLength(7);
     for (const [label, expected] of [
       ["客户概览", output.customerProfile.headquarters],
-      ["业务布局", output.customerProfile.businessAreas[0]],
+      ["战略与业务布局", output.customerProfile.businessAreas[0]],
       ["数字化与系统", output.customerProfile.knownSystems[0]],
       ["动态与组织", output.customerProfile.recentDynamics[0]],
       ["资料来源", output.evidenceChain.records[0].title],

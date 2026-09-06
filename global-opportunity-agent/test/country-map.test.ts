@@ -9,6 +9,7 @@ import { topology } from "topojson-server";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 const frontend = new URL("../../global-opportunity-radar/", import.meta.url);
+const countryMapCss = readFileSync(new URL("country-map.css", frontend), "utf8");
 const dom = new JSDOM('<div id="root"></div>', {runScripts:"outside-only",url:"http://localhost/"});
 const window = dom.window;
 const assets = Object.fromEntries(["chile","argentina","brazil","peru","colombia","usa","canada","australia","new_zealand","ireland","uae"].map(id=>[id,JSON.parse(readFileSync(new URL(`assets/maps/${id}.json`,frontend),"utf8"))]));
@@ -43,6 +44,10 @@ afterEach(async()=>{await act(async()=>root.unmount());container.remove();});
 afterAll(()=>{dom.window.close();vi.unstubAllGlobals();});
 
 describe("country geography and city annotations",()=>{
+  it("reserves vertical clearance between the country heading and map status at 16:9",()=>{
+    expect(countryMapCss).toMatch(/\.globe-wrap\.is-country-focus\s*\{\s*padding:176px/);
+    expect(countryMapCss).toMatch(/\.country-map-status\s*\{[^}]*top:148px/);
+  });
   it("covers exactly the existing 11 countries, matching all 33 customers with points inside the country",()=>{
     expect(Object.keys(maps).sort()).toEqual(Object.keys(data.countries).sort());
     for(const [id,map] of Object.entries(maps) as [string,any][]){

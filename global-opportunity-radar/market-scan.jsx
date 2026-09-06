@@ -66,10 +66,10 @@ function MarketOverviewPanel({ summary, onSelectRegion, onSelectCountry }) {
     <div className="panel-kicker">GLOBAL MARKET OVERVIEW <em className="lock-tag">资料已更新</em></div>
     <div className="region-title-row"><div><h1>整体市场与客户池</h1><p>已收录调研资料的整体视图</p></div></div>
     <p className="market-overview-note">视图整理于 {new Date(summary.completedAt).toLocaleTimeString("zh-CN", { hour12: false })}。选择国家后，可继续查看客户资料并启动深度分析。</p>
-    <div className="metrics-grid"><Metric label="覆盖区域" value={summary.regions.length}></Metric><Metric label="覆盖国家" value={summary.countryCount}></Metric><Metric label="真实客户" value={summary.companies.length}></Metric><Metric label="资料来源" value={summary.sourceCount}></Metric></div>
+    <div className="metrics-grid"><Metric label="覆盖区域" value={summary.regions.length}></Metric><Metric label="覆盖国家" value={summary.countryCount}></Metric><Metric label="客户" value={summary.companies.length}></Metric><Metric label="资料来源" value={summary.sourceCount}></Metric></div>
     <section className="panel-section"><div className="section-heading"><span>整体市场概览</span><small>点击区域下钻</small></div>
       <div className="market-overview-regions">{summary.regions.map(region => <button type="button" key={region.id} onClick={() => onSelectRegion(region.id)}>
-        <span style={{ background: region.color }}></span><div><strong>{region.name}</strong><p>{region.headline}</p></div><small>{region.countryIds.length} 国</small><Icon name="chevron" size={15}></Icon>
+        <span style={{ background: region.color }}></span><div><strong>{region.name}</strong><p>{region.headline}</p></div><small>已收录 {region.countryIds.length} 国</small><Icon name="chevron" size={15}></Icon>
       </button>)}</div>
     </section>
     <section className="panel-section"><div className="section-heading"><span>目标客户池</span><small>按集团去重 · 非新生成排名</small></div>

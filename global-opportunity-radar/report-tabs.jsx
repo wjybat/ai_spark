@@ -2,6 +2,14 @@
 function reportList(value) { return Array.isArray(value) ? value : []; }
 function reportText(value) { return value == null || value === "" ? "未返回，待确认" : String(value); }
 function reportLevel(value) { return ({ high: "高", medium: "中", low: "低", watch: "观察", positive: "积极", neutral: "中性", risk: "风险", unknown: "待确认" })[value] || reportText(value); }
+function capabilityDisplayText(value) {
+  return String(value ?? "")
+    .replace(/[，,；;]\s*(?:而非|而不是|并非|不是|不应|不要|避免|禁止|不得)[^。！？!?]*(?:宣称|替换|更换|承诺)[^。！？!?]*[。！？!?]?/g, "。")
+    .replace(/(^|[。！？!?]\s*)(?:而非|而不是|并非|不是|不应|不要|避免|禁止|不得)[^。！？!?]*(?:宣称|替换|更换|承诺)[^。！？!?]*[。！？!?]?/g, "$1")
+    .replace(/。\s*。/g, "。")
+    .trim();
+}
+function capabilityDisplayList(value) { return reportList(value).map(capabilityDisplayText).filter(Boolean); }
 function reportSourceUrl(value) {
   try {
     const url = new URL(value);
@@ -117,8 +125,6 @@ function ReportSales({ report }) {
   return <>
     <ReportSection title="销售跟进建议" meta="按本次结果排序，不预置时间表"><ReportList items={brief.nextActions} ordered></ReportList></ReportSection>
     <ReportSection title="建议切入点"><ReportList items={brief.recommendedEntryPoints}></ReportList></ReportSection>
-    <ReportSection title="优先联系角色" meta="需核验具体联系人"><ReportList items={report.customerProfile?.decisionRoles}></ReportList></ReportSection>
-    <ReportSection title="首次拜访问题"><ReportList items={brief.firstMeetingQuestions} ordered></ReportList></ReportSection>
     <ReportSection title="英文开发邮件" meta="待销售审核，未发送" className="report-email">
       <p className="report-note">{materialSourceLabel(brief.outreachEmail?.generation)}</p>
       <div className="report-field"><b>Subject</b><ReportText value={brief.outreachEmail?.subject}></ReportText></div>
@@ -132,28 +138,24 @@ function ReportSales({ report }) {
 }
 
 function ReportBattle({ report }) {
-  const profile = report.customerProfile || {};
   const admission = report.admission || {};
   const match = report.productMatch || {};
   const risks = report.riskAssessment || {};
   return <>
-    <div className="report-hero"><div><small>客户作战卡 · 集团口径</small><h2>{reportText(profile.name)}</h2><ReportText value={profile.storeCountLabel}></ReportText><ReportText value={profile.revenueLabel}></ReportText></div><span className="report-badge">{reportText(admission.label)} · {reportText(admission.referenceScore)} 分</span></div>
     <ReportSection title="准入评估" meta="参考判断，不是成交承诺">
       <ReportText value={admission.rationale}></ReportText>
       <div className="report-grid">{reportList(admission.dimensions).map((item, index) => <article className="report-card" key={index}><div className="report-card-heading"><b>{item.name}</b><span className="report-badge">{reportLevel(item.status)}</span></div><ReportText value={item.explanation}></ReportText><ReportEvidenceRefs ids={item.evidenceIds} report={report}></ReportEvidenceRefs></article>)}</div>
       <ReportSection title="准入前必须确认"><ReportList items={admission.mustConfirm}></ReportList></ReportSection><ReportText className="report-note" value={admission.disclaimer}></ReportText>
     </ReportSection>
-    <ReportSection title="Dmall 能力匹配" meta="匹配理由 / 前置条件 / 禁止承诺">
-      <p className="report-note">{materialSourceLabel(match.generation)} · 参考评分，需人工验证</p>
-      <ReportText value={match.positioning}></ReportText>
+    <ReportSection title="Dmall 能力匹配" meta="匹配理由 / 前置条件">
+      <ReportText value={capabilityDisplayText(match.positioning)}></ReportText>
       <div className="report-stack">{reportList(match.matches).map(item => <article className="report-card" key={item.capabilityId}>
         <div className="report-card-heading"><strong>{item.capabilityName}</strong><span className="report-badge">{reportLevel(item.fit)}匹配 · {item.fitScore} 分</span></div>
-        <ReportList items={item.reasons}></ReportList><b>前置条件</b><ReportList items={item.prerequisites}></ReportList>
+        <ReportList items={capabilityDisplayList(item.reasons)}></ReportList><b>前置条件</b><ReportList items={item.prerequisites}></ReportList>
         {item.pilotScope && <div className="report-field"><b>建议验证范围</b><ReportText value={item.pilotScope}></ReportText></div>}
-        <div className="report-field"><b>禁止直接宣称</b><ReportText value={item.caution}></ReportText></div><ReportEvidenceRefs ids={item.evidenceIds} report={report}></ReportEvidenceRefs>
+        <ReportEvidenceRefs ids={item.evidenceIds} report={report}></ReportEvidenceRefs>
       </article>)}</div>
       {!reportList(match.matches).length && <p className="report-empty">本次结果未返回能力匹配。</p>}
-      <ReportSection title="不可承诺事项"><ReportList items={match.avoidClaims}></ReportList></ReportSection>
     </ReportSection>
     <ReportSection title="风险与应对" meta={`整体风险：${reportLevel(risks.overall)}`}>
       <div className="report-stack">{reportList(risks.risks).map(risk => <article className="report-card report-risk" key={risk.id}>
@@ -209,4 +211,4 @@ function ReportTab({ tab, report, country, generating, onCopy, onSelectCustomer 
   </div>;
 }
 
-Object.assign(window, { ReportTab, buildReportManagementBrief, materialSourceLabel, countryReportNarrative });
+Object.assign(window, { ReportTab, buildReportManagementBrief, materialSourceLabel, countryReportNarrative, capabilityDisplayText, capabilityDisplayList });

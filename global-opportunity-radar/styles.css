@@ -289,6 +289,7 @@ button:focus-visible,
   position: absolute;
   z-index: 7;
   left: 34px;
+  right: 34px;
   top: 26px;
   pointer-events: none;
 }
@@ -305,17 +306,20 @@ button:focus-visible,
 }
 
 .map-stage-copy h2 {
-  margin: 7px 0 2px;
+  margin: 7px 0 6px;
   font-family: "Bricolage Grotesque", "Noto Sans SC", sans-serif;
   font-size: clamp(25px, 2vw, 34px);
+  line-height: 1.18;
   letter-spacing: -0.035em;
   font-weight: 620;
+  overflow-wrap: anywhere;
 }
 
 .map-stage-copy p {
   margin: 0;
   color: color-mix(in srgb, var(--ink) 56%, transparent);
   font-size: 12px;
+  line-height: 1.55;
 }
 
 .globe-wrap {

@@ -7,18 +7,18 @@ for (const file of ["data.js", "country-data.js"]) runInNewContext(readFileSync(
 const data = sandbox.window.OPPORTUNITY_DATA;
 const meta = data.countryMeta;
 const link = s => `[${s.title}](${s.url})`;
-const lines = ["# 国家层市场概况与市场雷达", "", `资料快照：${meta.asOf}。覆盖项目原有五洲的 11 个国家。`, "", "本文件逐项回答《大洲+国家_数据框架》的国家层六个问题、国家市场雷达五个问题，与前端“国家概况 / 市场与商机”使用同一份数据。", "", "## 演示口径", "", meta.countMethod, "", meta.metricMethod, "", meta.scoreMethod, "", meta.signalMethod, "", "## 国家速览", "", "| 国家 | 市场定位 | 优先分（演示） | 判断 | 年度规模（演示） |", "| --- | --- | --- | --- | --- |"];
+const lines = ["# 国家层市场概况与市场雷达", "", `资料快照：${meta.asOf}。覆盖项目原有五洲的 11 个国家。`, "", "本文件逐项回答《大洲+国家_数据框架》的国家层六个问题、国家市场雷达五个问题，与前端“国家概况 / 市场与商机”使用同一份数据。", "", "## 演示口径", "", meta.countMethod, "", meta.metricMethod, "", meta.scoreMethod, "", meta.signalMethod, "", "## 国家速览", "", "| 国家 | 市场定位 | 优先分（演示） | 判断 | 规模指标（见统计期） |", "| --- | --- | --- | --- | --- |"];
 for (const country of Object.values(data.countries)) {
   const r = country.research;
-  lines.push(`| ${country.name} | ${r.positioning} | ${r.score}/100 | ${r.verdict} | ${r.size} |`);
+  lines.push(`| ${country.name} | ${r.positioning} | ${r.score}/100 | ${r.verdict} | ${r.size}（${r.sizeMetric.label} · ${r.sizeMetric.period}） |`);
 }
 for (const country of Object.values(data.countries)) {
   const r = country.research;
   lines.push("", `## ${country.name}`, "", "### 国家层 1：零售市场概况", "", r.summary, "", r.structure,
-    "", "### 国家层 2：零售公司、门店与连锁品牌数量", "", ...r.counts.map(c => `- ${c.label}：**${c.value}${c.unit}**（${c.basis}）。`), "", `单独列示的项目客户样本：${r.sample.name}，${r.sample.stores}。${r.sample.detail} 来源：${link(r.sample.source)}。`,
+    "", "### 国家层 2：企业、门店与行业规模指标", "", ...r.counts.map(c => `- ${c.label}：**${c.value}${c.unit}**（${c.basis}${c.scope ? `；${c.scope}` : ""}）${c.source ? `。来源：${link(c.source)}` : ""}。`), "", `单独列示的项目客户样本：${r.sample.name}，${r.sample.stores}。${r.sample.detail} 来源：${link(r.sample.source)}。`,
     "", "### 国家层 3：主要零售业态", "", ...r.formats.map(f => `- **${f.name}**：${f.detail}`),
     "", "### 国家层 4：规模、增长与电商渗透", "", "| 指标 | 数值 | 时段 | 范围与依据 |", "| --- | --- | --- | --- |");
-  for (const m of r.metrics) lines.push(`| ${m.label} | ${m.value} | ${m.period} | ${m.scope}；${m.basis}${m.source ? `，${link(m.source)}` : ""} |`);
+  for (const m of r.metrics) lines.push(`| ${m.label} | ${m.value}${m.unit || ""} | ${m.period} | ${m.scope}；${m.basis}${m.source ? `，${link(m.source)}` : ""} |`);
   lines.push("", "### 国家层 5：成熟度、扩张、竞争与风险", "", "四维评分为独立演示判断；竞争与风险分越高表示挑战越大。", "", "| 维度 | 分值 | 判断 | 原因 |", "| --- | --- | --- | --- |");
   for (const d of r.dimensions) lines.push(`| ${d.label} | ${d.score}/100 | ${d.verdict} | ${d.detail} |`);
   lines.push("", "### 国家层 6：近期新闻、展会、公告与其他信号", "");

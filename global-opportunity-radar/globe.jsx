@@ -436,6 +436,7 @@ function Globe({
               type="button"
               key={id}
               className={`region-chip ${active ? "is-active" : ""}`}
+              title={item.market?.geography ? `全洲 ${item.market.geography.total} 个主权国家，已收录 ${item.countryIds.length} 国资料` : `已收录 ${item.countryIds.length} 国资料，不代表全洲国家总数`}
               onClick={() => (active ? onBack() : onSelectRegion(id))}
               onPointerEnter={() => { if (!selectedRegion) onHoverRegion(id); }}
               onPointerLeave={() => { if (!selectedRegion) onHoverRegion(null); }}

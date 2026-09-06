@@ -5,10 +5,30 @@ import { RunStore } from "../src/http/run-store.js";
 import { createCompatibleModel } from "../src/agent/compatible-provider.js";
 
 describe("country management brief",{timeout:20_000},()=>{
+  it("passes Brazil's official counts, source years and online sales ratio to the brief", () => {
+    const context = getCountryContext("brazil");
+    expect(context.asOf).toBe("2026-09-05");
+    expect(context.evidence.find(item => item.id === "M1")).toMatchObject({ kind: "fact" });
+    expect(context.evidence.find(item => item.id === "M1")?.text).toContain("巴西雷亚尔");
+    expect(context.evidence.find(item => item.id === "M3")).toMatchObject({ kind: "fact" });
+    expect(context.evidence.find(item => item.id === "M3")?.text).toContain("9.78%");
+    expect(context.market.counts).toEqual(expect.arrayContaining([
+      expect.objectContaining({ label: "零售企业", value: "1,175,862", period: "2024", basis: "公开资料" }),
+      expect.objectContaining({ label: "零售经营网点", value: "1,329,153", period: "2024", basis: "公开资料" }),
+      expect.objectContaining({ label: "特许经营品牌", value: "3,297", period: "2025", basis: "公开资料" }),
+    ]));
+  });
   it("reads exactly the same three companies as each of the eleven country pages and answers all six questions",async()=>{
     expect(countryBriefCatalog).toHaveLength(11);
     for (const item of countryBriefCatalog) {
       const context=getCountryContext(item.id);
+      expect(context.market.counts).toEqual(expect.arrayContaining([expect.objectContaining({ basis: "公开资料", source: expect.objectContaining({ url: expect.stringMatching(/^https:\/\//) }) })]));
+      expect(JSON.stringify(context.market.counts)).not.toMatch(/估算|待核实|约 /);
+      for (const metric of context.market.metrics as Array<{ value: string; unit?: string; source: { url: string } }>) {
+        expect(metric.source.url).toMatch(/^https:\/\//);
+        expect(metric.value).not.toMatch(/估算|待核实|约 /);
+        if (metric.unit) expect(context.evidence.some(e => e.text.includes(metric.value + metric.unit))).toBe(true);
+      }
       for(const c of context.companies){
         expect(c.business.length).toBeGreaterThan(1);expect(c.systems.length).toBeGreaterThan(1);
         expect(c.digital.length).toBeGreaterThan(1);expect(c.roles.length).toBeGreaterThan(1);

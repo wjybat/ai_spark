@@ -14,8 +14,6 @@
 .national-metrics article {padding:16px;min-width:0;}
 .national-metrics article+article {border-left:1px solid #d6e1d9;}
 .national-metric-label {display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:10px;}
-.national-metric-label span {padding:2px 5px;background:#f4e9db;color:#7c6044;border-radius:3px;font-size:8px;}
-.national-metric-label .is-sourced {background:#e3eee7;color:#3c6d58;}
 .national-metrics strong {display:block;font:600 22px/1.3 "Bricolage Grotesque","Noto Sans SC",sans-serif;letter-spacing:-.7px;margin:12px 0 8px;}
 .national-metrics strong small {display:block;font:10px/1.8 "Noto Sans SC",sans-serif;color:var(--national-muted);letter-spacing:0;margin-top:3px;}
 .national-signal-sources {display:flex;gap:4px 14px;flex-wrap:wrap;}
@@ -29,10 +27,6 @@
 .national-formats article>span {font:12px "IBM Plex Mono",monospace;color:#8ba296;}
 .national-page h4 {font-size:11px;line-height:1.6;}
 .national-formats p {font-size:10px;line-height:1.9;color:var(--national-muted);margin-top:5px;}
-.national-sample {display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px;background:#eaf0e87a;border-left:2px solid #9bb8a4;padding:11px 13px;margin-top:16px;font-size:10px;}
-.national-sample>span {color:var(--national-muted);font-size:9px;}
-.national-sample strong {font-size:11px;}
-.national-sample p {flex-basis:100%;font-size:9px;color:var(--national-muted);}
 .national-dimensions {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 24px;}
 .national-dimension>div:first-child {display:flex;justify-content:space-between;align-items:center;font-size:10px;}
 .national-dimension strong {font:600 17px "IBM Plex Mono",monospace;}
@@ -50,13 +44,8 @@
 .national-signals p {font-size:11px;line-height:1.85;margin-top:5px;color:var(--national-muted);}
 .national-action {color:#315b47!important;}
 .national-action b {font-size:9px;margin-right:9px;}
-.national-watch {background:#eeeee3;padding:12px 14px;border-radius:5px;}
-.national-watch b {font-size:10px;}
-.national-watch p {font-size:10px;line-height:1.8;color:var(--national-muted);margin-top:4px;}
 .national-method {border-top:1px solid #cddacd;margin-top:24px;font-size:10px;color:var(--national-muted);}
 .national-method summary {cursor:pointer;padding:14px 0;font-weight:600;}
-.national-method summary span {font-size:9px;font-weight:400;float:right;}
-.national-method p {line-height:1.85;margin:0 0 8px;}
 .national-method ol {padding-left:17px;}
 .national-method .national-source {margin-top:3px;}
 .national-radar-hero {background:#24443d;color:#f7f3e8;padding:20px 24px;border-radius:8px;position:relative;overflow:hidden;}
@@ -87,12 +76,6 @@
 .national-scenarios p {font-size:11px;line-height:1.8;margin-top:3px;color:var(--national-muted);}
 .national-kpi {font-size:10px;margin-top:8px;line-height:1.7;}
 .national-kpi span {font-size:9px;margin-right:9px;color:var(--national-muted);}
-.national-next {display:flex;align-items:center;gap:24px;justify-content:space-between;background:#e2ede1;border-left:3px solid #6c9177;padding:18px;}
-.national-next>div>span {font:9px "IBM Plex Mono",monospace;letter-spacing:1px;color:#65806b;}
-.national-next h3 {font-size:13px;margin:7px 0;}
-.national-next p {font-size:11px;line-height:1.9;}
-.national-next button {flex-shrink:0;border:0;background:#315b49;color:#fffaf0;font-size:10px;padding:11px 12px;border-radius:5px;cursor:pointer;}
-.national-next button:hover {background:#1b4031;}
 .national-page :is(button,a,summary):focus-visible {outline:2px solid #c26847;outline-offset:4px;}
 .national-header-stamp {text-align:right;flex-shrink:0;color:#547461;}
 .national-header-stamp b {display:block;font:11px "IBM Plex Mono",monospace;letter-spacing:1px;}
@@ -108,7 +91,6 @@
   .national-formats {gap:10px;}
   .national-formats article {display:block;}
   .national-formats h4 {margin-top:5px;}
-  .national-next {align-items:flex-start;flex-direction:column;gap:12px;}
 }
 @media (max-width:620px) {
   .national-page {padding:16px 18px 24px;}

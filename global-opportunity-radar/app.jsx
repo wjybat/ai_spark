@@ -87,8 +87,12 @@ function RegionPanel({ region, countries, onSelectCountry, pinned }) {
   const market = region.market;
   const meta = window.OPPORTUNITY_DATA.continentMeta;
   const [tab, setTab] = useAppState("overview");
+  const [showAllEvents, setShowAllEvents] = useAppState(false);
+  useAppEffect(() => { setShowAllEvents(false); }, [region.id]);
+  const sortedEvents = [...market.events].sort((a, b) => b.start.localeCompare(a.start) || a.name.localeCompare(b.name));
+  const visibleEvents = showAllEvents ? sortedEvents : sortedEvents.slice(0, 5);
   const scrollRef = React.useRef(null);
-  const tabs = [{ id: "overview", label: "市场全景" }, { id: "events", label: "展会日历" }, { id: "signals", label: "信号与风险" }];
+  const tabs = [{ id: "overview", label: "市场全景" }, { id: "events", label: "展会日历", count: market.events.length }, { id: "signals", label: "信号与风险" }, { id: "countries", label: "国家", count: region.countryIds.length }];
   useAppEffect(() => { if (scrollRef.current) scrollRef.current.scrollTop = 0; }, [region.id, tab]);
   const moveTab = (event, index) => {
     const keys = { ArrowRight: (index + 1) % tabs.length, ArrowLeft: (index + tabs.length - 1) % tabs.length, Home: 0, End: tabs.length - 1 };
@@ -99,7 +103,7 @@ function RegionPanel({ region, countries, onSelectCountry, pinned }) {
     document.getElementById(`continent-${region.id}-${next}`)?.focus();
   };
   const sourceLink = (item) => <a className="continent-source-link" href={item.url} target="_blank" rel="noopener noreferrer">{item.title}<Icon name="arrow" size={12}></Icon></a>;
-  const sources = [...new Map([market.snapshot.source, ...market.signals.map(item => item.source).filter(Boolean), ...market.events.map(item => item.source)].map(item => [item.url, item])).values()];
+  const sources = [...new Map([market.snapshot.source, market.geography?.source, ...(market.countMetrics || []).map(item => item.source), ...market.signals.map(item => item.source), ...market.events.map(item => item.source)].filter(Boolean).map(item => [item.url, item])).values()];
   const dimensionCards = (compact = false) => <div className={`continent-dimensions ${compact ? "is-compact" : ""}`}>
     {market.dimensions.map(item => <article className={`continent-dimension ${item.key === "risk" ? "is-risk" : ""}`} key={item.key}>
       <div><span>{item.label}</span><strong>{item.score}<small>/100</small></strong></div>
@@ -112,24 +116,22 @@ function RegionPanel({ region, countries, onSelectCountry, pinned }) {
       <header className="continent-head">
         <div className="panel-kicker"><span style={{ background: region.color }}></span>{region.en}<em className={`lock-tag ${pinned ? "is-locked" : ""}`}>{pinned ? "已锁定" : "悬停预览 · 点击区域锁定"}</em></div>
         <div className="continent-title"><h1>{region.name}<span>零售市场简报</span></h1><span className="continent-edition">SEP<br/><b>2026</b></span></div>
-        <p className="continent-thesis">{market.thesis}</p>
         <div className="continent-metrics">
-          <Metric label="零售公司 · 演示估算" value={market.companies} meta="家经营主体"></Metric>
-          <Metric label="连锁品牌 · 演示估算" value={market.brands} meta="个品牌网络"></Metric>
-          <Metric label="近 12 个月展会" value={`${market.events.length} 场`} meta="已收录代表性活动"></Metric>
+          {market.countMetrics.map(item => <Metric key={item.label} label={item.label} value={item.value} meta={item.meta}></Metric>)}
+          <Metric label="窗口内零售展会" value={`${market.events.length} 场`} meta="2025.09 — 2026.12 · 已收录"></Metric>
         </div>
         <div className="continent-tabs" role="tablist" aria-label={`${region.name}市场简报章节`}>
-          {tabs.map((item, index) => <button key={item.id} type="button" role="tab" id={`continent-${region.id}-${item.id}`} aria-selected={tab === item.id} aria-controls={`continent-content-${region.id}`} tabIndex={tab === item.id ? 0 : -1} className={tab === item.id ? "is-active" : ""} onClick={() => setTab(item.id)} onKeyDown={event => moveTab(event, index)}>{item.label}{item.id === "events" && <small>{market.events.length}</small>}</button>)}
+          {tabs.map((item, index) => <button key={item.id} type="button" role="tab" id={`continent-${region.id}-${item.id}`} aria-selected={tab === item.id} aria-controls={`continent-content-${region.id}`} tabIndex={tab === item.id ? 0 : -1} className={tab === item.id ? "is-active" : ""} onClick={() => setTab(item.id)} onKeyDown={event => moveTab(event, index)}>{item.label}{item.count != null && <small>{item.count}</small>}</button>)}
         </div>
       </header>
       <div className="continent-body" ref={scrollRef} role="tabpanel" id={`continent-content-${region.id}`} aria-labelledby={`continent-${region.id}-${tab}`} tabIndex="0" data-continent-tab={tab}>
         {tab === "overview" && <>
           <section className="continent-section">
-            <div className="section-heading"><span>市场整体情况</span><small>区域研判</small></div>
+            <div className="section-heading"><span>市场整体情况</span></div>
             <p className="continent-copy">{market.summary}</p><p className="continent-copy">{market.structure}</p>
             <div className="continent-formats">{market.formats.map(item => <span key={item}>{item}</span>)}</div>
           </section>
-          <div className="continent-fact"><span className="continent-fact-caption">公开资料 · 市场切片</span><div><strong>{market.snapshot.value}</strong><span>{market.snapshot.label}</span></div><p>{market.snapshot.scope}</p>{sourceLink(market.snapshot.source)}</div>
+          <div className="continent-fact"><span className="continent-fact-caption">{market.snapshot.label}</span><div><strong>{market.snapshot.value}</strong>{market.snapshot.unit && <span>{market.snapshot.unit}</span>}</div><p>{market.snapshot.scope}</p>{market.snapshot.currencyNote && <p>{market.snapshot.currencyNote}</p>}{sourceLink(market.snapshot.source)}</div>
           <section className="continent-section">
             <div className="section-heading"><span>市场温度</span><small>演示研判 · 风险分越高风险越大</small></div>
             {dimensionCards(true)}
@@ -140,24 +142,19 @@ function RegionPanel({ region, countries, onSelectCountry, pinned }) {
             <div className="continent-focus">{market.focus.map(item => <div key={item.name}><strong>{item.name}</strong><span>{item.reason}</span></div>)}</div>
             <p className="continent-retailers"><b>代表零售集团 / 品牌</b>{market.retailers.join(" · ")}</p>
           </section>
-          <section className="continent-section">
-            <div className="section-heading"><span>已收录国家资料</span><small>{region.countryIds.length} 国 · 可进入客户详情</small></div>
-            <div className="country-ranking">{region.countryIds.map((id, index) => {
-              const country = countries[id];
-              return <button type="button" className="country-row" key={id} onClick={() => onSelectCountry(id)}><span className="rank-index">{String(index + 1).padStart(2, "0")}</span><div className="country-row-main"><strong>{country.name}</strong><small>{country.tagline}</small></div><div className="country-row-tags"><em>{country.priority}</em><Icon name="chevron" size={16}></Icon></div></button>;
-            })}</div>
-          </section>
         </>}
         {tab === "events" && <>
           <section className="continent-section">
-            <div className="section-heading"><span>近 12 个月零售相关展会</span><small>按举办地归洲</small></div>
+            <div className="section-heading"><span>零售相关展会日历</span><small>按举办地归洲</small></div>
             <div className="continent-date-window"><Icon name="globe" size={15}></Icon><span>{meta.windowStart} — {meta.windowEnd}</span><b>{market.events.length} 场</b></div>
-            <p className="continent-copy">从已收录展会的议程、展商和案例回看市场动向，为下一轮客户拜访准备线索。</p>
-            <div className="continent-events">{market.events.map(item => <article className="continent-event" key={item.name}>
+            <div className="continent-events">{visibleEvents.map(item => {
+              const status = window.OPPORTUNITY_DATA.getContinentEventStatus(item);
+              return <article className="continent-event" key={item.name}>
               <div className="continent-event-month"><strong>{item.start.slice(5, 7)}<small>月</small></strong><span>{item.start.slice(0, 4)}</span></div>
-              <div className="continent-event-detail"><div className="continent-event-date"><time dateTime={item.start}>{item.start}</time><span>—</span><time dateTime={item.end}>{item.end}</time></div><h2>{item.name}</h2><span className="continent-event-city">{item.city}</span><p>{item.theme}</p><div className="continent-event-action"><b>跟进方向</b>{item.followUp}</div>{sourceLink(item.source)}</div>
-            </article>)}</div>
-            <p className="continent-footnote">日期取对应届次官方公告。仅列窗口内代表性活动；展会线索不代表参展企业正在采购。</p>
+              <div className="continent-event-detail"><div className="continent-event-date"><time dateTime={item.start}>{item.start}</time><span>—</span><time dateTime={item.end}>{item.end}</time><span className={`continent-event-status is-${status}`}>{({ ended: "已结束", ongoing: "正在举办", upcoming: "即将举办" })[status]}</span></div><h2>{item.name}</h2><span className="continent-event-city">{item.city}</span><p>{item.theme}</p><div className="continent-event-action"><b>跟进方向</b>{item.followUp}</div>{sourceLink(item.source)}</div>
+            </article>})}</div>
+            {market.events.length > 5 && <button type="button" className="continent-text-button" aria-expanded={showAllEvents} onClick={() => setShowAllEvents(value => !value)}>{showAllEvents ? "收起至 5 场" : `展开全部 ${market.events.length} 场展会`}</button>}
+            <p className="continent-footnote">默认展示 5 场，可展开全部已收录活动，数量不代表全年总数或完整检索结果。日期取对应届次主办方或行业协会资料，状态按当前日期与已公布日程判断；展会线索不代表参展企业正在采购。</p>
           </section>
         </>}
         {tab === "signals" && <>
@@ -165,10 +162,17 @@ function RegionPanel({ region, countries, onSelectCountry, pinned }) {
           <section className="continent-section"><div className="section-heading"><span>值得跟进的信号</span><small>公开事实 + 场景研判</small></div><div className="continent-signals">{market.signals.map(item => <article key={item.title}>
             <div className="continent-signal-tags"><span>{item.type}</span><small>{item.source ? "有来源依据" : "场景研判"}</small></div><h2>{item.title}</h2><p>{item.detail}</p><div className="continent-signal-action"><Icon name="arrow" size={14}></Icon><span>{item.action}</span></div>{item.source && sourceLink(item.source)}
           </article>)}</div></section>
-          <section className="continent-section"><div className="section-heading"><span>主要风险与应对</span><small>区域研判</small></div><div className="continent-risks">{market.risks.map(item => <article key={item.title}><Icon name="shield" size={18}></Icon><div><h2>{item.title}</h2><p>{item.detail}</p><span><b>应对</b>{item.response}</span></div></article>)}</div></section>
-          <div className="continent-next-step"><span>下一步建议</span><p>{market.nextStep}</p></div>
+          <section className="continent-section"><div className="section-heading"><span>主要风险与应对</span></div><div className="continent-risks">{market.risks.map(item => <article key={item.title}><Icon name="shield" size={18}></Icon><div><h2>{item.title}</h2><p>{item.detail}</p><span><b>应对</b>{item.response}</span></div></article>)}</div></section>
         </>}
-        <details className="continent-method" key={`${region.id}-${tab}`}><summary>数据口径与来源<span>截至 {meta.asOf}</span></summary><p>{meta.countMethod}</p><p>{meta.scoreMethod}</p><p>{meta.scopeNote}</p><div>{sources.map(item => <React.Fragment key={item.url}>{sourceLink(item)}</React.Fragment>)}</div></details>
+        {tab === "countries" && <section className="continent-section continent-countries">
+          <div className="section-heading"><span>已收录国家资料</span><small>{market.geography ? `全洲 ${market.geography.total} 国 · 已收录 ${region.countryIds.length} 国` : `已收录 ${region.countryIds.length} 国`}</small></div>
+          {market.geography && <details className="continent-coverage"><summary>查看全洲国家范围</summary><p>{market.geography.names.join("、")}</p><p>{market.geography.scope}</p>{sourceLink(market.geography.source)}</details>}
+          <div className="country-ranking">{region.countryIds.map((id, index) => {
+            const country = countries[id];
+            return <button type="button" className="country-row" key={id} onClick={() => onSelectCountry(id)}><span className="rank-index">{String(index + 1).padStart(2, "0")}</span><div className="country-row-main"><strong>{country.name}</strong></div><div className="country-row-tags"><em>{country.priority}</em><Icon name="chevron" size={16}></Icon></div></button>;
+          })}</div>
+        </section>}
+        <details className="continent-method" key={`${region.id}-${tab}`}><summary>数据口径与来源</summary><div>{sources.map(item => <React.Fragment key={item.url}>{sourceLink(item)}</React.Fragment>)}</div></details>
       </div>
     </div>
   );
@@ -272,6 +276,7 @@ function CustomerResearchView({ tab, country, customer, sourceProfile, liveRepor
     ? reportList(liveReport.evidenceChain?.records)
     : reportList(sourceProfile.sources).map((source, index) => ({ ...source, id: `source-${index + 1}`, sourceLevel: source.level, sourceUrl: source.url, kind: "fact" }));
   const positioning = hasLiveProfile ? liveReport.productMatch?.positioning : sourceProfile.strategicSummary;
+  const storeNetwork = sourceProfile.storeNetwork;
   const pageContent = {
     profile: <>
       <div className="customer-research-hero">
@@ -285,8 +290,20 @@ function CustomerResearchView({ tab, country, customer, sourceProfile, liveRepor
           ["覆盖国家", reportList(profile.countries).join(" · ")], ["零售业态", reportList(profile.formats).join(" · ")]
         ].map(([label, value]) => <article className="report-card" key={label}><b>{label}</b><ReportText value={value}></ReportText></article>)}
       </div>
+      {sourceProfile.operatingFacts?.length > 0 && <section className="customer-operating-facts" data-company-facts={sourceProfile.id}>
+        <div className="section-heading"><span>公司与经营事实</span></div>
+        <div className="customer-facts-table-wrap"><table className="customer-facts-table">
+          <thead><tr><th scope="col">数据项</th><th scope="col">数值</th><th scope="col">同比</th><th scope="col">期间 / 口径</th></tr></thead>
+          <tbody>{sourceProfile.operatingFacts.map(fact => <tr key={fact.item}><th scope="row">{fact.item}</th><td>{fact.value}</td><td>{fact.yoy}</td><td>{fact.period}</td></tr>)}</tbody>
+        </table></div>
+      </section>}
     </>,
     business: <>
+      {sourceProfile.regionalTechnologyStrategy?.length > 0 && <ReportSection title="2026 区域技术战略">
+        <div className="customer-strategy-grid" data-regional-strategy={sourceProfile.id}>{sourceProfile.regionalTechnologyStrategy.map((item, index) => <article key={item.title}>
+          <span>{String(index + 1).padStart(2, "0")}</span><div><h3>{item.title}</h3><p>{item.detail}</p></div>
+        </article>)}</div>
+      </ReportSection>}
       <ReportSection title="业务版图" meta="公开资料归纳的主要经营板块">
         <div className="customer-research-chips">{reportList(profile.businessAreas).map(item => <span key={item}>{item}</span>)}</div>
       </ReportSection>
@@ -301,12 +318,27 @@ function CustomerResearchView({ tab, country, customer, sourceProfile, liveRepor
         <ReportSection title="已知系统"><ReportList items={profile.knownSystems}></ReportList></ReportSection>
       </div>
       <ReportSection title="组织与技术能力"><div className="customer-research-callout"><Icon name="users" size={17}></Icon><ReportText value={profile.organization}></ReportText></div></ReportSection>
+      {sourceProfile.erpTimeline?.length > 0 && <ReportSection title="2016–2026 ERP 与核心系统时间线">
+        <ol className="customer-erp-timeline" data-erp-timeline={sourceProfile.id}>{sourceProfile.erpTimeline.map(item => <li key={item.period}>
+          <span>{item.period}</span><div><p>{item.event}</p><strong>{item.assessment}</strong></div>
+        </li>)}</ol>
+      </ReportSection>}
       <p className="customer-research-note">系统名称来自公开资料，仅表示已发现的技术基础，不代表当前版本、部署范围或采购意向。</p>
     </>,
     dynamics: <>
       <ReportSection title="近期经营与管理动态" meta={`${reportList(profile.recentDynamics).length} 条已收录线索`}><ReportList items={profile.recentDynamics}></ReportList></ReportSection>
-      <ReportSection title="优先关注角色" meta="角色线索，不代表已确认联系人"><div className="customer-role-chips">{reportList(profile.decisionRoles).map(role => <span key={role}>{role}</span>)}</div></ReportSection>
-      <ReportSection title="仍需补充的信息"><ReportList items={profile.unknowns}></ReportList></ReportSection>
+      {storeNetwork ? <ReportSection title="门店网络与地域分布">
+        <div className="customer-network" data-store-network={sourceProfile.id}>
+          <div className="customer-network-summary">{storeNetwork.summary.map(item => <article key={item.label}><span>{item.label}</span><strong>{item.value}</strong><small>{item.period}</small></article>)}</div>
+          <section><h3>2025 年末集团业态结构</h3><div className="customer-network-table-wrap"><table><thead><tr><th scope="col">年报业务口径</th><th scope="col">门店 / 地点</th></tr></thead><tbody>{storeNetwork.byFormat.map(item => <tr key={item.format}><th scope="row">{item.format}</th><td>{item.locations}</td></tr>)}</tbody></table></div></section>
+          <section><h3>国家门店分布 · 2026-06-30</h3><div className="customer-network-table-wrap"><table className="is-country-distribution"><thead><tr><th scope="col">国家</th><th scope="col">门店总数</th><th scope="col">品牌 / 格式数量</th></tr></thead><tbody>{storeNetwork.byCountry.map(item => <tr key={item.country}><th scope="row">{item.country}</th><td>{item.total}</td><td>{item.formats}</td></tr>)}</tbody></table></div></section>
+          <section><h3>国家与业态结构 · 2025-11</h3><div className="customer-network-table-wrap"><table className="is-historical-mix"><thead><tr><th scope="col">国家</th><th scope="col">超市</th><th scope="col">家居改善</th><th scope="col">百货</th><th scope="col">其他业务</th><th scope="col">合计</th></tr></thead><tbody>{storeNetwork.historicalMix.map(item => <tr key={item.country}><th scope="row">{item.country}</th><td>{item.supermarkets}</td><td>{item.homeImprovement}</td><td>{item.departmentStores}</td><td>{item.other}</td><td>{item.total}</td></tr>)}</tbody></table></div></section>
+          <div className="customer-network-insight"><p>{storeNetwork.shoppingCenters}</p><strong>{storeNetwork.insight}</strong></div>
+        </div>
+      </ReportSection> : <>
+        <ReportSection title="优先关注角色" meta="角色线索，不代表已确认联系人"><div className="customer-role-chips">{reportList(profile.decisionRoles).map(role => <span key={role}>{role}</span>)}</div></ReportSection>
+        <ReportSection title="仍需补充的信息"><ReportList items={profile.unknowns}></ReportList></ReportSection>
+      </>}
     </>,
     evidence: <>
       <ReportSection title="资料来源" meta={`${evidence.length} 条可回溯记录`}>
@@ -340,7 +372,7 @@ function SalesAdvice({ country }) {
       <div className="email-preview">
         <div><span><Icon name="mail" size={16}></Icon>英文开发邮件</span><small>待智能体分析</small></div>
         <strong>完成分析后生成个性化邮件</strong>
-        <p>点击底部“运行完整商机分析链路”后，智能体会基于该客户真实证据生成英文邮件、拜访问题和下一步行动。</p>
+        <p>点击底部“运行完整商机分析链路”后，智能体会基于该客户资料生成英文邮件、拜访问题和下一步行动。</p>
       </div>
     </div>
   );
@@ -351,7 +383,7 @@ function BattleCard({ country, customer }) {
   return (
     <div className="tab-body battle-card-grid">
       <div className="battle-lead">
-        <span>真实调研客户</span><strong>{lead.name}</strong><p>{lead.type} · {lead.stores}</p><em>{lead.sourceLevel}来源</em>
+        <span>调研客户</span><strong>{lead.name}</strong><p>{lead.type} · {lead.stores}</p><em>{lead.sourceLevel}来源</em>
       </div>
       <div className="battle-block"><span>推荐切入模块</span><div className="module-chips">{lead.modules.map((module) => <b key={module}>{module}</b>)}</div></div>
       <div className="battle-block"><span>已确认事实</span><p>{country.opportunities[1] || country.opportunities[0]}</p></div>
@@ -383,6 +415,8 @@ function ManagementBrief({ country, onCopy }) {
 
 function LiveAgentResult({ report, country }) {
   const brief = report.researchBrief;
+  const cleanCapabilityText = window.capabilityDisplayText || (value => value);
+  const cleanCapabilityList = window.capabilityDisplayList || (value => value);
   return (
     <div className="tab-body live-agent-result">
       <div className="live-result-hero">
@@ -391,7 +425,7 @@ function LiveAgentResult({ report, country }) {
       </div>
       <div className="live-result-stats">
         <Metric label="准入建议" value={report.admission.label} meta="非成交结论"></Metric>
-        <Metric label="真实证据" value={report.evidenceChain.coverage.facts} meta={`A级 ${report.evidenceChain.coverage.sourceLevelA}`}></Metric>
+        <Metric label="证据" value={report.evidenceChain.coverage.facts} meta={`A级 ${report.evidenceChain.coverage.sourceLevelA}`}></Metric>
         <Metric label="商机信号" value={report.opportunitySignals.length} meta="事实与推断分层"></Metric>
         <Metric label="风险项" value={report.riskAssessment.risks.length} meta={`${report.riskAssessment.overall} risk`}></Metric>
       </div>
@@ -408,10 +442,9 @@ function LiveAgentResult({ report, country }) {
         </section>
         <section>
           <div className="section-heading"><span>Dmall 能力匹配</span><small>含前置条件</small></div>
-          <p className="report-note">{materialSourceLabel(report.productMatch.generation)}</p>
           <div className="live-match-list">
             {report.productMatch.matches.slice(0, 4).map((match) => (
-              <div key={match.capabilityId}><span><b>{match.capabilityName}</b><em>{match.fitScore}</em></span><i><u style={{ width: `${match.fitScore}%` }}></u></i><MarkdownContent className="live-match-reason" content={match.reasons.join("\n\n")}></MarkdownContent>{match.pilotScope && <MarkdownContent className="live-match-reason" content={`**建议验证范围**\n\n${match.pilotScope}`}></MarkdownContent>}<p>禁止直接宣称：<MarkdownContent inline content={match.caution}></MarkdownContent></p></div>
+              <div key={match.capabilityId}><span><b>{match.capabilityName}</b><em>{match.fitScore}</em></span><i><u style={{ width: `${match.fitScore}%` }}></u></i><MarkdownContent className="live-match-reason" content={cleanCapabilityList(match.reasons).join("\n\n")}></MarkdownContent>{match.pilotScope && <MarkdownContent className="live-match-reason" content={`**建议验证范围**\n\n${cleanCapabilityText(match.pilotScope)}`}></MarkdownContent>}</div>
             ))}
           </div>
           <div className="section-heading live-risk-heading"><span>风险与待确认项</span><small>人工确认门禁</small></div>
@@ -435,7 +468,7 @@ function CountryPanel({ country, region, onBack, onGenerate, generating, notify,
   const selectedCustomer = controlledCustomer === undefined ? internalCustomer : controlledCustomer;
   const selectCustomer = controlledSelectCustomer || setInternalCustomer;
   const tabs = selectedCustomer
-    ? [["profile", "客户概览"], ["business", "业务布局"], ["digital", "数字化与系统"], ["dynamics", "动态与组织"], ["evidence", "资料来源"], ["sales", "销售建议"], ["battle", "作战卡"]]
+    ? [["profile", "客户概览"], ["business", "战略与业务布局"], ["digital", "数字化与系统"], ["dynamics", "动态与组织"], ["evidence", "资料来源"], ["sales", "销售建议"], ["battle", "作战卡"]]
     : [["country", "国家概况"], ["overview", "市场与商机"], ["customers", "客户雷达"], ["brief", "管理层简报"]];
   const [tab, setTab] = useAppState("country");
   const [briefReveal, setBriefReveal] = useAppState(0);
@@ -474,7 +507,7 @@ function CountryPanel({ country, region, onBack, onGenerate, generating, notify,
   const headerMetrics = selectedCustomer
     ? liveReport ? [["分析状态", liveReport.admission.label], ["集团规模", liveProfile.storeCountLabel.split("（")[0]], ["覆盖国家", liveProfile.countries.length], ["资料来源", liveReport.evidenceChain.records.length]]
       : [["资料状态", "已收录"], ["集团规模", sourceProfile.groupStores], ["覆盖国家", sourceProfile.countries.length], ["资料来源", sourceProfile.sources.length]]
-    : [...country.research.counts.map(item => [`${item.label} · 估算`, `${item.value}${item.unit}`]), ["市场观察", `${country.research.signals.length} 条`]];
+    : country.research.counts.map(item => [`${item.label}${item.period ? ` · ${item.period}` : ""}`, `${item.value}${item.unit}`]);
 
   const briefText = countryBriefText(country, countryReport);
   const copyBrief = async () => {
@@ -493,9 +526,9 @@ function CountryPanel({ country, region, onBack, onGenerate, generating, notify,
         <button type="button" className="back-link" onClick={selectedCustomer ? returnToCountry : onBack}><Icon name="back" size={16}></Icon>{selectedCustomer ? `${country.name} · 客户雷达` : `${region.name}雷达`}</button>
         <div className="country-head-main">
           <div><div className="panel-kicker"><span style={{ background: region.color }}></span>{selectedCustomer ? `${country.en.toUpperCase()} · CUSTOMER PROFILE` : `${country.en.toUpperCase()} OPPORTUNITY`}</div><h1>{headerName}</h1><p>{headerSubtitle}</p></div>
-          {selectedCustomer ? (liveReport ? <ScoreRing value={liveReport.admission.referenceScore} size="compact"></ScoreRing> : <VerifiedBadge count={country.sourceCount}></VerifiedBadge>) : <div className="national-header-stamp"><b>COUNTRY BRIEF</b><span>{window.OPPORTUNITY_DATA.countryMeta.asOf}</span></div>}
+          {selectedCustomer ? (liveReport ? <ScoreRing value={liveReport.admission.referenceScore} size="compact"></ScoreRing> : <VerifiedBadge count={country.sourceCount}></VerifiedBadge>) : <div className="national-header-stamp"><b>COUNTRY BRIEF</b><span>{country.research.asOf || window.OPPORTUNITY_DATA.countryMeta.asOf}</span></div>}
         </div>
-        <div className="country-quick-metrics">
+        <div className="country-quick-metrics" style={{ "--country-metric-columns": headerMetrics.length }}>
           {headerMetrics.map(([label, value]) => <Metric key={label} label={label} value={value}></Metric>)}
         </div>
       </div>
@@ -510,7 +543,7 @@ function CountryPanel({ country, region, onBack, onGenerate, generating, notify,
             : <>{tab === "sales" && <SalesAdvice country={country}></SalesAdvice>}{tab === "battle" && <BattleCard country={country} customer={selectedCustomer}></BattleCard>}</>)
           : <>
           {tab === "country" && <CountryOverview country={country} />}
-          {tab === "overview" && <CountryMarketRadar country={country} onCustomers={() => setTab("customers")} />}
+          {tab === "overview" && <CountryMarketRadar country={country} />}
           {tab === "customers" && <CustomerRadar country={country} onSelectCustomer={enterCustomer} />}
           {tab === "brief" && <CountryManagementBrief country={country} report={countryReport} generating={briefRun === undefined ? generating : Boolean(briefRun && !briefRun.done)} run={briefRun} onCopy={copyBrief} />}
           </>}
@@ -563,6 +596,8 @@ function AgentRunOverlay({ steps, active, mode, onClose, onMinimize, onViewPacka
 function buildLiveBattlePackage(report) {
   const brief = report.researchBrief;
   const profile = report.customerProfile;
+  const cleanCapabilityText = window.capabilityDisplayText || (value => value);
+  const cleanCapabilityList = window.capabilityDisplayList || (value => value);
   const artifacts = [
     { id: "research", title: "客户研究简报", en: "CUSTOMER RESEARCH", sections: [
       { h: "执行摘要", paras: [brief.executiveSummary] },
@@ -579,10 +614,8 @@ function buildLiveBattlePackage(report) {
       { h: "解释边界", list: report.opportunitySignals.map((signal) => signal.interpretation) }
     ]},
     { id: "match", title: "Dmall 能力匹配", en: "CAPABILITY MATCH", sections: [
-      { h: "生成方式", paras: [materialSourceLabel(report.productMatch.generation), "分析建议需人工核验，不代表已确认项目或成交概率。"] },
-      { h: "切入定位", paras: [report.productMatch.positioning] },
-      ...report.productMatch.matches.map((match) => ({ h: `${match.capabilityName}｜匹配参考 ${match.fitScore}`, paras: [...match.reasons, ...(match.pilotScope ? [`建议验证范围：${match.pilotScope}`] : []), `禁止直接宣称：${match.caution}`], list: match.prerequisites })),
-      { h: "禁止宣称", list: report.productMatch.avoidClaims }
+      { h: "切入定位", paras: [cleanCapabilityText(report.productMatch.positioning)] },
+      ...report.productMatch.matches.map((match) => ({ h: `${match.capabilityName}｜匹配参考 ${match.fitScore}`, paras: [...cleanCapabilityList(match.reasons), ...(match.pilotScope ? [`建议验证范围：${cleanCapabilityText(match.pilotScope)}`] : [])], list: match.prerequisites }))
     ]},
     { id: "risk", title: "风险与待确认项", en: "RISKS & GAPS", sections: [
       { h: `整体风险：${report.riskAssessment.overall}`, list: report.riskAssessment.risks.map((risk) => `${risk.title}｜${risk.reason}｜应对：${risk.mitigation}`) },
@@ -886,7 +919,7 @@ function App() {
       if (customerFocus.customerId !== target.customerId) {notify("仅第一家已收录客户开放作战包生成");return;}
       return startBackendRun({ scope:"customer", targetCountryId: selectedCountry, regionId: target.regionId, customerId: target.customerId, countryName: countries[selectedCountry].name });
     }
-    notify("当前国家暂无可运行的真实客户资料");
+    notify("当前国家暂无可运行的客户资料");
     return undefined;
   };
 
@@ -919,7 +952,7 @@ function App() {
           <div className="map-stage-copy">
             <span>GLOBAL OPPORTUNITY INTELLIGENCE</span>
             <h2>{selectedCountry ? `${countries[selectedCountry].name} · 客户版图` : selectedRegion ? `${regions[selectedRegion].name} · 零售市场` : "让全球商机变得可见"}</h2>
-            <p>{selectedCountry ? "从代表门店，走近本地零售市场" : selectedRegion ? (regions[selectedRegion].countryIds.length ? "浏览大洲简报，点击国家查看客户与下一步行动" : "浏览市场全景、展会日历与机会信号") : "拖动地球，悬停预览区域机会，点击锁定后下钻国家"}</p>
+            {(!selectedRegion || selectedCountry) && <p>{selectedCountry ? "从代表门店，走近本地零售市场" : "拖动地球，悬停预览区域机会，点击锁定后下钻国家"}</p>}
           </div>
           <Globe
             regions={regions}
