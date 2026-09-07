@@ -1,4 +1,4 @@
-.globe-wrap.is-country-focus { padding:132px 12px 56px; grid-template-rows:minmax(0,1fr); }
+.globe-wrap.is-country-focus { padding:176px 12px 56px; grid-template-rows:minmax(0,1fr); }
 .is-country-focus .globe-svg { width:100%; height:100%; max-width:100%; max-height:100%; overflow:hidden; }
 .is-country-focus .sphere-shadow { filter:none; }
 .is-country-focus .pin-badge { animation:country-map-reveal 180ms ease both; }
@@ -16,7 +16,7 @@
 .store-brand { font-family:"Bricolage Grotesque","Noto Sans SC",sans-serif; font-weight:700; fill:#24443d; }
 .store-city { font-family:"Noto Sans SC",sans-serif; font-size:11px; fill:#627e73; }
 .store-group { font-family:"Bricolage Grotesque","Noto Sans SC",sans-serif; font-size:9px; fill:#789185; }
-.country-map-status { position:absolute; top:112px; left:34px; z-index:5; display:flex; align-items:center; gap:7px; color:#5c7d70; font-size:10px; pointer-events:none; }
+.country-map-status { position:absolute; top:148px; left:34px; z-index:5; display:flex; align-items:center; gap:7px; color:#5c7d70; font-size:10px; line-height:1.5; pointer-events:none; }
 .country-map-status button { pointer-events:auto; border:1px solid #bfd0c5; background:#fffdf7; border-radius:8px; padding:5px 10px; color:#24443d; cursor:pointer; }
 .admin-line-key { width:17px; height:1px; background:#5a8a74; }
 .store-dot-key { width:6px; height:6px; border-radius:50%; background:#d46a4f; margin-left:12px; }
@@ -28,8 +28,8 @@
 .store-detail-close { position:absolute; right:10px; top:10px; width:28px; height:28px; border-radius:50%; border:0; background:#eaf1e9; color:#45695c; cursor:pointer; font-size:20px; }
 .has-country-map .map-stage-copy { right:24px; }
 @media(max-width:700px) {
-  .country-map-status { left:22px; top:102px; }
-  .globe-wrap.is-country-focus { padding:120px 4px 55px; }
+  .country-map-status { left:22px; top:140px; }
+  .globe-wrap.is-country-focus { padding:168px 4px 55px; }
   .store-detail-card { left:18px; right:18px; padding:14px 35px 14px 15px; }
   .store-detail-card h3 { font-size:15px; }
 }

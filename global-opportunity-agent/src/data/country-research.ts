@@ -19,12 +19,12 @@ export function getCountryContext(countryId: string): CountryContext {
   if (!Object.hasOwn(presentation.countries, countryId)) throw new Error(`Unknown country: ${countryId}`);
   const country = presentation.countries[countryId]!;
   const { companies, managementDraft, ...market } = country.research;
-  const metrics=market.metrics as Array<{label:string;value:string;scope:string;period:string;basis:string;source?:{title:string;url:string}}>;
-  const evidence:CountryEvidence[]=metrics.map((m,i)=>({id:`M${i+1}`,companyId:"country",kind:m.source?"fact":"inference",scope:`本国指标 · ${m.basis}`,text:`${m.label}：${m.value}；${m.period}；${m.scope}。${m.basis}。`,...(m.source?{source:m.source}:{})}));
+  const metrics=market.metrics as Array<{label:string;value:string;unit?:string;scope:string;period:string;basis:string;source?:{title:string;url:string}}>;
+  const evidence:CountryEvidence[]=metrics.map((m,i)=>({id:`M${i+1}`,companyId:"country",kind:m.source?"fact":"inference",scope:`本国指标 · ${m.basis}`,text:`${m.label}：${m.value}${m.unit || ""}；${m.period}；${m.scope}。${m.basis}。`,...(m.source?{source:m.source}:{})}));
   evidence.push({id:"M4",companyId:"country",kind:"inference",scope:"国家演示口径",text:JSON.stringify({counts:market.counts,dimensions:market.dimensions,method: presentation.countryMeta.countMethod})});
   if (companies.length !== 3 || new Set(companies.map(c => c.id)).size !== 3) throw new Error("Country brief requires exactly three distinct company dossiers");
   return structuredClone({ countryId, countryName: country.name, regionId: country.region,
-    regionName: presentation.regions[country.region]!.name, asOf: presentation.countryMeta.asOf!,
+    regionName: presentation.regions[country.region]!.name, asOf: typeof market.asOf === "string" ? market.asOf : presentation.countryMeta.asOf!,
     market, methodology: presentation.countryMeta, companies, evidence, draft: managementDraft });
 }
 export const countryBriefCatalog = Object.keys(presentation.countries).map(id => {

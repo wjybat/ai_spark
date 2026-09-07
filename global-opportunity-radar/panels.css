@@ -384,6 +384,7 @@
 
 .country-quick-metrics {
   margin-top: 8px;
+  grid-template-columns: repeat(var(--country-metric-columns, 4), minmax(0, 1fr));
 }
 
 .country-quick-metrics .metric-cell {

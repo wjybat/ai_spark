@@ -19,6 +19,69 @@
       decisionRoles: ["CIO", "COO", "Regional Technology Lead", "E-commerce & Fulfilment Lead"],
       unknowns: ["当前 POS/OMS/WMS/CDP 供应商与版本", "区域平台的上线国家和系统边界", "并购整合项目预算与时间表", "采购与决策链"],
       strategicSummary: "区域平台化与多国家复制是主线，适合从 OMS/WMS、库存服务和 Open Platform 外围集成切入。",
+      operatingFacts: [
+        { item: "2025 收入", value: "182.08 亿美元", yoy: "+0.6%", period: "FY2025" },
+        { item: "2025 净利润", value: "4.37 亿美元", yoy: "+70.4%", period: "FY2025" },
+        { item: "电商销售", value: "5.27 亿美元", yoy: "+14.6%", period: "2026 Q2 · 线上渗透率 12.2%" },
+        { item: "在线交易", value: "890 万笔", yoy: "+14.5%", period: "2026 Q2" },
+        { item: "活跃忠诚客户", value: "3,100 万人", yoy: "—", period: "截至 2026 Q2" },
+        { item: "Prime 订阅用户", value: "未披露", yoy: "+31.3%", period: "2026 Q2 · 绝对用户数未披露" },
+        { item: "自助结账", value: "1,255 台", yoy: "—", period: "2026 Q2 · 覆盖相关门店 100%" },
+        { item: "LTM 电商销售", value: "16.81 亿美元", yoy: "—", period: "截至 2025-09 的 LTM" },
+        { item: "LTM 电商渗透率", value: "10%", yoy: "—", period: "截至 2025-09 的 LTM" },
+        { item: "Costanera 暗店", value: "15 万+ 单/月", yoy: "—", period: "官方材料" },
+        { item: "Cenco Media 广告品牌", value: "1,000+ 个", yoy: "—", period: "2025 · CencoDay" }
+      ],
+      regionalTechnologyStrategy: [
+        { title: "Regional Commercial Decision Engine", detail: "统一定价和规划工具、规则与标准。" },
+        { title: "Customer & Data Platform", detail: "建立单一客户视图、区域数据治理、可复用分析和个性化能力。" },
+        { title: "Regional Security and Resilience", detail: "统一控制、监控和关键系统韧性。" },
+        { title: "数字商业和零售媒体", detail: "持续扩大电商、Prime、Cenco Media、自有品牌和客户数据商业化。" },
+        { title: "组织平台化", detail: "通过跨职能组织加速技术部署、流程整合和协同效应。" }
+      ],
+      erpTimeline: [
+        { period: "2016", event: "智利纳入区域 SAP FICO；既有 SAP FICO 实施 HANA。", assessment: "SAP ERP on HANA，不等于 S/4HANA。" },
+        { period: "2016–2017", event: "秘鲁启动约 3,000 万美元转型计划：SAP ERP 6.07 HANA 由 IBM 执行，后续阶段为 POS 和 BI。", assessment: "明确的国家级 ERP / POS / BI 项目；最终上线范围待确认。" },
+        { period: "2017", event: "巴西纳入区域 SAP FICO；扩展 Ariba、Fiori、FSCM、Credit Management、Collections and Disputes。", assessment: "区域统一与 SAP 生态扩展，不是更换 SAP。" },
+        { period: "2018–2019", event: "引入 Blue Prism、Automation Anywhere、SAP Lumira，并形成 120 多个自动化流程。", assessment: "保留 SAP 核心并增加自动化和分析能力。" },
+        { period: "2021–2022", event: "SAP 支持临期商品和射频流程；2022 年招聘要求 SAP ERP MM、PI、HANA、Fiori 与卫星系统集成。", assessment: "SAP ERP 仍存在持续开发和运维信号。" },
+        { period: "2023–2024", event: "年报继续披露关键 SAP 系统副本、SAP Process Control、SAP Access Control 和 Ariba Sourcing。", assessment: "SAP 仍属关键体系；版本、实例和部署方式未公开。" },
+        { period: "2025–2026", event: "战略重点转向 Retail Ecosystem、数据、AI、全渠道、物流和并购整合。", assessment: "未发现正式核心 ERP 替换公告；数字化或云项目不能视为 ERP 替换。" }
+      ],
+      storeNetwork: {
+        summary: [
+          { label: "零售门店 / 地点", value: "1,398 家", period: "截至 2025-12-31" },
+          { label: "购物中心", value: "68 个", period: "2025 年报" },
+          { label: "配送中心", value: "49 个", period: "2025 年报" }
+        ],
+        byFormat: [
+          { format: "超市", locations: "1,093 家" },
+          { format: "家居改善", locations: "114 家" },
+          { format: "Paris 百货", locations: "48 家" },
+          { format: "其他业务 / 格式差额", locations: "约 143 家" },
+          { format: "合计", locations: "1,398 家" }
+        ],
+        byCountry: [
+          { country: "智利", total: "379 家", formats: "Jumbo 59、Santa Isabel 198、SPID 36、Don Salva 3、Paris 48、Easy 42" },
+          { country: "阿根廷", total: "349 家", formats: "Jumbo 34、Disco 70、Vea 160、Makro 24、Basualdo 4、Easy 50、Blaisten 6" },
+          { country: "美国", total: "174 家", formats: "The Fresh Market 173" },
+          { country: "巴西", total: "272 家", formats: "Prezunic 34、Bretas 25、GBarbosa 69、Mercantil Atacado 9、SPID 5、Giga Atacado 13；Perini 未披露数量" },
+          { country: "哥伦比亚", total: "134 家", formats: "Jumbo 48、Metro 33、Easy 16" },
+          { country: "秘鲁", total: "88 家", formats: "Wong 20、Metro 68（50 家超市 + 18 家 Cash & Carry）" },
+          { country: "国家总数相加", total: "1,396 家", formats: "" }
+        ],
+        historicalMix: [
+          { country: "智利", supermarkets: "289", homeImprovement: "41", departmentStores: "48", other: "0", total: "378" },
+          { country: "阿根廷", supermarkets: "307", homeImprovement: "60", departmentStores: "0", other: "0", total: "367" },
+          { country: "巴西", supermarkets: "169", homeImprovement: "0", departmentStores: "0", other: "140", total: "309" },
+          { country: "哥伦比亚", supermarkets: "80", homeImprovement: "16", departmentStores: "0", other: "37", total: "133" },
+          { country: "秘鲁", supermarkets: "87", homeImprovement: "0", departmentStores: "0", other: "0", total: "87" },
+          { country: "美国", supermarkets: "172", homeImprovement: "0", departmentStores: "0", other: "0", total: "172" },
+          { country: "合计", supermarkets: "1,104", homeImprovement: "117", departmentStores: "48", other: "177", total: "1,446" }
+        ],
+        shoppingCenters: "购物中心分布：智利 36 个、阿根廷 22 个、秘鲁 6 个、哥伦比亚 4 个。",
+        insight: "智利和阿根廷门店最多、业态最完整；巴西和美国以超市为主，美国主要为 The Fresh Market。"
+      },
       signals: [
         "2Q26 电商销售同比增长 14.6%",
         "约 3,100 万活跃忠诚客户",
@@ -204,7 +267,7 @@
       storeCount: stores,
       signalCount: company.signals.length,
       sourceCount: company.sources.length,
-      demand: "真实资料",
+      demand: "已收录资料",
       entry: "待智能体分析",
       segments: company.formats,
       tagline: `${company.name} · ${stores}`,
@@ -247,7 +310,7 @@
       id: "south_america", name: "南美洲", en: "South America", center: [-64, -18], score: null, badge: "5 国",
       color: "#78A96D", countryIds: ["chile", "argentina", "brazil", "peru", "colombia"],
       customerNames: ["Cencosud"], evidenceCount: 3, lastUpdated: "2026-08-27",
-      headline: "Cencosud 多国家真实经营网络",
+      headline: "Cencosud 多国家经营网络",
       summary: "调研资料确认 Cencosud 在智利、阿根廷、巴西、秘鲁和哥伦比亚运营，FY2025 年末集团共 1,398 家零售门店/地点。",
       opportunities: ["区域商业决策引擎与客户数据平台", "暗店、电商和区域履约", "新配送中心与跨国家复制"]
     },
@@ -263,7 +326,7 @@
       id: "oceania", name: "大洋洲", en: "Oceania", center: [150, -28], score: null, badge: "2 国",
       color: "#6CA7BD", countryIds: ["australia", "new_zealand"],
       customerNames: ["Sigma / Chemist Warehouse"], evidenceCount: 4, lastUpdated: "2026-08-27",
-      headline: "药房、批发、加盟和物流真实网络",
+      headline: "药房、批发、加盟和物流经营网络",
       summary: "Sigma FY2026 资料确认澳大利亚 561 家、新西兰 75 家 Chemist Warehouse 门店。",
       opportunities: ["药房履约与仓店协同", "批次效期、冷链和受控药品", "D365、Manhattan 与 EDI 共存"]
     },

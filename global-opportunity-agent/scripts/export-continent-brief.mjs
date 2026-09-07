@@ -8,14 +8,16 @@ for (const file of ["data.js", "continent-data.js"]) runInNewContext(readFileSyn
 const data = sandbox.window.OPPORTUNITY_DATA;
 const meta = data.continentMeta;
 const link = item => `[${item.title}](${item.url})`;
-const lines = ["# 大洲层市场简报：框架问题的逐洲回答", "", `资料快照：${meta.asOf}。近 12 个月展会窗口：${meta.windowStart} 至 ${meta.windowEnd}。`, "", "本简报为可展示演示稿；市场结构和切入建议是区域研判，带来源的指标为国家、集团或活动样本。", "", meta.countMethod, "", meta.scoreMethod, "", meta.scopeNote, "", "## 五洲速览", "", "| 大洲 | 零售公司（演示假设） | 连锁品牌（演示假设） | 窗口内已收录展会 | 核心判断 |", "| --- | --- | --- | --- | --- |"];
+const lines = ["# 大洲层市场简报：框架问题的逐洲回答", "", `资料快照：${meta.asOf}。展会收录范围：${meta.windowStart} 至 ${meta.windowEnd}。`, "", "本简报为可展示演示稿；市场结构和切入建议是区域研判，带来源的指标为国家、集团或活动样本。", "", meta.countMethod, "", meta.scoreMethod, "", meta.scopeNote, "", "## 五洲速览", "", "| 大洲 | 规模指标一 | 规模指标二 | 窗口内已收录展会 | 核心判断 |", "| --- | --- | --- | --- | --- |"];
 for (const region of Object.values(data.regions)) {
   const m = region.market;
-  lines.push(`| ${region.name} | ${m.companies}家 | ${m.brands}个 | ${m.events.length}场 | ${m.thesis} |`);
+  lines.push(`| ${region.name} | ${m.countMetrics[0].label}：${m.countMetrics[0].value}（${m.countMetrics[0].meta}） | ${m.countMetrics[1].label}：${m.countMetrics[1].value}（${m.countMetrics[1].meta}） | ${m.events.length}场 | ${m.thesis} |`);
 }
 for (const region of Object.values(data.regions)) {
   const m = region.market;
-  lines.push("", `## ${region.name}`, "", "### 1. 零售市场整体情况", "", m.summary, "", m.structure, "", `主要业态：${m.formats.join("、")}。`, "", `重点市场：${m.focus.map(item => `${item.name}（${item.reason}）`).join("；")}。`, "", `代表零售集团 / 品牌：${m.retailers.join("、")}。这些名称用于理解市场版图，不代表已确认的销售线索。`, "", `公开资料切片：**${m.snapshot.value}**，${m.snapshot.label}。${m.snapshot.scope} 来源：${link(m.snapshot.source)}。`, "", "### 2. 有多少零售公司、多少连锁品牌", "", `演示量级：**${m.companies}家零售经营主体、${m.brands}个连锁品牌网络**。这两项是演示假设，不是官方统计或客户池数量。`, "", `当前项目单独收录 ${region.countryIds.length} 个国家详情、${region.customerNames.length} 组客户样本。市场总量、门店数和客户样本不能混用。`, "", "### 3. 近 12 个月有哪些零售相关展会", "", "| 展会 | 日期 | 举办地 | 主题 | 跟进方向 | 依据 |", "| --- | --- | --- | --- | --- | --- |");
+  const metricSources = m.countMetrics.map(item => item.source).filter(Boolean);
+  const metricSourceText = metricSources.length ? ` 来源：${metricSources.map(link).join("；")}` : "";
+  lines.push("", `## ${region.name}`, "", "### 1. 零售市场整体情况", "", m.summary, "", m.structure, "", `主要业态：${m.formats.join("、")}。`, "", `重点市场：${m.focus.map(item => `${item.name}（${item.reason}）`).join("；")}。`, "", `代表零售集团 / 品牌：${m.retailers.join("、")}。这些名称用于理解市场版图，不代表已确认的销售线索。`, "", `公开资料切片：**${m.snapshot.value}${m.snapshot.unit || ""}**，${m.snapshot.label}。${m.snapshot.scope} 来源：${link(m.snapshot.source)}。`, "", "### 2. 公开规模指标", "", m.countNote + metricSourceText, "", `当前项目单独收录 ${region.countryIds.length} 个国家详情、${region.customerNames.length} 组客户样本。市场总量、门店数和客户样本不能混用。`, "", "### 3. 2025 年 9 月至 2026 年 12 月有哪些零售相关展会", "", "| 展会 | 日期 | 举办地 | 主题 | 跟进方向 | 依据 |", "| --- | --- | --- | --- | --- | --- |");
   for (const e of m.events) lines.push(`| ${e.name} | ${e.start} — ${e.end} | ${e.city} | ${e.theme} | ${e.followUp} | ${link(e.source)} |`);
   lines.push("", "### 4. 市场活跃度、数字化水平、扩张信号和风险", "", "| 维度 | 演示评分 | 判断 | 解释 |", "| --- | --- | --- | --- |");
   for (const d of m.dimensions) lines.push(`| ${d.label} | ${d.score}/100 | ${d.verdict} | ${d.detail} |`);

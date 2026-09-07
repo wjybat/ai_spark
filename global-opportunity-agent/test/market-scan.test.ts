@@ -136,6 +136,7 @@ describe("local market scan demo", { timeout: 20_000 }, () => {
     expect(container.querySelectorAll(".market-overview-regions button")).toHaveLength(5);
     expect(container.querySelector(".country-panel-shell")).toBeNull();
     expect(container.querySelector(".market-overview")?.textContent).toContain("已收录调研资料的整体视图");
+    expect(container.querySelector(".market-overview")?.textContent).not.toContain("真实");
     expect(fetchMock).not.toHaveBeenCalled();
     expect(TestEventSource.instances).toHaveLength(0);
     expect(button("重新扫描市场").disabled).toBe(false);
@@ -240,7 +241,7 @@ describe("local market scan demo", { timeout: 20_000 }, () => {
     await act(async () => container.querySelector<HTMLButtonElement>('[data-customer-entry="loblaw"]')!.click());
     expect(container.querySelector('[data-view-level="customer"]')).not.toBeNull();
     expect(container.querySelector(".country-head-main h1")?.textContent).toBe("Loblaw Companies Limited");
-    expect([...container.querySelectorAll(".detail-tabs button")].map(item => item.textContent)).toEqual(["客户概览", "业务布局", "数字化与系统", "动态与组织", "资料来源", "销售建议", "作战卡"]);
+    expect([...container.querySelectorAll(".detail-tabs button")].map(item => item.textContent)).toEqual(["客户概览", "战略与业务布局", "数字化与系统", "动态与组织", "资料来源", "销售建议", "作战卡"]);
     expect(button("生成国家简报")).toBeUndefined();
     await click("生成 BD 作战包");
     expect(JSON.parse(fetchMock.mock.calls[2][1].body)).toEqual({scope:"customer",regionId:"canada",customerId:"loblaw",countryId:"canada",countryName:"加拿大",mode:"auto"});
