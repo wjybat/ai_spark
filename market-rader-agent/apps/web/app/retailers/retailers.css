@@ -1,0 +1,33 @@
+.retailer-directory { max-width: 1600px; margin: 0 auto; }
+.retailer-filters { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 14px; margin: 12px 0 18px; }
+.retailer-filters label { display: flex; flex-direction: column; gap: 7px; color: var(--text-2); font-size: 12px; }
+.retailer-filters select, .retailer-filters input { min-height: 38px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text-1); font: inherit; }
+.retailer-filters input { width: 290px; }
+.retailer-filters > a { padding: 10px 0; }
+.retailer-directory a { color: var(--primary); text-underline-offset: 3px; }
+.retailer-directory :is(a, button, input, select, summary):focus-visible { outline: 3px solid #7fa9ff; outline-offset: 3px; }
+.retailer-summary { display: flex; flex-wrap: wrap; gap: 12px 28px; padding: 16px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; color: var(--text-2); }
+.retailer-summary strong { color: var(--text-1); font-size: 18px; }
+.retailer-disclosure { color: var(--text-2); line-height: 1.7; margin: 12px 0 16px; font-size: 12px; }
+.retailer-table { width: 100%; min-width: 850px; border-collapse: collapse; }
+.retailer-table-caption { text-align: left; padding: 16px; color: var(--text-2); }
+.retailer-table th, .retailer-table td { padding: 15px 16px; text-align: left; vertical-align: top; border-top: 1px solid var(--border-soft); line-height: 1.6; }
+.retailer-table thead th { color: var(--text-2); background: #f8faff; font-size: 12px; font-weight: 600; }
+.retailer-table tbody th { width: 20%; font-weight: 500; overflow-wrap: anywhere; }
+.retailer-table td:nth-child(3) { width: 20%; }
+.retailer-table td:last-child { width: 36%; min-width: 270px; }
+.retailer-table small { display: block; font-size: 11px; color: var(--text-2); margin-top: 3px; }
+.retailer-website { display: block; font-size: 11px; margin-top: 5px; }
+.retailer-evidence summary { cursor: pointer; color: var(--primary); border-radius: 4px; }
+.retailer-observation { margin-top: 12px; padding: 12px; background: #f8faff; border: 1px solid var(--border); border-radius: 8px; overflow-wrap: anywhere; font-size: 12px; }
+.retailer-observation-head { display: flex; flex-wrap: wrap; gap: 5px 12px; justify-content: space-between; }
+.retailer-observation-head span, .retailer-observation > p { color: var(--text-2); }
+.retailer-observation blockquote { margin: 9px 0; padding-left: 10px; border-left: 3px solid #b9cdf9; white-space: pre-wrap; }
+.retailer-provenance { display: flex; flex-direction: column; gap: 3px; margin-top: 9px; font-size: 10px; color: var(--text-2); }
+.retailer-conflict { padding: 10px; background: #fff4dd; color: #83530b; margin-top: 10px; border-radius: 6px; }
+.retailer-directory .empty-state p { margin: 10px 0; }
+@media (max-width: 800px) {
+  .retailer-filters label { flex: 1 1 180px; }
+  .retailer-filters input { width: 100%; }
+  .retailer-summary { gap: 10px; flex-direction: column; }
+}

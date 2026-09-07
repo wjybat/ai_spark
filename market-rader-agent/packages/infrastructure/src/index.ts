@@ -108,3 +108,10 @@ export {
 export { appendScanEvent } from "./usecases/events.js";
 export { getScanEvents, getScanJobs, isScanTerminal } from "./usecases/events.js";
 export { renderBusinessMetrics } from "./usecases/metrics-report.js";
+export { getRetailerDirectory } from "./usecases/retailers.js";
+export type {
+  RetailerDirectoryInput,
+  RetailerDirectoryItem,
+  RetailerDirectoryResult,
+  RetailerStoreObservation,
+} from "./usecases/retailers.js";

@@ -1,16 +1,33 @@
-import { Icon } from "../ui/icons";
+import { getMarketRegions, getRetailerDirectory } from "@market-radar/infrastructure";
+import { cookies } from "next/headers";
+
+import { getDb } from "@/lib/db";
+import { DEFAULT_REGION_CODE, parseRegionCode, REGION_COOKIE } from "@/lib/regions";
+import { RetailerDirectoryView } from "./directory-view";
+import "./retailers.css";
 
 export const dynamic = "force-dynamic";
 
-export default function RetailersPage(): React.JSX.Element {
-  return (
-    <>
-      <h1 className="page-title">Retailers</h1>
-      <p className="page-sub">重点零售商与门店观测数据。</p>
-      <div className="empty-state">
-        <Icon name="store" size={28} />
-        <div style={{ marginTop: 8 }}>零售商模块将在接入零售商级证据采集后开放（当前 fixture 为国家级数据）。</div>
-      </div>
-    </>
-  );
+type SearchParams = Record<string, string | string[] | undefined>;
+function single(value: SearchParams[string]): string {
+  return typeof value === "string" ? value : "";
+}
+
+export default async function RetailersPage({ searchParams }: { searchParams: Promise<SearchParams> }): Promise<React.JSX.Element> {
+  const params = await searchParams;
+  const cookieStore = await cookies();
+  const requestedRegion = single(params.region);
+  const region = requestedRegion === "all" ? "all" : parseRegionCode(requestedRegion)
+    ?? parseRegionCode(cookieStore.get(REGION_COOKIE)?.value) ?? DEFAULT_REGION_CODE;
+  const regions = await getMarketRegions();
+  const countryIds = regions.filter((item) => region === "all" || item.code === region)
+    .flatMap((item) => item.country_scope.map((iso2) => `cty_${iso2.toLowerCase()}`));
+  // Region changes must not keep a country from the previous region selected.
+  const requestedCountry = single(params.country);
+  const country = countryIds.includes(requestedCountry) ? requestedCountry : "";
+  const query = single(params.q).trim().slice(0, 200);
+  const asOf = new Date().toISOString().slice(0, 10);
+  const directory = await getRetailerDirectory(getDb(), { countryIds, countryId: country, query, asOf });
+  return <RetailerDirectoryView directory={directory} regions={regions.map((item) => ({ code: item.code, name: item.name_zh }))}
+    region={region} country={country} query={query} asOf={asOf} />;
 }

@@ -619,8 +619,16 @@ tasks:
   acceptance:
   - store count includes date and claim
   - no value read from retailer master row
-  notes: 'Retailer page deferred; fixture covers country-level evidence only in this iteration.'
-  changed_files: []
+  notes: 'Completed the previously deferred placeholder on 2026-09-07. Read-only directory shows active retailer master records, with actual store counts only from linked active verified claims; dated history, quotes, source links, claim versions, missing values, same-date conflicts and low-precision provenance remain visible. Defaults to the selected region with explicit all-region, country and literal name filters; does not imply qualification or a frozen scan ranking. Added five real SQLite query tests and three server-rendered UI tests. All 136 tests, workspace typecheck, lint, boundary/config checks and production build pass. Browser verified 125 all-region retailers, 30 SEA retailers, OXXO search, Brazil filtering, empty-region isolation and expandable evidence. Production build retains the existing dynamic DB-path tracing warning in apps/web/lib/db.ts; no DB/scoring/schema mutations were introduced.'
+  changed_files:
+  - packages/infrastructure/src/usecases/retailers.ts
+  - packages/infrastructure/src/retailers.test.ts
+  - packages/infrastructure/src/index.ts
+  - apps/web/app/retailers/page.tsx
+  - apps/web/app/retailers/directory-view.tsx
+  - apps/web/app/retailers/retailers.css
+  - apps/web/src/retailers.test.ts
+  - docs/implementation/TASKS.yaml
 - id: MR-119
   phase: phase_1
   title: 建立 Golden Replay 和 Phase 1 E2E
