@@ -23,7 +23,7 @@ export const config = {
   model: process.env.AGENT_MODEL ?? "gpt-5.6-luna",
   baseUrl: process.env.AGENT_BASE_URL ?? "https://ai-router.dmall.com/v1",
   thinkingEffort: process.env.AGENT_THINKING_EFFORT === "off" ? "off" as const : process.env.AGENT_THINKING_EFFORT === "low" ? "low" as const : process.env.AGENT_THINKING_EFFORT === "max" ? "max" as const : process.env.AGENT_THINKING_EFFORT === "xhigh" ? "xhigh" as const : "high" as const,
-  host: process.env.HOST ?? "127.0.0.1",
+  host: process.env.HOST ?? "0.0.0.0",
   port: Number(process.env.PORT ?? 8787),
   projectDir,
   frontendDir: path.resolve(projectDir, process.env.FRONTEND_DIR ?? "../global-opportunity-radar"),
