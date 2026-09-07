@@ -879,7 +879,7 @@ function App() {
           }
           if (event.type === "tool_progress") {
             const progress = event.data?.progress || 50;
-            setRun((current) => current?.source === "backend" ? { ...current, step: event.stage ? Math.max(0, event.stage - 1) : current.step, statusMessage: `${event.label || event.toolName} · ${progress}%` } : current);
+            setRun((current) => current?.source === "backend" ? { ...current, step: event.stage ? Math.max(0, event.stage - 1) : current.step, statusMessage: event.message || `${event.label || event.toolName} · ${progress}%` } : current);
           }
           if (event.type === "tool_end" && event.data?.validationError) {
             setRun(current => current?.source === "backend" ? {...current,statusMessage:"内容校验未通过，正在修订分析与引用…"} : current);

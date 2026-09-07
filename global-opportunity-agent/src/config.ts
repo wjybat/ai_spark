@@ -15,6 +15,11 @@ function parseProvider(value: string | undefined): LiveProvider {
   return "dmall-router";
 }
 
+function parseThinkingEffort(value: string | undefined, fallback: "high" | "low"): "off" | "low" | "high" | "xhigh" | "max" {
+  if (value === "off" || value === "low" || value === "high" || value === "xhigh" || value === "max") return value;
+  return fallback;
+}
+
 const projectDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 export const config = {
@@ -22,7 +27,8 @@ export const config = {
   provider: parseProvider(process.env.AGENT_PROVIDER),
   model: process.env.AGENT_MODEL ?? "gpt-5.6-luna",
   baseUrl: process.env.AGENT_BASE_URL ?? "https://ai-router.dmall.com/v1",
-  thinkingEffort: process.env.AGENT_THINKING_EFFORT === "off" ? "off" as const : process.env.AGENT_THINKING_EFFORT === "low" ? "low" as const : process.env.AGENT_THINKING_EFFORT === "max" ? "max" as const : process.env.AGENT_THINKING_EFFORT === "xhigh" ? "xhigh" as const : "high" as const,
+  thinkingEffort: parseThinkingEffort(process.env.AGENT_THINKING_EFFORT, "high"),
+  countryBriefThinkingEffort: parseThinkingEffort(process.env.COUNTRY_BRIEF_THINKING_EFFORT ?? process.env.AGENT_THINKING_EFFORT, "low"),
   host: process.env.HOST ?? "127.0.0.1",
   port: Number(process.env.PORT ?? 8787),
   projectDir,

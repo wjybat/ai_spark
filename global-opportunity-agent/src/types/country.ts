@@ -24,9 +24,20 @@ export interface CountryContext {
   market: Record<string, unknown>; methodology: Record<string, string>;
   companies: CountryCompany[]; evidence: CountryEvidence[]; draft: CountryBriefAnalysis;
 }
+export interface CountryBriefDiagnostics {
+  elapsedMs: number;
+  preparationMs: number;
+  modelTurns: Array<{
+    turn: number; startedMs: number; elapsedMs?: number; firstDeltaMs?: number;
+    outputChars: number; thinkingChars: number;
+    inputTokens?: number; outputTokens?: number; totalTokens?: number;
+  }>;
+  validationFailures: Array<{tool: string; message: string; elapsedMs: number}>;
+}
 export interface CountryBriefOutput {
   scope: "country"; runId: string; mode: "demo" | "live"; countryId: string; countryName: string;
   regionId: string; regionName: string; startedAt: string; completedAt: string;
   analysis: CountryBriefAnalysis; companies: CountryCompany[]; evidence: CountryEvidence[];
   generation: GenerationProvenance; finalNarrative: string; modelRun: PipelineOutput["modelRun"];
+  diagnostics: CountryBriefDiagnostics;
 }
