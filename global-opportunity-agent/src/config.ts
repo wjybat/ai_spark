@@ -29,7 +29,7 @@ export const config = {
   baseUrl: process.env.AGENT_BASE_URL ?? "https://ai-router.dmall.com/v1",
   thinkingEffort: parseThinkingEffort(process.env.AGENT_THINKING_EFFORT, "high"),
   countryBriefThinkingEffort: parseThinkingEffort(process.env.COUNTRY_BRIEF_THINKING_EFFORT ?? process.env.AGENT_THINKING_EFFORT, "low"),
-  host: process.env.HOST ?? "127.0.0.1",
+  host: process.env.HOST ?? "0.0.0.0",
   port: Number(process.env.PORT ?? 8787),
   projectDir,
   frontendDir: path.resolve(projectDir, process.env.FRONTEND_DIR ?? "../global-opportunity-radar"),
